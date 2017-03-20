@@ -1,0 +1,39 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ALL_BUILD", "ALL_BUILD.vcxproj", "{070624D6-7C03-39C5-80DD-8CE073404B03}"
+	ProjectSection(ProjectDependencies) = postProject
+		{EF06B169-096A-3FCC-929B-3B4396C53D62} = {EF06B169-096A-3FCC-929B-3B4396C53D62}
+		{2DDA4C69-5A3C-3975-818A-7A6856471768} = {2DDA4C69-5A3C-3975-818A-7A6856471768}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZERO_CHECK", "ZERO_CHECK.vcxproj", "{EF06B169-096A-3FCC-929B-3B4396C53D62}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "getJointSpaceForces", "getJointSpaceForces.vcxproj", "{2DDA4C69-5A3C-3975-818A-7A6856471768}"
+	ProjectSection(ProjectDependencies) = postProject
+		{EF06B169-096A-3FCC-929B-3B4396C53D62} = {EF06B169-096A-3FCC-929B-3B4396C53D62}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		RelWithDebInfo|x64 = RelWithDebInfo|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{070624D6-7C03-39C5-80DD-8CE073404B03}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
+		{070624D6-7C03-39C5-80DD-8CE073404B03}.Release|x64.ActiveCfg = Release|x64
+		{EF06B169-096A-3FCC-929B-3B4396C53D62}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
+		{EF06B169-096A-3FCC-929B-3B4396C53D62}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
+		{EF06B169-096A-3FCC-929B-3B4396C53D62}.Release|x64.ActiveCfg = Release|x64
+		{EF06B169-096A-3FCC-929B-3B4396C53D62}.Release|x64.Build.0 = Release|x64
+		{2DDA4C69-5A3C-3975-818A-7A6856471768}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
+		{2DDA4C69-5A3C-3975-818A-7A6856471768}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
+		{2DDA4C69-5A3C-3975-818A-7A6856471768}.Release|x64.ActiveCfg = Release|x64
+		{2DDA4C69-5A3C-3975-818A-7A6856471768}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

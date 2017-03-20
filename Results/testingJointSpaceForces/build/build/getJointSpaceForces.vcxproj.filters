@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\Daniel\Desktop\Automating Inverse Model\Results\testingJointSpaceForces\build\getJointSpaceForces.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Daniel\Desktop\Automating Inverse Model\Results\testingJointSpaceForces\build\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{6BCC854C-47AD-3750-93D7-91CA353C00FE}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
