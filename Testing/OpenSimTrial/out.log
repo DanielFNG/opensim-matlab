@@ -1,0 +1,216 @@
+Loaded model model_scaled from file C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\testing_adjusted.osim
+               MODEL: model_scaled
+         coordinates: 23
+              forces: 0
+           actuators: 0
+             muscles: 0
+            analyses: 0
+              probes: 0
+              bodies: 18
+              joints: 17
+         constraints: 0
+             markers: 33
+         controllers: 0
+  contact geometries: 0
+misc modelcomponents: 0
+Running tool ID.
+
+Storage: file=C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\ik0.mot (nr=495 nc=24)
+Storage: file=C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\grf0.mot (nr=2974 nc=19)
+ExternalForce::right
+Data source being set to grf.mot
+ExternalForce::left
+Data source being set to grf.mot
+InverseDynamicsTool: 51 time frames in 0.375s
+
+Loaded model model_scaled from file C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\testing_adjusted.osim
+               MODEL: model_scaled
+         coordinates: 23
+              forces: 0
+           actuators: 0
+             muscles: 0
+            analyses: 0
+              probes: 0
+              bodies: 18
+              joints: 17
+         constraints: 0
+             markers: 33
+         controllers: 0
+  contact geometries: 0
+misc modelcomponents: 0
+Running tool ID.
+
+Storage: file=C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\ik0.mot (nr=495 nc=24)
+Storage: file=C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\grf0.mot (nr=2974 nc=19)
+ExternalForce::right
+Data source being set to grf.mot
+ExternalForce::left
+Data source being set to grf.mot
+InverseDynamicsTool: 51 time frames in 0.326s
+
+Loaded model model_scaled from file C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\testing_adjusted.osim
+               MODEL: model_scaled
+         coordinates: 23
+              forces: 0
+           actuators: 0
+             muscles: 0
+            analyses: 0
+              probes: 0
+              bodies: 18
+              joints: 17
+         constraints: 0
+             markers: 33
+         controllers: 0
+  contact geometries: 0
+misc modelcomponents: 0
+Running tool ID.
+
+Storage: file=C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\ik0.mot (nr=495 nc=24)
+Storage: file=C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\grf0.mot (nr=2974 nc=19)
+ExternalForce::right
+Data source being set to grf.mot
+ExternalForce::left
+Data source being set to grf.mot
+InverseDynamicsTool: 51 time frames in 0.335s
+
+Loaded model model_scaled from file C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\testing_adjusted.osim
+Storage: file=C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\grf0.mot (nr=2974 nc=19)
+ExternalForce::right
+Data source being set to grf.mot
+ExternalForce::left
+Data source being set to grf.mot
+Loaded model model_scaled from file C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\testing_adjusted.osim
+Storage: file=C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\grf0.mot (nr=2974 nc=19)
+ExternalForce::right
+Data source being set to grf.mot
+ExternalForce::left
+Data source being set to grf.mot
+               MODEL: model_scaled
+         coordinates: 23
+              forces: 2
+           actuators: 0
+             muscles: 0
+            analyses: 0
+              probes: 0
+              bodies: 18
+              joints: 17
+         constraints: 0
+             markers: 33
+         controllers: 0
+  contact geometries: 0
+misc modelcomponents: 0
+Running tool ID.
+
+Storage: file=C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\ik0.mot (nr=495 nc=24)
+Error: failed to construct ExternalLoads from file C:\Users\Daniel\Desktop\Automating Inverse Model\Rubbish\ID\grf.xml. Please make sure the file exists and that it contains an ExternalLoads object or create a fresh one.
+InverseDynamicsTool Failed: Object: ERR- Could not open file C:\Users\Daniel\Desktop\Automating Inverse Model\Rubbish\ID\grf.xml. It may not exist or you don't have permission to read it.
+Loaded model model_scaled from file C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\testing_adjusted.osim
+               MODEL: model_scaled
+         coordinates: 23
+              forces: 0
+           actuators: 0
+             muscles: 0
+            analyses: 0
+              probes: 0
+              bodies: 18
+              joints: 17
+         constraints: 0
+             markers: 33
+         controllers: 0
+  contact geometries: 0
+misc modelcomponents: 0
+Running tool .
+
+Storage: file=C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\ik0.mot (nr=495 nc=24)
+Storage: file=C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\grf0.mot (nr=2974 nc=19)
+ExternalForce::right
+Data source being set to grf.mot
+ExternalForce::left
+Data source being set to grf.mot
+InverseDynamicsTool: 51 time frames in 0.331s
+
+Loaded model model_scaled from file C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\testing_adjusted.osim
+Storage: file=C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\grf0.mot (nr=2974 nc=19)
+ExternalForce::right
+Data source being set to grf.mot
+ExternalForce::left
+Data source being set to grf.mot
+Loaded model model_scaled from file C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\testing_adjusted.osim
+Storage: file=C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\grf0.mot (nr=2974 nc=19)
+ExternalForce::right
+Data source being set to grf.mot
+ExternalForce::left
+Data source being set to grf.mot
+               MODEL: model_scaled
+         coordinates: 23
+              forces: 2
+           actuators: 0
+             muscles: 0
+            analyses: 0
+              probes: 0
+              bodies: 18
+              joints: 17
+         constraints: 0
+             markers: 33
+         controllers: 0
+  contact geometries: 0
+misc modelcomponents: 0
+Running tool .
+
+Storage: file=C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\ik0.mot (nr=495 nc=24)
+No external loads will be applied (external loads file not specified).
+InverseDynamicsTool: 51 time frames in 0.353s
+
+Loaded model model_scaled from file C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\testing_adjusted.osim
+Storage: file=C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\grf0.mot (nr=2974 nc=19)
+ExternalForce::right
+Data source being set to grf.mot
+ExternalForce::left
+Data source being set to grf.mot
+               MODEL: model_scaled
+         coordinates: 23
+              forces: 2
+           actuators: 0
+             muscles: 0
+            analyses: 0
+              probes: 0
+              bodies: 18
+              joints: 17
+         constraints: 0
+             markers: 33
+         controllers: 0
+  contact geometries: 0
+misc modelcomponents: 0
+Running tool .
+
+Storage: file=C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\ik0.mot (nr=495 nc=24)
+No external loads will be applied (external loads file not specified).
+InverseDynamicsTool: 51 time frames in 0.316s
+
+Loaded model model_scaled from file C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\testing_adjusted.osim
+Storage: file=C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\grf0.mot (nr=2974 nc=19)
+ExternalForce::right
+Data source being set to grf.mot
+ExternalForce::left
+Data source being set to grf.mot
+               MODEL: model_scaled
+         coordinates: 23
+              forces: 2
+           actuators: 0
+             muscles: 0
+            analyses: 0
+              probes: 0
+              bodies: 18
+              joints: 17
+         constraints: 0
+             markers: 33
+         controllers: 0
+  contact geometries: 0
+misc modelcomponents: 0
+Running tool .
+
+Storage: file=C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\ik0.mot (nr=495 nc=24)
+No external loads will be applied (external loads file not specified).
+InverseDynamicsTool: 51 time frames in 0.335s
+
+Loaded model model_scaled from file C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\testing_adjusted.osim
