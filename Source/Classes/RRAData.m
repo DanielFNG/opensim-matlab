@@ -90,6 +90,7 @@ classdef RRAData < Data
             end
             display('Intermediate timesteps correctly removed from RRA data.')
         end
+        
     end
     
 end

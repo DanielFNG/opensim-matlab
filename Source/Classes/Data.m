@@ -3,7 +3,9 @@ classdef Data
     %   Easy access to reading and writing of data files in the correct
     %   format to be used within OpenSim. Methods for data handling
     %   including subsampling, ensuring time syncronisation of various data
-    %   inputs, etc. 
+    %   inputs, etc. Filenames are not stored since the data is designed to
+    %   be worked with and so the original filename is likely to be out of
+    %   date anyway. 
     
     properties
         Values 

@@ -32,7 +32,7 @@
       <groups/><!--Storage file (.sto) containing (3) components of force and/or torque
 		    and point of application.Note: this file overrides the data source
 		    specified by the individual external forces if specified.-->
-      <datafile>C:\Users\Daniel\Desktop\Exopt\Testing\OpenSimTrial\grf0.mot</datafile><!--Optional motion file (.mot) or storage file (.sto) containing the
+      <datafile>C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\OpenSimTrial\grf0.mot</datafile><!--Optional motion file (.mot) or storage file (.sto) containing the
 		    model kinematics used to transform a point expressed in ground to the
 		    body of force application.If the point is not expressed in ground, the
 		    point is not transformed--><!--Editing this bit out until I figure out how to point to the right file

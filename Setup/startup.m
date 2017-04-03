@@ -1,1 +1,0 @@
-setenv('EXOPT_HOME', 'C:\Users\Daniel\Desktop\Exopt');
