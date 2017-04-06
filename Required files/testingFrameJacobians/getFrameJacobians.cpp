@@ -156,6 +156,9 @@ bool parseSettingsFile(
 		internal_points[i] = point_from_string;
 		
 		frames.push_back(node->first_node("frame")->value());
+		
+		// Shift the node over to the next point. 
+		node = node->next_sibling();
 	}
 	
 	// Finish by saving the points array. 
