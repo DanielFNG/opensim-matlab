@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ExOptDocument Version="1">
+	<ContactPointSettings name="apo">
+		<Point name="right">
+			<location> 0 0 0 </location>
+			<frame> pelvis </frame>
+		</Point>
+		<Point name="left">
+			<location> 0 0 0 </location>
+			<frame> pelvis </frame>
+		</Point>
+		<Point name="centre">
+			<location> 0 0 0 </location>
+			<frame> pelvis </frame>
+		</Point>
+	</ContactPointSettings>
+</ExOptDocument>

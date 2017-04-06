@@ -13,18 +13,47 @@
 // 	-	coriolis & other nonlinear effects,
 //	-	gravity,
 //	-	net joint moments (human subject + attached exoskeleton),
-//	-	external forces (left/right GRF).
+//	-	external forces (e.g. left/right GRF).
 //
-// This function calculates these joint space forces, checks that they satisfy 
-// the classical equation of motion, and saves them for later use in an 
-// optimization. 
+// This function supports and REQUIRES five command line arguments: the absolute
+// paths to a set of input files. These files are as follows:
 //
-// This function supports and requires a single command line argument: the path
-// to the directory where the results are to be read in from. 
+// (1) The model file;
+// (2) The external forces data file;
+// (3) The states file from an RRA analysis of an OpenSimTrial;
+// (4) The accelerations file from an RRA analysis of an OpenSimTrial;
+// (5) The inverse dynamics file from an ID analysis of an OpenSimTrial. 
 //
-// To do: document some assumptions, i.e. using in tandem with the Matlab 
-// inverse model code, for one thing Matlab makes the results folder as a 
-// relative path, etc...
+// care should be taken to precisely match the order of these input arguments.
+//
+// There is an additional REQUIRED (6) command line argument which is the 
+// absolute path to a directory where the results are to be saved. The results 
+// are saved as tab delimited .txt files with some nominal filenames which are 
+// similar to those listed above, but with underscores instead of spaces where 
+// relevant (i.e. net_joint_moments.txt). There are two additional output files:
+//
+// A) calculated net joint moments 
+// B) discrepancy
+//
+// A) is similar to the net joint moments, but rather than being calculated from 
+// the ID process of an OpenSim trial, it is calculated by an appropriate 
+// summation of the other joint-space forces.
+//
+// B) is the difference between the net joint moments measured from ID and A) 
+// above. B) is used to make sure that the calculation of joint-space forces 
+// was sufficiently accurate. THIS SHOULD BE EXACT, MY CURRENT THEORY FOR WHY 
+// IT ISN'T IS THE OFFSET IN TIME BETWEEN MOTION DATA AND EXTERNAL FORCES. 
+// OPENSIM DOES SOME SORT OF FITTING TO GET THESE AT THE SAME TIME, WHEREAS 
+// I WORK WITH DISCRETE TIMESTEPS, WHICH INTRODUCES DISCREPANCIES. SUPPORT FOR 
+// THIS THEORY IS THAT B) HAS BEEN MUCH WORSE IN CASES WHERE THERE HAVE BEEN 
+// DUPLICATE OR MISSING GRF TIMESTEPS. 
+//
+// There should be a method in Matlab to read in this discrepancy file and 
+// analyse whether this script has completed accurate enough. 
+//
+// Finally, an OPTIONAL (7) command line argument should be a boolean. If true 
+// this sets the verbose keyword which causes the calculation of the joint-space
+// forces to be printed. This can be useful for debugging. 
 //==============================================================================
 //==============================================================================
 
@@ -56,35 +85,34 @@ void printForceVector(Vector_<double> vec,
 
 int main(int argc, const char * argv[])
 {
-	// Here we assume that the correct pathname to the results directory is 
-	// given. Later in the code when we attempt to open files errors will be 
-	// thrown if this is unsuccessful.
-	if (argc == 1) {
-		std::cout << "Error: require path to results folder as a command line" 
-				<< " argument." << std::endl; 
+	// Handle command line arguments. Check that we have neither too little nor
+	// too many. Check that if the optional argument is given, that it's a
+	// boolean.
+	bool print_info;
+	if (argc < 7) {
+		std::cout << "Error: too few command line arguments. See comments at" 
+				<< " top of file for the correct number and order of input" 
+				<< " arguments." << std::endl; 
 		return 1;
-	}
-	else if (argc > 2) {
-		std::cout << "Error: too many command line arguments." << std::endl;
+	} else if (argc > 8) {
+		std::cout << "Error: too many command line arguments. See comments at"
+				<< " top of file for the correct number and order of input"
+				<< " arguments." << std::endl;
 		return 1;
+	} else if (argc == 8) {
+		if not ((atoi(argv[7] == 0)) or ((atoi(argv[7] == 1)))) {
+			std::cout << "Error: 7th command line argument, if given, has to be"
+					<< " boolean." << std::endl;
+			return 1;
+		}
+		print_info = argv[7];
 	}
-	
-	// Get the OpenSim results directory from the input argument. 
-	std::string OSIM_RESULTS = argv[1];
-	
-	// Given this results directory and using knowledge of the structure of the 
-	// Matlab inverse model code, get variables for other key files. 
-	std::string MODEL_FILE = OSIM_RESULTS + "/../testing_adjusted.osim";
-	std::string STATES = OSIM_RESULTS + "/RRA_states.sto";
-	std::string ACCELERATIONS = OSIM_RESULTS + "/RRA_accelerations.sto";
-	std::string DYNAMICS = OSIM_RESULTS + "/ID_dynamics.sto";
-	std::string REACTION_FORCES = OSIM_RESULTS + "/grf.mot";
-	
-	// Create a variable for the output results directory.
-	std::string JSF_RESULTS = OSIM_RESULTS + "/../jsf";
+	std::string model_file = argv[1], ext_file = argv[2], 
+		states_file = argv[3], accelerations_file = argv[4],
+		id_file = argv[5], results_directory = argv[6];
 	
 	// Create variable names for the output files. 
-	std::string LEFT_APO_JACOBIAN = JSF_RESULTS + "/left_apo_jacobian.txt";
+	std::string left_apo_jacobian = results_directory + "/left_apo_jacobian.txt";
 	std::string RIGHT_APO_JACOBIAN = JSF_RESULTS + "/right_apo_jacobian.txt";
 	std::string RESIDUAL_FORCE = JSF_RESULTS + "/residual_force.txt";
 	std::string INTERNAL_FORCE = JSF_RESULTS + "/net_internal_values.txt";
@@ -130,11 +158,14 @@ int main(int argc, const char * argv[])
 		const int expectedGRFSize = 18;
 		Vec<expectedGRFSize,double> grfs;
 		
-		// Output system model info and begin calculations.  		
-		std::cout << "Number of bodies: " << n_bodies << std::endl; 
-		std::cout << "Degrees of freedom: " << n_dofs << std::endl; 
-		std::cout << "Beginning calculation of system & state properties..." 
-				<< std::endl;
+		// Output system model info and begin calculations.
+		if (printInfo) 
+		{
+			std::cout << "Number of bodies: " << n_bodies << std::endl; 
+			std::cout << "Degrees of freedom: " << n_dofs << std::endl; 
+			std::cout << "Beginning calculation of system & state properties..." 
+					<< std::endl;
+		}
 
 		while (true)
 		{
@@ -146,7 +177,10 @@ int main(int argc, const char * argv[])
 			dynamics_file >> time;
 			
 			if (states_file.eof()) {
-				std::cout << "\nReached end of states file." << std::endl;
+				if (printInfo) 
+				{
+					std::cout << "\nReached end of states file." << std::endl;
+				}
 				break;
 			}
 			
@@ -366,18 +400,21 @@ int main(int argc, const char * argv[])
 				first_frame = false;
 			}
 			
-			// Output the time of the current state and separate the timesteps
-			// visually. Print each joint-space vector to the screen. 
-			std::cout << "---------------------------------------" << std::endl; 
-			std::cout << "Time: " << time << std::endl; 
-			printForceVector(dynamics, "net joint torques");
-			printForceVector(inertiaTorques, "inertia");
-			printForceVector(gravityTorques, "gravity");
-			printForceVector(coriolisTorques, "centrifugal effects");
-			printForceVector(rightGRFTorques, "right foot contact");
-			printForceVector(leftGRFTorques, "left foot contact");
-			
-			
+			if (printInfo) 
+			{
+				// Output the time of the current state and separate the 
+				// timesteps visually. Print each joint-space vector to the 
+				// screen. 
+				std::cout << "---------------------------------------" 
+					<< std::endl; 
+				std::cout << "Time: " << time << std::endl; 
+				printForceVector(dynamics, "net joint torques");
+				printForceVector(inertiaTorques, "inertia");
+				printForceVector(gravityTorques, "gravity");
+				printForceVector(coriolisTorques, "centrifugal effects");
+				printForceVector(rightGRFTorques, "right foot contact");
+				printForceVector(leftGRFTorques, "left foot contact");
+			}
 		}
 		
 		delete [] states;

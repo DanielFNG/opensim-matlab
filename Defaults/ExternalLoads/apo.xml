@@ -45,7 +45,7 @@
 			<ExternalForce name="apo_right">
 				<isDisabled> false </isDisabled>
 				<!--Name of the body the force is applied to.-->
-				<applied_to_body> femur_r </applied_to_body>
+				<applied_to_body> APO_r_link </applied_to_body>
 				<!--Name of the body the force is expressed in (default is ground).-->
 				<force_expressed_in_body> ground </force_expressed_in_body>
 				<!--Name of the body the point is expressed in (default is ground).-->
@@ -62,7 +62,7 @@
 			<ExternalForce name="apo_left">
 				<isDisabled> false </isDisabled>
 				<!--Name of the body the force is applied to.-->
-				<applied_to_body> femur_l </applied_to_body>
+				<applied_to_body> APO_l_link </applied_to_body>
 				<!--Name of the body the force is expressed in (default is ground).-->
 				<force_expressed_in_body> ground </force_expressed_in_body>
 				<!--Name of the body the point is expressed in (default is ground).-->
