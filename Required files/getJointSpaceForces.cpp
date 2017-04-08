@@ -72,13 +72,6 @@ void writeVector(std::ofstream& file_name,
 				  
 void writeVectorTimeless(std::ofstream& file_name,
 						 Vector vector_object);
-				  
-void writeMatrix(std::ofstream& file_name,
-				   double time, 
-				   Matrix matrix_object);
-				   
-void writeMatrixTimeless(std::ofstream& file_name,
-						 Matrix matrix_object);
 					  
 void printForceVector(Vector_<double> vec,
 					  std::string description);
@@ -100,31 +93,27 @@ int main(int argc, const char * argv[])
 				<< " arguments." << std::endl;
 		return 1;
 	} else if (argc == 8) {
-		if not ((atoi(argv[7] == 0)) or ((atoi(argv[7] == 1)))) {
+		if (! ((atoi(argv[7]) == 0) || (atoi(argv[7]) == 1))) {
 			std::cout << "Error: 7th command line argument, if given, has to be"
 					<< " boolean." << std::endl;
 			return 1;
 		}
-		print_info = argv[7];
+		print_info = (atoi(argv[7]) != 0);
+		// Convert the int (1 or 0) argv[7] to bool type. 
 	}
-	std::string model_file = argv[1], ext_file = argv[2], 
-		states_file = argv[3], accelerations_file = argv[4],
-		id_file = argv[5], results_directory = argv[6];
+	std::string model_file = argv[1], ext_path = argv[2], 
+		states_path = argv[3], accelerations_path = argv[4],
+		id_path = argv[5], results_directory = argv[6];
 	
 	// Create variable names for the output files. 
-	std::string left_apo_jacobian = results_directory + "/left_apo_jacobian.txt";
-	std::string RIGHT_APO_JACOBIAN = JSF_RESULTS + "/right_apo_jacobian.txt";
-	std::string RESIDUAL_FORCE = JSF_RESULTS + "/residual_force.txt";
-	std::string INTERNAL_FORCE = JSF_RESULTS + "/net_internal_values.txt";
-	
-	// Need a 
-	bool first_frame = true; 
+	std::string residual_force = results_directory + "/residual_force.txt";
+	std::string internal_force = results_directory + "/net_internal_values.txt";
 	
 	try {
 		
 		// Load OpenSim model from file, initialise state and calculate some 
 		// dynamic properties. 
-		Model osimModel(MODEL_FILE);
+		Model osimModel(model_file);
 		SimTK::State & si  = osimModel.initSystem();
 		int n_dofs = osimModel.getMatterSubsystem().getNumMobilities(),
 			n_bodies = osimModel.getMatterSubsystem().getNumBodies();
@@ -134,16 +123,14 @@ int main(int argc, const char * argv[])
 		
 		// Load the necessary files from the RRA results (states, 
 		// accelerations, forces) and the raw data (grfs).
-		std::ifstream states_file(STATES), 
-					  accelerations_file(ACCELERATIONS),
-					  dynamics_file(DYNAMICS), 
-					  grfs_file(REACTION_FORCES);
+		std::ifstream states_file(states_path), 
+					  accelerations_file(accelerations_path),
+					  dynamics_file(id_path), 
+					  grfs_file(ext_path);
 		
 		// Open files for output. 
-		std::ofstream leftAPOJacobian_file(LEFT_APO_JACOBIAN), 
-					  rightAPOJacobian_file(RIGHT_APO_JACOBIAN), 
-					  residualForce_file(RESIDUAL_FORCE), 
-					  internalForce_file(INTERNAL_FORCE);
+		std::ofstream residual_force_file(residual_force), 
+					  internal_force_file(internal_force);
 
 		// Create array for states.
 		// Require double array for API compatability.
@@ -159,7 +146,7 @@ int main(int argc, const char * argv[])
 		Vec<expectedGRFSize,double> grfs;
 		
 		// Output system model info and begin calculations.
-		if (printInfo) 
+		if (print_info) 
 		{
 			std::cout << "Number of bodies: " << n_bodies << std::endl; 
 			std::cout << "Degrees of freedom: " << n_dofs << std::endl; 
@@ -177,7 +164,7 @@ int main(int argc, const char * argv[])
 			dynamics_file >> time;
 			
 			if (states_file.eof()) {
-				if (printInfo) 
+				if (print_info) 
 				{
 					std::cout << "\nReached end of states file." << std::endl;
 				}
@@ -248,11 +235,8 @@ int main(int argc, const char * argv[])
 			osimModel.getMatterSubsystem().multiplyBySystemJacobianTranspose(
 					si, totalCentrifugalForces_reference, coriolisTorques);
 			
-			// Calculate joint-space force due to ground reaction forces, and
-			// simultaneously calculate the Jacobians to the left and right 
-			// APO contact points.
+			// Calculate joint-space force due to ground reaction forces.
 			Vector leftGRFTorques, rightGRFTorques;
-			Matrix leftAPOJacobian, rightAPOJacobian;
 			
 			// Variables for the forces, moments and centres of pressure 
 			// for each foot reaction force. 
@@ -270,14 +254,6 @@ int main(int argc, const char * argv[])
 				groundLeftCOP[j] = grfs[j+9];
 				groundLeftMoment[j] = grfs[j+15];
 			}
-			
-			// Orthosis COP is COP of external force applied by APO in R/L
-			// femur frames. See report for more info on this.
-			SimTK::Vec3 orthosisCOP(0);
-			
-			orthosisCOP[0] = 0;
-			orthosisCOP[1] = -0.35;
-			orthosisCOP[2] = 0;
 		
 			for (int j=0; j<n_bodies; j++) {
 				
@@ -342,26 +318,6 @@ int main(int argc, const char * argv[])
 									lCalcCOP_reference, lCalcSpatial_reference, 
 									leftGRFTorques);
 					
-				} else if (
-					osimModel.getBodySet().get(j).getName() == "femur_r") {
-					
-					const SimTK::Vec3 orthosisCOP_reference(orthosisCOP);
-					
-					// Calc right APO Jacobian. 
-					osimModel.getMatterSubsystem().
-						calcFrameJacobian(si, MobilizedBodyIndex(testingBodies), 
-							orthosisCOP_reference, rightAPOJacobian);
-					
-				} else if (
-					osimModel.getBodySet().get(j).getName() == "femur_l") {
-					
-					const SimTK::Vec3 orthosisCOP_reference(orthosisCOP);
-					
-					// Calc left APO Jacobian. 
-					osimModel.getMatterSubsystem().
-						calcFrameJacobian(si, MobilizedBodyIndex(testingBodies), 
-							orthosisCOP_reference, leftAPOJacobian);
-					
 				}
 			}
 			/* Above, I transform the COP measured by the treadmill on to the 
@@ -373,34 +329,24 @@ int main(int argc, const char * argv[])
 			   minimal, but if anything results were better for the current 
 			   implementation. But I'm not 100% sure on the correctness of this.
 			*/
-			
-			if (! first_frame) {
-			
-				// Write the APO Jacobians to a file.
-				writeMatrixTimeless(leftAPOJacobian_file,leftAPOJacobian);
-				writeMatrixTimeless(rightAPOJacobian_file,rightAPOJacobian);
 				
-				// Write the residual forces and internal forces (almost 
-				// identical to net joint torques but with a slighty 
-				// discrepancy, a.k.a residual forces) to file.
-				Vector residualForce, internalForce; 
-				residualForce = gravityTorques - inertiaTorques + dynamics 
-								- coriolisTorques + rightGRFTorques 
-								+ leftGRFTorques;
-				internalForce = inertiaTorques - gravityTorques 
-								+ coriolisTorques - rightGRFTorques 
-								- leftGRFTorques;
-				writeVectorTimeless(residualForce_file, residualForce);
-				writeVectorTimeless(internalForce_file, internalForce);
+			// Write the residual forces and internal forces (almost 
+			// identical to net joint torques but with a slighty 
+			// discrepancy, a.k.a residual forces) to file.
+			Vector residualForce, internalForce; 
+			residualForce = gravityTorques - inertiaTorques + dynamics 
+							- coriolisTorques + rightGRFTorques 
+							+ leftGRFTorques;
+			internalForce = inertiaTorques - gravityTorques 
+							+ coriolisTorques - rightGRFTorques 
+							- leftGRFTorques;
+			writeVectorTimeless(residual_force_file, residualForce);
+			writeVectorTimeless(internal_force_file, internalForce);
 				
-				// Can use writeVector or writeMatrix to write a time-indexed 
-				// file if I end up needing this. 
-				
-			} else {
-				first_frame = false;
-			}
+			// Can use writeVector or writeMatrix to write a time-indexed 
+			// file if I end up needing this. 
 			
-			if (printInfo) 
+			if (print_info) 
 			{
 				// Output the time of the current state and separate the 
 				// timesteps visually. Print each joint-space vector to the 
@@ -442,43 +388,6 @@ int main(int argc, const char * argv[])
 	std::cout << "Now check the residual forces!" << std::endl;
 	
 	return 0;
-}
-
-void writeMatrix(std::ofstream& file_name,
-					  double time, 
-					  Matrix matrix_object)
-{  					  
-	file_name << time;
-	for (int k = 0; k < matrix_object.nrow(); k++) 
-	{
-		for (int j = 0; j < matrix_object.ncol(); j++) 
-		{
-			file_name << "\t";
-			file_name << matrix_object[k][j];
-		}
-		file_name << "\n";
-	}
-}
-
-void writeMatrixTimeless(std::ofstream& file_name,
-						 Matrix matrix_object)
-{
-	for (int k = 0; k < matrix_object.nrow(); k++)
-	{
-		for (int j = 0; j < matrix_object.ncol(); j++)
-		{
-			if (! (j == matrix_object.ncol() - 1))
-			{
-				file_name << matrix_object[k][j];
-				file_name << "\t";
-			}
-			else
-			{
-				file_name << matrix_object[k][j];
-			}
-		}
-		file_name << "\n";
-	}
 }
 						
 void writeVector(std::ofstream& file_name,
