@@ -106,8 +106,13 @@ int main(int argc, const char * argv[])
 		id_path = argv[5], results_directory = argv[6];
 	
 	// Create variable names for the output files. 
-	std::string residual_force = results_directory + "/residual_force.txt";
-	std::string internal_force = results_directory + "/net_internal_values.txt";
+	std::string inertia_force = results_directory + "/inertia.txt";
+	std::string coriolis_force = results_directory + "/coriolis.txt";
+	std::string gravity_force = results_directory + "/gravity.txt";
+	std::string external_force = results_directory + "/external.txt";
+	std::string actuation_force = results_directory + "/actuation.txt";
+	std::string residual_force = results_directory + "/residual.txt";
+	std::string internal_force = results_directory + "/internal.txt";
 	
 	try {
 		
@@ -129,7 +134,12 @@ int main(int argc, const char * argv[])
 					  grfs_file(ext_path);
 		
 		// Open files for output. 
-		std::ofstream residual_force_file(residual_force), 
+		std::ofstream inertia_force_file(inertia_force),
+					  coriolis_force_file(coriolis_force),
+					  gravity_force_file(gravity_force),
+					  external_force_file(external_force),
+					  actuation_force_file(actuation_force),
+					  residual_force_file(residual_force), 
 					  internal_force_file(internal_force);
 
 		// Create array for states.
@@ -157,11 +167,22 @@ int main(int argc, const char * argv[])
 		while (true)
 		{
 			// Dump first entry (time) for each file. Code requires aligned 
-			// data inputs so these are the same.
+			// data inputs so check this. 
 			grfs_file >> time;
+			double checktime = time; 
 			states_file >> time;
+			checktime += time;
 			accelerations_file >> time;
+			checktime += time;
 			dynamics_file >> time;
+			checktime += time; 
+			
+			if (checktime != time*4.0)
+			{
+				std::cout << "Error: input files not properly time-aligned."
+					<< std::endl;
+				return 1;
+			}
 			
 			if (states_file.eof()) {
 				if (print_info) 
@@ -329,6 +350,14 @@ int main(int argc, const char * argv[])
 			   minimal, but if anything results were better for the current 
 			   implementation. But I'm not 100% sure on the correctness of this.
 			*/
+			
+			// Write the various components to a file.
+			writeVector(inertia_force_file, time, inertiaTorques);
+			writeVector(coriolis_force_file, time, coriolisTorques);
+			writeVector(gravity_force_file, time, gravityTorques);
+			writeVector(external_force_file, time,
+								rightGRFTorques + leftGRFTorques);
+			writeVector(actuation_force_file, time, dynamics);
 				
 			// Write the residual forces and internal forces (almost 
 			// identical to net joint torques but with a slighty 
@@ -340,8 +369,8 @@ int main(int argc, const char * argv[])
 			internalForce = inertiaTorques - gravityTorques 
 							+ coriolisTorques - rightGRFTorques 
 							- leftGRFTorques;
-			writeVectorTimeless(residual_force_file, residualForce);
-			writeVectorTimeless(internal_force_file, internalForce);
+			writeVector(residual_force_file, time, residualForce);
+			writeVector(internal_force_file, time, internalForce);
 				
 			// Can use writeVector or writeMatrix to write a time-indexed 
 			// file if I end up needing this. 

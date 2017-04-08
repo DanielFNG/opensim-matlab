@@ -176,7 +176,7 @@ int main(int argc, const char * argv[])
 				// Open approrpiate output file & append Jacobian. 
 				output_files[i].open(
 					results_directory + "/" + names[i] + ".txt");
-				writeMatrixTimeless(output_files[i], Jacobian);
+				writeMatrix(output_files[i], time, Jacobian);
 			}
 		}
 		
