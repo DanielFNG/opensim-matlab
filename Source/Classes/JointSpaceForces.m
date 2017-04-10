@@ -4,6 +4,10 @@ classdef JointSpaceForces
     % residual force to make sure it's low enough (this is not the same as
     % the residuals from RRA). 
     
+    % For the moment COMPLETING THIS CLASS IS ON HOLD!
+    % When you come back remember the necessary intricacies of subsampling
+    % etc.
+    
     properties (SetAccess = private)
         trial % OpenSimTrial with RRA calculated
         results % Results directory

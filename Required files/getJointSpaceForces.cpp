@@ -22,7 +22,8 @@
 // (2) The external forces data file;
 // (3) The states file from an RRA analysis of an OpenSimTrial;
 // (4) The accelerations file from an RRA analysis of an OpenSimTrial;
-// (5) The inverse dynamics file from an ID analysis of an OpenSimTrial. 
+// (5) The inverse dynamics file from an ID analysis of a kinematics file,
+//	   which itself resulted from an OpenSimTrial. 
 //
 // care should be taken to precisely match the order of these input arguments.
 //

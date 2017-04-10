@@ -11,7 +11,7 @@ function new_directory = createUniqueDirectory( desired_directory )
         % in a directory where a relative path makes sense. This requires a
         % change to getFullPath which I haven't implemented yet, there's a
         % note in a comment there. 
-        if exist(attempt, 'dir')
+        if exist([pwd filesep attempt], 'dir')
             display(['Directory already exists. Appending integer ' ...
                 'to prevent loss of data.']);
             append = append + 1;
