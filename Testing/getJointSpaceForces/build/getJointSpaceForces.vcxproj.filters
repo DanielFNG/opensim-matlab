@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\getJointSpaceForces\getJointSpaceForces.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\getJointSpaceForces\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{89943757-69AE-3CA2-B726-96346DACDB5B}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -105,6 +105,8 @@ int main(int argc, const char * argv[])
 	std::string model_file = argv[1], ext_path = argv[2], 
 		states_path = argv[3], accelerations_path = argv[4],
 		id_path = argv[5], results_directory = argv[6];
+		
+	std::cout << id_path << std::endl;
 	
 	// Create variable names for the output files. 
 	std::string inertia_force = results_directory + "/inertia.txt";
@@ -143,6 +145,8 @@ int main(int argc, const char * argv[])
 					  residual_force_file(residual_force), 
 					  internal_force_file(internal_force);
 
+		std::cout << dynamics_file.is_open() << std::endl;
+					  
 		// Create array for states.
 		// Require double array for API compatability.
 		double * states = new double[2*n_dofs];
@@ -178,12 +182,12 @@ int main(int argc, const char * argv[])
 			dynamics_file >> time;
 			checktime += time; 
 			
-			if (checktime != time*4.0)
+			/* if (checktime != time*4.0)
 			{
 				std::cout << "Error: input files not properly time-aligned."
 					<< std::endl;
 				return 1;
-			}
+			} */
 			
 			if (states_file.eof()) {
 				if (print_info) 

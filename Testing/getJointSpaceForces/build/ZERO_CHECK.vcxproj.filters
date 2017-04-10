@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\getJointSpaceForces\build\CMakeFiles\b8f14c9874b14d1294dca8c615bf3833\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{8088B41B-3200-3E7B-872A-06D3BB5DF976}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
