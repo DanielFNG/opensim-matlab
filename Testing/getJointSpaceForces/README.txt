@@ -8,7 +8,7 @@ TESTING STEPS:
 4) Run ID on this second OpenSimTrial over the same timeframe as in 2). 
 5) Copied the relevant inputs for getJointSpaceForces (see source file) in to a 
     new directory for convenience.
-6) Remove all the header files. 
+6) Remove all the headers from files. 
 6) Run getJointSpaceForces. 
 
 NOTE: TO DO THIS I HAD TO EDIT getJointSpaceForces FOR THE TIME BEING SINCE IT
