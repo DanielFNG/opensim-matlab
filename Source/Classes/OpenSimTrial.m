@@ -35,7 +35,6 @@ classdef OpenSimTrial
         results_directory % path to high level results directory
         rra = 'Not yet calculated.'
         id = 'Not yet calculated.'
-        jsf = 'Not yet calculated.' % joint space forces results 
     end
     
     properties (GetAccess = private, SetAccess = private)

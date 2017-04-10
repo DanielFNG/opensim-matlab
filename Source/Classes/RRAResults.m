@@ -4,6 +4,8 @@ classdef RRAResults
     % residuals to see if they're good enough. 
     
     properties (SetAccess = private)
+        start % first timestep
+        final % last timestep
         forces % Actuation forces 
         accelerations % Joint accelerations etc.
         velocities
@@ -49,6 +51,8 @@ classdef RRAResults
                 obj.positions = RRAData(obj.positions_path);
                 obj.errors = RRAData(obj.errors_path);
                 obj.states = RRAData(obj.states_path);
+                obj.start = obj.forces.Timesteps(1);
+                obj.final = obj.forces.Timesteps(end);
             end
         end
         

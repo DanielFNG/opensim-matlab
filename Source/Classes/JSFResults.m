@@ -41,7 +41,13 @@ classdef JSFResults
                 obj.actuation_path = [directory '/actuation.txt'];
                 obj.internal_path = [direcotry '/internal.txt'];
                 obj.residual_path = [directory '/residual.txt'];
-                obj.inertia = Data
+                obj.inertia = Data(obj.inertia_path);
+                obj.coriolis = Data(obj.coriolis_path);
+                obj.gravity = Data(obj.gravity_path);
+                obj.external = Data(obj.external_path);
+                obj.actuation = Data(obj.actuation_path);
+                obj.internal = Data(obj.internal_path);
+                obj.residual = Data(obj.residual_path);
             end
         end
         
