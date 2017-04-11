@@ -5,7 +5,9 @@ classdef Data
     %   including subsampling, ensuring time syncronisation of various data
     %   inputs, etc. Filenames are not stored since the data is designed to
     %   be worked with and so the original filename is likely to be out of
-    %   date anyway. 
+    %   date anyway. Data should be numerical. Text can appear in labels or
+    %   in the header, but text in the main body of the data leads to
+    %   incompatability. 
     
     properties
         Values 

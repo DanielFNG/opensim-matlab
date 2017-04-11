@@ -20,7 +20,18 @@ classdef FrameJacobian
     
     methods
         
-        function obj = FrameJacobian(OpenSimTrial, 
+        function obj = FrameJacobian(OpenSimTrial, name, body, point, path)
+            % Name of the frame as per the settings file, body to which it
+            % is attached, point on body. Path to text file holding the
+            % Jacobian over some time trajectory. 
+            if nargin > 0
+                obj.Trial = OpenSimTrial;
+                obj.Name = name;
+                obj.Body = char(body);
+                obj.Point = point;
+                obj.Jacobian = MatrixData(path);
+            end
+        end
         
     end
     
