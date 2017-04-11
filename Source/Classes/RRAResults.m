@@ -53,7 +53,29 @@ classdef RRAResults
                 obj.states = RRAData(obj.states_path);
                 obj.start = obj.forces.Timesteps(1);
                 obj.final = obj.forces.Timesteps(end);
+                
+                % Rewrite RRA data files to account for intermediate
+                % timestep removal.
+                obj.rewriteRRA();
             end
+        end
+        
+        % Rewrites the RRA files after reading them in.
+        function rewriteRRA(obj)
+            % A key feature of the RRAData class is that removes
+            % intermediate RRA timesteps. We require the use of RRA data
+            % later on in getJointSpaceForces and getFrameJacobians, and
+            % I've already made the mistake once of forgetting to reprint
+            % the RRA data to file post these changes. Therefore, I'm going
+            % to make it an intrinsic part of getting RRA data - the
+            % intermediate timesteps are removed, and the files are
+            % reprinted. 
+            obj.forces.writeToFile(obj.forces_path,1,1);
+            obj.accelerations.writeToFile(obj.accelerations_path,1,1);
+            obj.velocities.writeToFile(obj.velocities_path,1,1);
+            obj.positions.writeToFile(obj.positions_path,1,1);
+            obj.errors.writeToFile(obj.errors_path,1,1);
+            obj.states.writeToFile(obj.states_path,1,1);
         end
         
     end

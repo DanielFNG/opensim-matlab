@@ -12,9 +12,7 @@ classdef FrameJacobianSet
     properties
         Trial % OpenSimTrial with RRA calculated 
         Names % array of names given to the contact points in the setup file
-        Bodies % map from names to bodies 
-        Points % map from names to points 
-        Jacobian % map from names to MatrixData object 
+        Jacobians % map from names to FrameJacobian objects 
     end
     
     methods
@@ -28,9 +26,9 @@ classdef FrameJacobianSet
             % is the string input) should be located in
             % Exopt/Defaults/ContactPointSettings.
             if nargin > 0
-                obj.trial = OpenSimTrial;
+                obj.Trial = OpenSimTrial;
                 dir = createUniqueDirectory(dir);
-                obj.calculateFrameJacobians(ContactPointSettings, dir)
+                obj.calculateFrameJacobianSet(ContactPointSettings, dir)
             end
         end
         
@@ -42,8 +40,8 @@ classdef FrameJacobianSet
             cd([home '\bin']);
             % I NEED TO REMOVE HEADERS!
             [run_status, cmdout] = system(['getFrameJacobians.exe'...
-                ' "' obj.trial.model_path '" '...
-                ' "' obj.trial.rra.states_path '" '...
+                ' "' obj.Trial.model_path '" '...
+                ' "' obj.Trial.rra.states_path '" '...
                 ' "' setupfile '" '...
                 ' "' getFullPath(dir) '" ']);
             if ~(run_status == 0)

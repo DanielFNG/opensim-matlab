@@ -166,12 +166,15 @@ classdef OpenSimTrial
             % Setup RRATool.
             switch nargin
                 case 4
-                    dir = ['RRA_' loadType];
+                    dir = ['RRA_' 'load=' loadType ...
+                        '_time=' num2str(initialTime) '-' num2str(finalTime)];
                     rraTool = obj.setupRRA(...
                                 dir, loadType, ...
                                     initialTime, finalTime);
                 case 6
-                    dir = ['RRA_' loadType '_withAdjustment'];
+                    dir = ['RRA_' loadType ...
+                        '_time=' num2str(initialTime) '-' num2str(finalTime)...
+                        '_withAdjustment'];
                     rraTool = obj.setupRRA(...
                                 dir, loadType,...
                                     initialTime, finalTime, body, output);
@@ -211,7 +214,8 @@ classdef OpenSimTrial
         % Run the ID algorithm. 
         function obj = runID(obj, loadType, startTime, endTime)
             
-            dir = ['ID_' loadType];
+            dir = ['ID_' 'load=' loadType ...
+                '_time=' num2str(startTime) '-' num2str(endTime)];
             
             idTool = obj.setupID(dir,loadType,startTime,endTime);
             
