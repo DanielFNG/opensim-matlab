@@ -1,16 +1,25 @@
-classdef FrameJacobians
-    %FRAMEJACOBIANS Summary of this class goes here
-    %   Detailed explanation goes here
+classdef FrameJacobianSet
+    % Class for calculating and storing FrameJacobians. 
+    %   Given an OpenSimTrial and a set of contact points for which
+    %   FrameJacobians are desired, described by the appropriate
+    %   ContactPointSettings xml file, this function computes and stores
+    %   these Jacobians.
+    %
+    %   This class contains functions for returning parameters relating to
+    %   a specific contact point given the name. See comments below for
+    %   usage guidelines.
     
     properties
-        trial % OpenSimTrial with RRA calculated 
-        names % array of names given to the contact points in the setup file
-        jacobians % array of data objects holding the time indexed jacobians  
+        Trial % OpenSimTrial with RRA calculated 
+        Names % array of names given to the contact points in the setup file
+        Bodies % map from names to bodies 
+        Points % map from names to points 
+        Jacobian % map from names to MatrixData object 
     end
     
     methods
         
-        function obj = FrameJacobians(OpenSimTrial, ContactPointSettings, dir)
+        function obj = FrameJacobianSet(OpenSimTrial, ContactPointSettings, dir)
             % OpenSimTrial is the OpenSimTrial for which frame Jacobians
             % are sought. dir is the results directory in which output
             % files are stored. ContactPointSettings is a string describing
@@ -25,7 +34,7 @@ classdef FrameJacobians
             end
         end
         
-        function calculateFrameJacobians(obj, ContactPointSettings, dir)
+        function calculateFrameJacobianSet(obj, ContactPointSettings, dir)
             current_dir = pwd;
             home = getenv('EXOPT_HOME');
             setupfile = [home '\defaults\ContactPointsSettings\' ...
