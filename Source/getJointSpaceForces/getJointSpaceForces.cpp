@@ -13,18 +13,48 @@
 // 	-	coriolis & other nonlinear effects,
 //	-	gravity,
 //	-	net joint moments (human subject + attached exoskeleton),
-//	-	external forces (left/right GRF).
+//	-	external forces (e.g. left/right GRF).
 //
-// This function calculates these joint space forces, checks that they satisfy 
-// the classical equation of motion, and saves them for later use in an 
-// optimization. 
+// This function supports and REQUIRES five command line arguments: the absolute
+// paths to a set of input files. These files are as follows:
 //
-// This function supports and requires a single command line argument: the path
-// to the directory where the results are to be read in from. 
+// (1) The model file;
+// (2) The external forces data file;
+// (3) The states file from an RRA analysis of an OpenSimTrial;
+// (4) The accelerations file from an RRA analysis of an OpenSimTrial;
+// (5) The inverse dynamics file from an ID analysis of a kinematics file,
+//	   which itself resulted from an OpenSimTrial. 
 //
-// To do: document some assumptions, i.e. using in tandem with the Matlab 
-// inverse model code, for one thing Matlab makes the results folder as a 
-// relative path, etc...
+// care should be taken to precisely match the order of these input arguments.
+//
+// There is an additional REQUIRED (6) command line argument which is the 
+// absolute path to a directory where the results are to be saved. The results 
+// are saved as tab delimited .txt files with some nominal filenames which are 
+// similar to those listed above, but with underscores instead of spaces where 
+// relevant (i.e. net_joint_moments.txt). There are two additional output files:
+//
+// A) calculated net joint moments 
+// B) discrepancy
+//
+// A) is similar to the net joint moments, but rather than being calculated from 
+// the ID process of an OpenSim trial, it is calculated by an appropriate 
+// summation of the other joint-space forces.
+//
+// B) is the difference between the net joint moments measured from ID and A) 
+// above. B) is used to make sure that the calculation of joint-space forces 
+// was sufficiently accurate. THIS SHOULD BE EXACT, MY CURRENT THEORY FOR WHY 
+// IT ISN'T IS THE OFFSET IN TIME BETWEEN MOTION DATA AND EXTERNAL FORCES. 
+// OPENSIM DOES SOME SORT OF FITTING TO GET THESE AT THE SAME TIME, WHEREAS 
+// I WORK WITH DISCRETE TIMESTEPS, WHICH INTRODUCES DISCREPANCIES. SUPPORT FOR 
+// THIS THEORY IS THAT B) HAS BEEN MUCH WORSE IN CASES WHERE THERE HAVE BEEN 
+// DUPLICATE OR MISSING GRF TIMESTEPS. 
+//
+// There should be a method in Matlab to read in this discrepancy file and 
+// analyse whether this script has completed accurate enough. 
+//
+// Finally, an OPTIONAL (7) command line argument should be a boolean. If true 
+// this sets the verbose keyword which causes the calculation of the joint-space
+// forces to be printed. This can be useful for debugging. 
 //==============================================================================
 //==============================================================================
 
@@ -43,60 +73,55 @@ void writeVector(std::ofstream& file_name,
 				  
 void writeVectorTimeless(std::ofstream& file_name,
 						 Vector vector_object);
-				  
-void writeMatrix(std::ofstream& file_name,
-				   double time, 
-				   Matrix matrix_object);
-				   
-void writeMatrixTimeless(std::ofstream& file_name,
-						 Matrix matrix_object);
 					  
 void printForceVector(Vector_<double> vec,
 					  std::string description);
 
 int main(int argc, const char * argv[])
 {
-	// Here we assume that the correct pathname to the results directory is 
-	// given. Later in the code when we attempt to open files errors will be 
-	// thrown if this is unsuccessful.
-	if (argc == 1) {
-		std::cout << "Error: require path to results folder as a command line" 
-				<< " argument." << std::endl; 
+	// Handle command line arguments. Check that we have neither too little nor
+	// too many. Check that if the optional argument is given, that it's a
+	// boolean.
+	bool print_info;
+	if (argc < 7) {
+		std::cout << "Error: too few command line arguments. See comments at" 
+				<< " top of file for the correct number and order of input" 
+				<< " arguments." << std::endl; 
 		return 1;
-	}
-	else if (argc > 2) {
-		std::cout << "Error: too many command line arguments." << std::endl;
+	} else if (argc > 8) {
+		std::cout << "Error: too many command line arguments. See comments at"
+				<< " top of file for the correct number and order of input"
+				<< " arguments." << std::endl;
 		return 1;
+	} else if (argc == 8) {
+		if (! ((atoi(argv[7]) == 0) || (atoi(argv[7]) == 1))) {
+			std::cout << "Error: 7th command line argument, if given, has to be"
+					<< " boolean." << std::endl;
+			return 1;
+		}
+		print_info = (atoi(argv[7]) != 0);
+		// Convert the int (1 or 0) argv[7] to bool type. 
 	}
-	
-	// Get the OpenSim results directory from the input argument. 
-	std::string OSIM_RESULTS = argv[1];
-	
-	// Given this results directory and using knowledge of the structure of the 
-	// Matlab inverse model code, get variables for other key files. 
-	std::string MODEL_FILE = OSIM_RESULTS + "/../testing_adjusted.osim";
-	std::string STATES = OSIM_RESULTS + "/RRA_states.sto";
-	std::string ACCELERATIONS = OSIM_RESULTS + "/RRA_accelerations.sto";
-	std::string DYNAMICS = OSIM_RESULTS + "/ID_dynamics.sto";
-	std::string REACTION_FORCES = OSIM_RESULTS + "/grf.mot";
-	
-	// Create a variable for the output results directory.
-	std::string JSF_RESULTS = OSIM_RESULTS + "/../jsf";
+	std::string model_file = argv[1], ext_path = argv[2], 
+		states_path = argv[3], accelerations_path = argv[4],
+		id_path = argv[5], results_directory = argv[6];
+		
+	std::cout << id_path << std::endl;
 	
 	// Create variable names for the output files. 
-	std::string LEFT_APO_JACOBIAN = JSF_RESULTS + "/left_apo_jacobian.txt";
-	std::string RIGHT_APO_JACOBIAN = JSF_RESULTS + "/right_apo_jacobian.txt";
-	std::string RESIDUAL_FORCE = JSF_RESULTS + "/residual_force.txt";
-	std::string INTERNAL_FORCE = JSF_RESULTS + "/net_internal_values.txt";
-	
-	// Need a 
-	bool first_frame = true; 
+	std::string inertia_force = results_directory + "/inertia.txt";
+	std::string coriolis_force = results_directory + "/coriolis.txt";
+	std::string gravity_force = results_directory + "/gravity.txt";
+	std::string external_force = results_directory + "/external.txt";
+	std::string actuation_force = results_directory + "/actuation.txt";
+	std::string residual_force = results_directory + "/residual.txt";
+	std::string internal_force = results_directory + "/internal.txt";
 	
 	try {
 		
 		// Load OpenSim model from file, initialise state and calculate some 
 		// dynamic properties. 
-		Model osimModel(MODEL_FILE);
+		Model osimModel(model_file);
 		SimTK::State & si  = osimModel.initSystem();
 		int n_dofs = osimModel.getMatterSubsystem().getNumMobilities(),
 			n_bodies = osimModel.getMatterSubsystem().getNumBodies();
@@ -106,17 +131,22 @@ int main(int argc, const char * argv[])
 		
 		// Load the necessary files from the RRA results (states, 
 		// accelerations, forces) and the raw data (grfs).
-		std::ifstream states_file(STATES), 
-					  accelerations_file(ACCELERATIONS),
-					  dynamics_file(DYNAMICS), 
-					  grfs_file(REACTION_FORCES);
+		std::ifstream states_file(states_path), 
+					  accelerations_file(accelerations_path),
+					  dynamics_file(id_path), 
+					  grfs_file(ext_path);
 		
 		// Open files for output. 
-		std::ofstream leftAPOJacobian_file(LEFT_APO_JACOBIAN), 
-					  rightAPOJacobian_file(RIGHT_APO_JACOBIAN), 
-					  residualForce_file(RESIDUAL_FORCE), 
-					  internalForce_file(INTERNAL_FORCE);
+		std::ofstream inertia_force_file(inertia_force),
+					  coriolis_force_file(coriolis_force),
+					  gravity_force_file(gravity_force),
+					  external_force_file(external_force),
+					  actuation_force_file(actuation_force),
+					  residual_force_file(residual_force), 
+					  internal_force_file(internal_force);
 
+		std::cout << dynamics_file.is_open() << std::endl;
+					  
 		// Create array for states.
 		// Require double array for API compatability.
 		double * states = new double[2*n_dofs];
@@ -130,23 +160,40 @@ int main(int argc, const char * argv[])
 		const int expectedGRFSize = 18;
 		Vec<expectedGRFSize,double> grfs;
 		
-		// Output system model info and begin calculations.  		
-		std::cout << "Number of bodies: " << n_bodies << std::endl; 
-		std::cout << "Degrees of freedom: " << n_dofs << std::endl; 
-		std::cout << "Beginning calculation of system & state properties..." 
-				<< std::endl;
+		// Output system model info and begin calculations.
+		if (print_info) 
+		{
+			std::cout << "Number of bodies: " << n_bodies << std::endl; 
+			std::cout << "Degrees of freedom: " << n_dofs << std::endl; 
+			std::cout << "Beginning calculation of system & state properties..." 
+					<< std::endl;
+		}
 
 		while (true)
 		{
 			// Dump first entry (time) for each file. Code requires aligned 
-			// data inputs so these are the same.
+			// data inputs so check this. 
 			grfs_file >> time;
+			double checktime = time; 
 			states_file >> time;
+			checktime += time;
 			accelerations_file >> time;
+			checktime += time;
 			dynamics_file >> time;
+			checktime += time; 
+			
+			/* if (checktime != time*4.0)
+			{
+				std::cout << "Error: input files not properly time-aligned."
+					<< std::endl;
+				return 1;
+			} */
 			
 			if (states_file.eof()) {
-				std::cout << "\nReached end of states file." << std::endl;
+				if (print_info) 
+				{
+					std::cout << "\nReached end of states file." << std::endl;
+				}
 				break;
 			}
 			
@@ -214,11 +261,8 @@ int main(int argc, const char * argv[])
 			osimModel.getMatterSubsystem().multiplyBySystemJacobianTranspose(
 					si, totalCentrifugalForces_reference, coriolisTorques);
 			
-			// Calculate joint-space force due to ground reaction forces, and
-			// simultaneously calculate the Jacobians to the left and right 
-			// APO contact points.
+			// Calculate joint-space force due to ground reaction forces.
 			Vector leftGRFTorques, rightGRFTorques;
-			Matrix leftAPOJacobian, rightAPOJacobian;
 			
 			// Variables for the forces, moments and centres of pressure 
 			// for each foot reaction force. 
@@ -236,14 +280,6 @@ int main(int argc, const char * argv[])
 				groundLeftCOP[j] = grfs[j+9];
 				groundLeftMoment[j] = grfs[j+15];
 			}
-			
-			// Orthosis COP is COP of external force applied by APO in R/L
-			// femur frames. See report for more info on this.
-			SimTK::Vec3 orthosisCOP(0);
-			
-			orthosisCOP[0] = 0;
-			orthosisCOP[1] = -0.35;
-			orthosisCOP[2] = 0;
 		
 			for (int j=0; j<n_bodies; j++) {
 				
@@ -308,26 +344,6 @@ int main(int argc, const char * argv[])
 									lCalcCOP_reference, lCalcSpatial_reference, 
 									leftGRFTorques);
 					
-				} else if (
-					osimModel.getBodySet().get(j).getName() == "femur_r") {
-					
-					const SimTK::Vec3 orthosisCOP_reference(orthosisCOP);
-					
-					// Calc right APO Jacobian. 
-					osimModel.getMatterSubsystem().
-						calcFrameJacobian(si, MobilizedBodyIndex(testingBodies), 
-							orthosisCOP_reference, rightAPOJacobian);
-					
-				} else if (
-					osimModel.getBodySet().get(j).getName() == "femur_l") {
-					
-					const SimTK::Vec3 orthosisCOP_reference(orthosisCOP);
-					
-					// Calc left APO Jacobian. 
-					osimModel.getMatterSubsystem().
-						calcFrameJacobian(si, MobilizedBodyIndex(testingBodies), 
-							orthosisCOP_reference, leftAPOJacobian);
-					
 				}
 			}
 			/* Above, I transform the COP measured by the treadmill on to the 
@@ -340,44 +356,47 @@ int main(int argc, const char * argv[])
 			   implementation. But I'm not 100% sure on the correctness of this.
 			*/
 			
-			if (! first_frame) {
+			// Write the various components to a file.
+			writeVector(inertia_force_file, time, inertiaTorques);
+			writeVector(coriolis_force_file, time, coriolisTorques);
+			writeVector(gravity_force_file, time, gravityTorques);
+			writeVector(external_force_file, time,
+								rightGRFTorques + leftGRFTorques);
+			writeVector(actuation_force_file, time, dynamics);
+				
+			// Write the residual forces and internal forces (almost 
+			// identical to net joint torques but with a slighty 
+			// discrepancy, a.k.a residual forces) to file.
+			Vector residualForce, internalForce; 
+			residualForce = gravityTorques - inertiaTorques + dynamics 
+							- coriolisTorques + rightGRFTorques 
+							+ leftGRFTorques;
+			internalForce = inertiaTorques - gravityTorques 
+							+ coriolisTorques - rightGRFTorques 
+							- leftGRFTorques;
+			writeVector(residual_force_file, time, residualForce);
+			writeVector(internal_force_file, time, internalForce);
+				
+			// Can use writeVector or writeMatrix to write a time-indexed 
+			// file if I end up needing this. 
 			
-				// Write the APO Jacobians to a file.
-				writeMatrixTimeless(leftAPOJacobian_file,leftAPOJacobian);
-				writeMatrixTimeless(rightAPOJacobian_file,rightAPOJacobian);
-				
-				// Write the residual forces and internal forces (almost 
-				// identical to net joint torques but with a slighty 
-				// discrepancy, a.k.a residual forces) to file.
-				Vector residualForce, internalForce; 
-				residualForce = gravityTorques - inertiaTorques + dynamics 
-								- coriolisTorques + rightGRFTorques 
-								+ leftGRFTorques;
-				internalForce = inertiaTorques - gravityTorques 
-								+ coriolisTorques - rightGRFTorques 
-								- leftGRFTorques;
-				writeVectorTimeless(residualForce_file, residualForce);
-				writeVectorTimeless(internalForce_file, internalForce);
-				
-				// Can use writeVector or writeMatrix to write a time-indexed 
-				// file if I end up needing this. 
-				
-			} else {
-				first_frame = false;
+			if (print_info) 
+			{
+				// Output the time of the current state and separate the 
+				// timesteps visually. Print each joint-space vector to the 
+				// screen. 
+				std::cout << "---------------------------------------" 
+					<< std::endl; 
+				std::cout << model_file << std::endl;
+				std::cout << states_path << std::endl;
+				std::cout << "Time: " << time << std::endl; 
+				printForceVector(dynamics, "net joint torques");
+				printForceVector(inertiaTorques, "inertia");
+				printForceVector(gravityTorques, "gravity");
+				printForceVector(coriolisTorques, "centrifugal effects");
+				printForceVector(rightGRFTorques, "right foot contact");
+				printForceVector(leftGRFTorques, "left foot contact");
 			}
-			
-			// Output the time of the current state and separate the timesteps
-			// visually. Print each joint-space vector to the screen. 
-			std::cout << "---------------------------------------" << std::endl; 
-			std::cout << "Time: " << time << std::endl; 
-			printForceVector(dynamics, "net joint torques");
-			printForceVector(inertiaTorques, "inertia");
-			printForceVector(gravityTorques, "gravity");
-			printForceVector(coriolisTorques, "centrifugal effects");
-			printForceVector(rightGRFTorques, "right foot contact");
-			printForceVector(leftGRFTorques, "left foot contact");
-			
-			
 		}
 		
 		delete [] states;
@@ -405,43 +424,6 @@ int main(int argc, const char * argv[])
 	std::cout << "Now check the residual forces!" << std::endl;
 	
 	return 0;
-}
-
-void writeMatrix(std::ofstream& file_name,
-					  double time, 
-					  Matrix matrix_object)
-{  					  
-	file_name << time;
-	for (int k = 0; k < matrix_object.nrow(); k++) 
-	{
-		for (int j = 0; j < matrix_object.ncol(); j++) 
-		{
-			file_name << "\t";
-			file_name << matrix_object[k][j];
-		}
-		file_name << "\n";
-	}
-}
-
-void writeMatrixTimeless(std::ofstream& file_name,
-						 Matrix matrix_object)
-{
-	for (int k = 0; k < matrix_object.nrow(); k++)
-	{
-		for (int j = 0; j < matrix_object.ncol(); j++)
-		{
-			if (! (j == matrix_object.ncol() - 1))
-			{
-				file_name << matrix_object[k][j];
-				file_name << "\t";
-			}
-			else
-			{
-				file_name << matrix_object[k][j];
-			}
-		}
-		file_name << "\n";
-	}
 }
 						
 void writeVector(std::ofstream& file_name,

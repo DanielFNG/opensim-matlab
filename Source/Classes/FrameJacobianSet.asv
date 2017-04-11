@@ -39,14 +39,13 @@ classdef FrameJacobianSet
             end
             current_dir = pwd;
             home = getenv('EXOPT_HOME');
-            setupfile = [home '\defaults\ContactPointSettings\' ...
+            setupfile = [home '\defaults\ContactPointsSettings\' ...
                 ContactPointSettings '.xml'];
             cd([home '\bin']);
-            % Remove headers and labels. 
-            states_without_header = obj.removeHeaderFromStatesFile(dir);
+            % I NEED TO REMOVE HEADERS!
             [run_status, cmdout] = system(['getFrameJacobians.exe'...
                 ' "' obj.Trial.model_path '" '...
-                ' "' states_without_header '" '...
+                ' "' obj.Trial.rra.states_path '" '...
                 ' "' setupfile '" '...
                 ' "' getFullPath(dir) '" ']);
             if ~(run_status == 0)
@@ -56,10 +55,8 @@ classdef FrameJacobianSet
             cd(current_dir);
         end
         
-        function no_header = removeHeaderFromStatesFile(obj, dir)
-            no_header = [dir '\no_header.sto'];
-            obj.Trial.rra.states.writeToFile(no_header,0,0);
-        end
+        function removeHeaderFromStatesFile(obj)
+            
         
     end
     

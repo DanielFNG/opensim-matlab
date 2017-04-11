@@ -11,13 +11,8 @@ classdef RRAResults
         velocities
         positions
         errors % Position error between desired & achieved kinematics. 
-        states 
-    end
-    
-    properties (GetAccess = private)
-        % Store paths incase, might not need them, especially not if we
-        % need to change the data i.e. subsampling or cutting off data
-        % points.
+        states
+        
         forces_path
         accelerations_path
         velocities_path

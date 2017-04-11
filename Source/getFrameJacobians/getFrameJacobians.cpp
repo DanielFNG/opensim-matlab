@@ -94,11 +94,14 @@ int main(int argc, const char * argv[])
 		return 1;
 	}
 
-	std::cout << all_points << std::endl;
-	for (int i = 0; i < all_frames.size(); ++i)
+	// Print the information relating to each Jacobian. Name, body to which
+	// it relates, point on body. 
+	std::ofstream info(results_directory + "/" + "info.txt");
+	for (int i = 0; i < names.size(); ++i)
 	{
-		std::cout << all_frames[i] << std::endl;
-		std::cout << names[i] << std::endl;
+		info << names[i] << "\t" << all_frames[i] << "\t"
+			<< all_points[i][0] << "\t" << all_points[i][1] << "\t"
+			<< all_points[i][2] << "\n";
 	}
 	
 	try 
@@ -123,8 +126,19 @@ int main(int argc, const char * argv[])
 		// Require double array for API compatability.
 		double * states = new double[2*n_dofs];
 		
-		// Begin calculation, iterating over the states file.
 		
+		// Open the appropriate files for writing. Use of truncate deliberate 
+		// to overwrite pre-existing files. 
+		for (int i = 0; i < names.size(); ++i)
+		{
+			output_files[i].open(results_directory + "/" + names[i] 
+				+ ".txt", std::ios_base::trunc);
+		}
+		
+		// Prepare boolean keyword so we can switch from truncate to append. 
+		bool first_frame = true; 
+			
+		// Begin calculation, iterating over the states file.
 		while (true)
 		{
 			// Stop if we're at the end of the states file. 
@@ -132,6 +146,8 @@ int main(int argc, const char * argv[])
 			
 			// Dump the time entry of the states file. 
 			states_file >> time;
+			
+			std::cout << time << std::endl;
 			
 			// Save data from states file as a vector.
 			for (int i = 0; i < 2*n_dofs; ++i) 
@@ -145,6 +161,8 @@ int main(int argc, const char * argv[])
 			
 			// Realize the simulation up to dynamics stage (see documentation).
 			osimModel.updMultibodySystem().realize(si, Stage::Dynamics);
+			
+			
 			
 			// Iterate over the points we wish to calculate the Jacobians for.
 			for (int i = 0; i < names.size(); ++i)
@@ -173,10 +191,21 @@ int main(int argc, const char * argv[])
 					current_point, 
 					Jacobian);
 				
-				// Open approrpiate output file & append Jacobian. 
-				output_files[i].open(
-					results_directory + "/" + names[i] + ".txt");
+				// Append Jacobian to file. 
 				writeMatrix(output_files[i], time, Jacobian);
+			}
+			
+			// Switch from truncate to append after writing the first 
+			// timestep. Change first_frame so we only do this once. 
+			if (first_frame) 
+			{
+				for (int i = 0; i < names.size(); ++i)
+				{
+					output_files[i].close();
+					output_files[i].open(results_directory + "/" + names[i] 
+						+ ".txt", std::ios_base::app);
+				}
+				first_frame = false;
 			}
 		}
 		

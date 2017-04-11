@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Required files\testingFrameJacobians\build\CMakeFiles\a758ec481b2c38c365ffeb34f83593d0\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{D839AB98-9598-3366-A202-AE286536C44A}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

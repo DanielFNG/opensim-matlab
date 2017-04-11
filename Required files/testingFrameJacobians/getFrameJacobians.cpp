@@ -94,11 +94,13 @@ int main(int argc, const char * argv[])
 		return 1;
 	}
 
-	std::cout << all_points << std::endl;
-	for (int i = 0; i < all_frames.size(); ++i)
+	std::ofstream info(results_directory + "/" + "info.txt");
+	
+	for (int i = 0; i < names.size(); ++i)
 	{
-		std::cout << all_frames[i] << std::endl;
-		std::cout << names[i] << std::endl;
+		info << names[i] << "\t" << all_frames[i] << "\t"
+			<< all_points[i][0] << "\t" << all_points[i][1] << "\t"
+			<< all_points[i][2] << "\n";
 	}
 	
 	try 
