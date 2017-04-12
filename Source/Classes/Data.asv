@@ -466,10 +466,7 @@ classdef Data
         end
         
         function obj = scaleColumn(obj,index,multiplier)
-            if strcmp(obj.Labels(index), 'time') 
-                error('You probably dont want to be scaling time col.');
-            end
-            obj.Values(1:end,index) = multiplier*obj.Values(1:end,index);
+            obj.Values(1:end,index) = multipiler*obj.Values(1:end,index);
         end
       
     end

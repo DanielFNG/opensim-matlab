@@ -3,7 +3,8 @@ classdef Desired
     
     properties
         mode
-        value = 'Not yet calculated.'
+        IDTrial = 'Not yet supplied.'
+        Result = 'Not yet calculated.'
     end
     
     properties (SetAccess = private, GetAccess = private)
@@ -35,16 +36,26 @@ classdef Desired
                     'percentage reduction.']);
             end
             
-            % First get the number of DOFs from the data. 
-            nDofs = size(IDTrial.Labels,2) - 1; % -1 to remove the time col
+            obj.IDTrial = IDTrial;
+            obj.Result = IDTrial;
             
+            % Identify which joints are to be multiplied and the
+            % multipliers corresponding to each joint. 
             [identifiers, multipliers] = ...
                 obj.parsePercentageReductionArguments(IDTrial);
+            
+            for i=1:size(identifiers,2)
+                index = obj.Result.getIndexCorrespondingToLabel(identifiers(i));
+                obj.Result = obj.Result.scaleColumn(index, multipliers(i));
+            end
                     
         end
         
         function [identifiers, multipliers] = ...
                 parsePercentageReductionArguments(obj, IDTrial)
+            % First get the number of DOFs from the data. 
+            nDofs = size(IDTrial.Labels,2) - 1; % -1 to remove the time col
+            
             if isa(obj.varargin{1}, 'char') && strcmp(obj.varargin{1}, 'all')
                 identifiers = IDTrial.Labels(2:end);
                 if size(obj.varargin{2},2) == 1
