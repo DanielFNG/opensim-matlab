@@ -4,12 +4,10 @@ classdef OfflineExOptController
     % exoskeleton motor commands which will best match a desired human
     % contribution to the net torque trajectory.
     
-    properties
+    properties (SetAccess = private)
         OpenSimTrial
         ExoskeletonForceModel
         Desired
-        MotorCommands
-        PredictedHumanContribution
     end
     
     methods
