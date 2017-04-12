@@ -20,6 +20,8 @@ classdef Desired
             end
         end
         
+        % Desired corresponds to a percentage increase/decrease over some
+        % subset of joints. 
         function obj = setupPercentageReduction(obj,IDTrial)
             % Here it is assumed that varargin = [joints, mutliplier].
             % If joints is a string, 'all', it is assumed all joints are to
@@ -44,13 +46,19 @@ classdef Desired
             [identifiers, multipliers] = ...
                 obj.parsePercentageReductionArguments(IDTrial);
             
+            % NOTE: we have to append '_moment' to the label we want
+            % because this is what happens to the labels after OpenSim ID.
+            % Don't like having this hard-coded here, potentially revisit
+            % this. 
             for i=1:size(identifiers,2)
-                index = obj.Result.getIndexCorrespondingToLabel(identifiers(i));
-                obj.Result = obj.Result.scaleColumn(index, multipliers(i));
+                index = obj.Result.getIndexCorrespondingToLabel(...
+                    [char(identifiers(1,i)) '_moment']);
+                obj.Result = obj.Result.scaleColumn(index, multipliers(1,i));
             end
                     
         end
         
+        % Parse varargin for the percantage_reduction mode. 
         function [identifiers, multipliers] = ...
                 parsePercentageReductionArguments(obj, IDTrial)
             % First get the number of DOFs from the data. 
@@ -70,15 +78,28 @@ classdef Desired
                     error('Received more multipliers than model DOFS.');
                 end
             elseif size(obj.varargin{1},2) ~= size(obj.varargin{2},2)
-                error(['Attempting percentage reduction at subset of '...
-                    'joints, but was given an unmatching number of '...
-                    'multipliers.']);
+                % Joint size doesn't match multipliers size, but it's ok if
+                % the multiplier is just a scalar. 
+                if size(obj.varargin{2},2) == 1
+                    multipliers = ...
+                        obj.varargin{2}*ones(1,size(obj.varargin{1},2));
+                else
+                    error(['Attempting percentage reduction at subset of '...
+                        'joints, but was given an unmatching number of '...
+                        'multipliers.']);
+                end
             else
                 identifiers = obj.varargin{1};
                 multipliers = obj.varargin{2};
             end
         end
         
+        % This will be desired which is just based on matching input. However, 
+        % not quite as easy as just plainly matching as will also need to
+        % do stuff like matching the phase. Not yet implemented this - will
+        % do this after I've tested ExOpt vs. the old implementation to see
+        % if we get the same, among other things to change (e.g. updated
+        % APO force model). 
         function obj = setupMatchTrajectory(obj,IDTrial)
         end
         
