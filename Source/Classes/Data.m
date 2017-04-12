@@ -442,7 +442,17 @@ classdef Data
             end
             fclose(fileID);
         end
-            
+      
+        % Get, as a vector, the data corresponding to a specific label.
+        % Returns 0 if the label could not be matched. 
+        function vector = getDataCorrespondingToLabel(obj,label)
+            vector = 0;
+            for i=1:size(obj.Labels,2)
+                if strcmp(label, char(obj.Labels{i}))
+                    vector = obj.Values(1:end,i);
+                end
+            end     
+        end
       
     end
     
