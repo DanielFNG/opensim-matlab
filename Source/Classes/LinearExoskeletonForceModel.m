@@ -69,6 +69,16 @@ classdef LinearExoskeletonForceModel
             end
             APO_model = LinearExoskeletonForceModel('APO',P,Q);
         end
+        
+        function model = constructLinearExosksletonForceModel(...
+                OpenSimTrial, dir, identifier)
+            if strcmp(identifier, 'APO')
+                d = 0.35; % Hard-coding d for now. 
+                model = constructLinearAPOForceModel(OpenSimTrial, dir, d);
+            else
+                error('Unrecognized exoskeleton identifier.');
+            end
+        end
        
     end
     
