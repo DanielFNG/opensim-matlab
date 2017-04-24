@@ -3,7 +3,7 @@ classdef Desired
     
     properties
         mode
-        IDTrial = 'Not yet supplied.'
+        IDResult = 'Not yet supplied.'
         Result = 'Not yet calculated.'
     end
     
@@ -22,7 +22,7 @@ classdef Desired
         
         % Desired corresponds to a percentage increase/decrease over some
         % subset of joints. 
-        function obj = setupPercentageReduction(obj,IDTrial)
+        function obj = setupPercentageReduction(obj,IDResult)
             % Here it is assumed that varargin = [joints, mutliplier].
             % If joints is a string, 'all', it is assumed all joints are to
             % be multiplied. If joints is a cell array of joint identifiers
@@ -38,13 +38,13 @@ classdef Desired
                     'percentage reduction.']);
             end
             
-            obj.IDTrial = IDTrial;
-            obj.Result = IDTrial;
+            obj.IDResult = IDResult;
+            obj.Result = IDResult;
             
             % Identify which joints are to be multiplied and the
             % multipliers corresponding to each joint. 
             [identifiers, multipliers] = ...
-                obj.parsePercentageReductionArguments(IDTrial);
+                obj.parsePercentageReductionArguments(IDResult);
             
             % NOTE: we have to append '_moment' to the label we want
             % because this is what happens to the labels after OpenSim ID.
@@ -60,12 +60,12 @@ classdef Desired
         
         % Parse varargin for the percantage_reduction mode. 
         function [identifiers, multipliers] = ...
-                parsePercentageReductionArguments(obj, IDTrial)
+                parsePercentageReductionArguments(obj, IDResult)
             % First get the number of DOFs from the data. 
-            nDofs = size(IDTrial.Labels,2) - 1; % -1 to remove the time col
+            nDofs = size(IDResult.Labels,2) - 1; % -1 to remove the time col
             
             if isa(obj.varargin{1}, 'char') && strcmp(obj.varargin{1}, 'all')
-                identifiers = IDTrial.Labels(2:end);
+                identifiers = IDResult.Labels(2:end);
                 if size(obj.varargin{2},2) == 1
                     multipliers = obj.varargin{2}*ones(1,nDofs);
                 elseif size(obj.varargin{2},2) < nDofs
@@ -100,16 +100,16 @@ classdef Desired
         % do this after I've tested ExOpt vs. the old implementation to see
         % if we get the same, among other things to change (e.g. updated
         % APO force model). 
-        function obj = setupMatchTrajectory(obj,IDTrial)
+        function obj = setupMatchTrajectory(obj,IDResult)
         end
         
-        function obj = evaluateDesired(obj, IDTrial)
+        function obj = evaluateDesired(obj, IDResult)
             if strcmp(obj.mode, 'percentage_reduction')
                 obj.mode = 'percentage_reduction';
-                obj = obj.setupPercentageReduction(IDTrial);
+                obj = obj.setupPercentageReduction(IDResult);
             elseif strcmp(obj.mode, 'match_trajectory')
                 obj.mode = 'match_trajectory';
-                obj = obj.setupMatchTrajectory(IDTrial);
+                obj = obj.setupMatchTrajectory(IDResult);
             else
                 error('Unrecognized desired mode.')
             end

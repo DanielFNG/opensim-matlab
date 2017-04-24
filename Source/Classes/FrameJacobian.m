@@ -3,8 +3,8 @@ classdef FrameJacobian
     %   This is associated with a name, a body, a point on that body to
     %   which some force could be applied (for example). Finally, a MatrixData
     %   object which stores the Jacobian itself (including the timesteps).
-    %   There is also an association to an OpenSimTrial which is required
-    %   to be calculated up to RRA. 
+    %   There is also an association to a states file, for example one
+    %   corresponding to an RRAResults object. 
     %
     %   Note that FrameJacobians are calculated in sets and so
     %   FrameJacobianSet is what actually does the calculation. This is
@@ -15,17 +15,18 @@ classdef FrameJacobian
         Body
         Point
         Jacobian
-        Trial
+        States
     end
     
     methods
         
-        function obj = FrameJacobian(OpenSimTrial, name, body, point, path)
+        function obj = FrameJacobian(states, name, body, point, path)
             % Name of the frame as per the settings file, body to which it
             % is attached, point on body. Path to text file holding the
-            % Jacobian over some time trajectory. 
+            % Jacobian over some time trajectory. States is a Data or RRAData
+            % object giving the states. 
             if nargin > 0
-                obj.Trial = OpenSimTrial;
+                obj.States = states;
                 obj.Name = name;
                 obj.Body = char(body);
                 obj.Point = point;
