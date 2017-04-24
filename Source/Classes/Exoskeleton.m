@@ -36,8 +36,22 @@ classdef Exoskeleton
         end
         
         function obj = loadDefaults(obj)
-            % Search for the appropriate files in the appropriate
-            % locations. If they don't exist, throw an error. 
+            % Search for the appropriate files in the default folder(s). 
+            obj.Model = [getenv('EXOPT_HOME') '/Defaults/Model/' ...
+                obj.Name '.osim'];
+            obj.ContactPoints = [getenv('EXOPT_HOME') ...
+                '/Defaults/ContactPointSettings/' obj.Name '.xml'];
+            obj.ExternalLoads = [getenv('EXOPT_HOME') ...
+                '/Defaults/ExternalLoads/' obj.Name '.xml'];
+            
+            % If these files don't exist, throw an error. 
+            if exist(obj.Model, 'file') ~= 2 
+                error('Could not find default model for given exoskeleton.');
+            elseif exist(obj.ContactPoints, 'file') ~= 2
+                error('Could not find default contacts for given exoskeleton.');
+            elseif exist(obj.ExternalLoads, 'file') ~= 2
+                error('Could not find default ext. for given exoskeleton.');
+            end
         end
         
         function name = getName(obj)
@@ -69,12 +83,17 @@ classdef Exoskeleton
             % should be interpreted from the ContactPointSettings file.
             d = 0.35;
             
-            Jacobians = FrameJacobianSet(states, ...
+            Jacobians = FrameJacobianSet(obj.Model, states, ...
                 obj.getContactSettings(), dir);
             
             nTimesteps = size(states.Timesteps,1);
             Q = 0;
             P{nTimesteps} = 0;
+            
+            right_hip_flexion = states.getDataCorrespondingToLabel(...
+                'hip_flexion_r');
+            left_hip_flexion = states.getDataCorrespondingToLabel(...
+                'hip_flexion_l');
             
             for i=1:nTimesteps
                 unit_right_force = [0;0;0; ...
@@ -87,6 +106,7 @@ classdef Exoskeleton
                     , left_jacobian.' * unit_left_force];
             end
             APO_model = LinearExoskeletonForceModel(obj, states, P, Q);
+            
         end
         
         % This will be for the new APO model with 2 additional contact

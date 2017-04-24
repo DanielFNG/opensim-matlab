@@ -26,7 +26,7 @@ classdef Desired
             % Here it is assumed that varargin = [joints, mutliplier].
             % If joints is a string, 'all', it is assumed all joints are to
             % be multiplied. If joints is a cell array of joint identifiers
-            % i.e. 'r_hip_f' then those identified are the ones to be
+            % i.e. 'hip_flexion_r' then those identified are the ones to be
             % multiplied. Multiplier can either be a constant, meaning all
             % DOFS are multiplied by the same value, OR an array of the
             % same size as joints (or an n dimensional array if joints ==
@@ -39,7 +39,7 @@ classdef Desired
             end
             
             obj.IDResult = IDResult;
-            obj.Result = IDResult;
+            obj.Result = IDResult.id;
             
             % Identify which joints are to be multiplied and the
             % multipliers corresponding to each joint. 
@@ -62,10 +62,10 @@ classdef Desired
         function [identifiers, multipliers] = ...
                 parsePercentageReductionArguments(obj, IDResult)
             % First get the number of DOFs from the data. 
-            nDofs = size(IDResult.Labels,2) - 1; % -1 to remove the time col
+            nDofs = size(IDResult.id.Labels,2) - 1; % -1 to remove the time col
             
             if isa(obj.varargin{1}, 'char') && strcmp(obj.varargin{1}, 'all')
-                identifiers = IDResult.Labels(2:end);
+                identifiers = IDResult.id.Labels(2:end);
                 if size(obj.varargin{2},2) == 1
                     multipliers = obj.varargin{2}*ones(1,nDofs);
                 elseif size(obj.varargin{2},2) < nDofs

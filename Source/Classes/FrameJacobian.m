@@ -15,18 +15,16 @@ classdef FrameJacobian
         Body
         Point
         Jacobian
-        States
     end
     
     methods
         
-        function obj = FrameJacobian(states, name, body, point, path)
+        function obj = FrameJacobian(name, body, point, path)
             % Name of the frame as per the settings file, body to which it
             % is attached, point on body. Path to text file holding the
             % Jacobian over some time trajectory. States is a Data or RRAData
             % object giving the states. 
             if nargin > 0
-                obj.States = states;
                 obj.Name = name;
                 obj.Body = char(body);
                 obj.Point = point;

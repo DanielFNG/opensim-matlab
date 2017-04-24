@@ -852,3 +852,770 @@ ExternalForce::left
 Data source being set to grf.mot
 InverseDynamicsTool: 51 time frames in 0.416s
 
+AbstractTool RRA loading model 'gait2392_APO.osim'
+Loaded model model_scaled from file gait2392_APO.osim
+Adding force object set from gait2392_RRA_Actuators.xml
+AbstractTool RRA loading model 'C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Exoskeleton\testing_adjusted.osim'
+Loaded model model_scaled from file C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Exoskeleton\testing_adjusted.osim
+Adding force object set from gait2392_RRA_Actuators.xml
+Storage: file=C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Exoskeleton\grf0.mot (nr=2974 nc=19)
+ExternalForce::right
+Data source being set to grf.mot
+ExternalForce::left
+Data source being set to grf.mot
+Running tool RRA.
+No external loads will be applied (external loads file not specified).
+
+
+ taskSet size = 23
+
+
+
+WARN- a desired points file was not specified.
+
+
+
+Loading desired kinematics from file C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Exoskeleton\ik0.mot ...
+
+Loading q's from file C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Exoskeleton\ik0.mot.
+Storage: file=C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Exoskeleton\ik0.mot (nr=495 nc=24)
+Found 495 q's with time stamps ranging
+from 0.01 to 4.95.
+
+
+Low-pass filtering desired kinematics with a cutoff frequency of 6...
+
+MODEL: model_scaled
+
+ANALYSES (0)
+
+BODIES (18)
+body[0] = ground (mass: 0) (inertia: 0 0 0 0 0 0 0 0 0)
+body[1] = pelvis (mass: 12.6213) (inertia: 0.149972 0 0 0 0.127068 0 0 0 0.0844687)
+body[2] = femur_r (mass: 9.97) (inertia: 0.156033 0 0 0 0.0409019 0 0 0 0.16454)
+body[3] = tibia_r (mass: 3.97) (inertia: 0.0658288 0 0 0 0.00666125 0 0 0 0.0667431)
+body[4] = talus_r (mass: 0.107) (inertia: 0.00130613 0 0 0 0.00130613 0 0 0 0.00130613)
+body[5] = calcn_r (mass: 1.345) (inertia: 0.00199486 0 0 0 0.0055571 0 0 0 0.00584208)
+body[6] = toes_r (mass: 0.23) (inertia: 0.00014249 0 0 0 0.000284979 0 0 0 0.00014249)
+body[7] = femur_l (mass: 9.97) (inertia: 0.156033 0 0 0 0.0409019 0 0 0 0.16454)
+body[8] = tibia_l (mass: 3.97) (inertia: 0.0658288 0 0 0 0.00666125 0 0 0 0.0667431)
+body[9] = talus_l (mass: 0.107) (inertia: 0.00130613 0 0 0 0.00130613 0 0 0 0.00130613)
+body[10] = calcn_l (mass: 1.345) (inertia: 0.00199486 0 0 0 0.0055571 0 0 0 0.00584208)
+body[11] = toes_l (mass: 0.23) (inertia: 0.00014249 0 0 0 0.000284979 0 0 0 0.00014249)
+body[12] = torso (mass: 36.6952) (inertia: 2.20191 0 0 0 1.12821 0 0 0 2.13755)
+body[13] = APO_backpack (mass: 2) (inertia: 0.0104714 6.47821e-07 -0.00202883 6.47821e-07 0.117329 1.20459e-05 -0.00202883 1.20459e-05 0.125011)
+body[14] = APO_group_r (mass: 1.42534) (inertia: 0.0420278 0.00431944 -0.00698471 0.00431944 0.0364127 0.0177558 -0.00698471 0.0177558 0.0174713)
+body[15] = APO_group_l (mass: 1.42534) (inertia: 0.0420278 -0.000978371 -0.00187707 -0.000978371 0.0364127 -0.00238641 -0.00187707 -0.00238641 0.0174713)
+body[16] = APO_r_link (mass: 1.34623) (inertia: 0.00396186 0.00077141 0.000225172 0.00077141 0.000629326 -0.000828509 0.000225172 -0.000828509 0.00382679)
+body[17] = APO_l_link (mass: 1.34623) (inertia: 0.00395996 0.000771429 -0.000225172 0.000771429 0.000629326 0.000828509 -0.000225172 0.000828509 0.00382679)
+
+ACTUATORS (23)
+actuator[0] = FX
+actuator[1] = FY
+actuator[2] = FZ
+actuator[3] = MX
+actuator[4] = MY
+actuator[5] = MZ
+actuator[6] = hip_flexion_r
+actuator[7] = hip_adduction_r
+actuator[8] = hip_rotation_r
+actuator[9] = knee_angle_r
+actuator[10] = ankle_angle_r
+actuator[11] = subtalar_angle_r
+actuator[12] = mtp_angle_r
+actuator[13] = hip_flexion_l
+actuator[14] = hip_adduction_l
+actuator[15] = hip_rotation_l
+actuator[16] = knee_angle_l
+actuator[17] = ankle_angle_l
+actuator[18] = subtalar_angle_l
+actuator[19] = mtp_angle_l
+actuator[20] = lumbar_extension
+actuator[21] = lumbar_bending
+actuator[22] = lumbar_rotation
+numStates = 46
+numCoordinates = 23
+numSpeeds = 23
+numActuators = 23
+numBodies = 18
+numConstraints = 0
+numProbes = 0
+
+STATES (46)
+y[0] = pelvis_tilt
+y[1] = pelvis_list
+y[2] = pelvis_rotation
+y[3] = pelvis_tx
+y[4] = pelvis_ty
+y[5] = pelvis_tz
+y[6] = hip_flexion_r
+y[7] = hip_adduction_r
+y[8] = hip_rotation_r
+y[9] = knee_angle_r
+y[10] = ankle_angle_r
+y[11] = subtalar_angle_r
+y[12] = mtp_angle_r
+y[13] = hip_flexion_l
+y[14] = hip_adduction_l
+y[15] = hip_rotation_l
+y[16] = knee_angle_l
+y[17] = ankle_angle_l
+y[18] = subtalar_angle_l
+y[19] = mtp_angle_l
+y[20] = lumbar_extension
+y[21] = lumbar_bending
+y[22] = lumbar_rotation
+y[23] = pelvis_tilt_u
+y[24] = pelvis_list_u
+y[25] = pelvis_rotation_u
+y[26] = pelvis_tx_u
+y[27] = pelvis_ty_u
+y[28] = pelvis_tz_u
+y[29] = hip_flexion_r_u
+y[30] = hip_adduction_r_u
+y[31] = hip_rotation_r_u
+y[32] = knee_angle_r_u
+y[33] = ankle_angle_r_u
+y[34] = subtalar_angle_r_u
+y[35] = mtp_angle_r_u
+y[36] = hip_flexion_l_u
+y[37] = hip_adduction_l_u
+y[38] = hip_rotation_l_u
+y[39] = knee_angle_l_u
+y[40] = ankle_angle_l_u
+y[41] = subtalar_angle_l_u
+y[42] = mtp_angle_l_u
+y[43] = lumbar_extension_u
+y[44] = lumbar_bending_u
+y[45] = lumbar_rotation_u
+Coordinate.setValue: WARN- coordinate subtalar_angle_r is locked. Unable to change its value.
+Coordinate.setValue: WARN- coordinate subtalar_angle_l is locked. Unable to change its value.
+
+Constructing function set for tracking desired kinematics...
+
+No Actuation analysis found in analysis set -- adding one
+No Kinematics analysis found in analysis set -- adding one
+Using the generalized coordinates specified in C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Exoskeleton\ik0.mot to set the initial configuration.
+
+Using IPOPT optimizer algorithm.
+
+Setting optimizer print level to 0.
+Setting optimizer convergence tolerance to 1e-05.
+Setting optimizer maximum iterations to 2000.
+
+Setting cmc controller to not use verbose printing.
+CMC.computeControls:  t = 0.5
+
+
+
+================================================================
+================================================================
+Using CMC to track the specified kinematics
+Integrating from 0.5 to 1
+Start time = Mon Apr 24 15:32:37 2017
+================================================================
+CMC.computeControls:  t = 0.5
+CMC.computeControls:  t = 0.501
+CMC.computeControls:  t = 0.502
+CMC.computeControls:  t = 0.503
+CMC.computeControls:  t = 0.504
+CMC.computeControls:  t = 0.505
+CMC.computeControls:  t = 0.506
+CMC.computeControls:  t = 0.507
+CMC.computeControls:  t = 0.508
+CMC.computeControls:  t = 0.509
+CMC.computeControls:  t = 0.51
+CMC.computeControls:  t = 0.511
+CMC.computeControls:  t = 0.512
+CMC.computeControls:  t = 0.513
+CMC.computeControls:  t = 0.514
+CMC.computeControls:  t = 0.515
+CMC.computeControls:  t = 0.516
+CMC.computeControls:  t = 0.517
+CMC.computeControls:  t = 0.518
+CMC.computeControls:  t = 0.519
+CMC.computeControls:  t = 0.52
+CMC.computeControls:  t = 0.521
+CMC.computeControls:  t = 0.522
+CMC.computeControls:  t = 0.523
+CMC.computeControls:  t = 0.524
+CMC.computeControls:  t = 0.525
+CMC.computeControls:  t = 0.526
+CMC.computeControls:  t = 0.527
+CMC.computeControls:  t = 0.528
+CMC.computeControls:  t = 0.529
+CMC.computeControls:  t = 0.53
+CMC.computeControls:  t = 0.531
+CMC.computeControls:  t = 0.532
+CMC.computeControls:  t = 0.533
+CMC.computeControls:  t = 0.534
+CMC.computeControls:  t = 0.535
+CMC.computeControls:  t = 0.536
+CMC.computeControls:  t = 0.537
+CMC.computeControls:  t = 0.538
+CMC.computeControls:  t = 0.539
+CMC.computeControls:  t = 0.54
+CMC.computeControls:  t = 0.541
+CMC.computeControls:  t = 0.542
+CMC.computeControls:  t = 0.543
+CMC.computeControls:  t = 0.544
+CMC.computeControls:  t = 0.545
+CMC.computeControls:  t = 0.546
+CMC.computeControls:  t = 0.547
+CMC.computeControls:  t = 0.548
+CMC.computeControls:  t = 0.549
+CMC.computeControls:  t = 0.55
+CMC.computeControls:  t = 0.551
+CMC.computeControls:  t = 0.552
+CMC.computeControls:  t = 0.553
+CMC.computeControls:  t = 0.554
+CMC.computeControls:  t = 0.555
+CMC.computeControls:  t = 0.556
+CMC.computeControls:  t = 0.557
+CMC.computeControls:  t = 0.558
+CMC.computeControls:  t = 0.559
+CMC.computeControls:  t = 0.56
+CMC.computeControls:  t = 0.561
+CMC.computeControls:  t = 0.562
+CMC.computeControls:  t = 0.563
+CMC.computeControls:  t = 0.564
+CMC.computeControls:  t = 0.565
+CMC.computeControls:  t = 0.566
+CMC.computeControls:  t = 0.567
+CMC.computeControls:  t = 0.568
+CMC.computeControls:  t = 0.569
+CMC.computeControls:  t = 0.57
+CMC.computeControls:  t = 0.571
+CMC.computeControls:  t = 0.572
+CMC.computeControls:  t = 0.573
+CMC.computeControls:  t = 0.574
+CMC.computeControls:  t = 0.575
+CMC.computeControls:  t = 0.576
+CMC.computeControls:  t = 0.577
+CMC.computeControls:  t = 0.578
+CMC.computeControls:  t = 0.579
+CMC.computeControls:  t = 0.58
+CMC.computeControls:  t = 0.581
+CMC.computeControls:  t = 0.582
+CMC.computeControls:  t = 0.583
+CMC.computeControls:  t = 0.584
+CMC.computeControls:  t = 0.585
+CMC.computeControls:  t = 0.586
+CMC.computeControls:  t = 0.587
+CMC.computeControls:  t = 0.588
+CMC.computeControls:  t = 0.589
+CMC.computeControls:  t = 0.59
+CMC.computeControls:  t = 0.591
+CMC.computeControls:  t = 0.592
+CMC.computeControls:  t = 0.593
+CMC.computeControls:  t = 0.594
+CMC.computeControls:  t = 0.595
+CMC.computeControls:  t = 0.596
+CMC.computeControls:  t = 0.597
+CMC.computeControls:  t = 0.598
+CMC.computeControls:  t = 0.599
+CMC.computeControls:  t = 0.6
+CMC.computeControls:  t = 0.601
+CMC.computeControls:  t = 0.602
+CMC.computeControls:  t = 0.603
+CMC.computeControls:  t = 0.604
+CMC.computeControls:  t = 0.605
+CMC.computeControls:  t = 0.606
+CMC.computeControls:  t = 0.607
+CMC.computeControls:  t = 0.608
+CMC.computeControls:  t = 0.609
+CMC.computeControls:  t = 0.61
+CMC.computeControls:  t = 0.611
+CMC.computeControls:  t = 0.612
+CMC.computeControls:  t = 0.613
+CMC.computeControls:  t = 0.614
+CMC.computeControls:  t = 0.615
+CMC.computeControls:  t = 0.616
+CMC.computeControls:  t = 0.617
+CMC.computeControls:  t = 0.618
+CMC.computeControls:  t = 0.619
+CMC.computeControls:  t = 0.62
+CMC.computeControls:  t = 0.621
+CMC.computeControls:  t = 0.622
+CMC.computeControls:  t = 0.623
+CMC.computeControls:  t = 0.624
+CMC.computeControls:  t = 0.625
+CMC.computeControls:  t = 0.626
+CMC.computeControls:  t = 0.627
+CMC.computeControls:  t = 0.628
+CMC.computeControls:  t = 0.629
+CMC.computeControls:  t = 0.63
+CMC.computeControls:  t = 0.631
+CMC.computeControls:  t = 0.632
+CMC.computeControls:  t = 0.633
+CMC.computeControls:  t = 0.634
+CMC.computeControls:  t = 0.635
+CMC.computeControls:  t = 0.636
+CMC.computeControls:  t = 0.637
+CMC.computeControls:  t = 0.638
+CMC.computeControls:  t = 0.639
+CMC.computeControls:  t = 0.64
+CMC.computeControls:  t = 0.641
+CMC.computeControls:  t = 0.642
+CMC.computeControls:  t = 0.643
+CMC.computeControls:  t = 0.644
+CMC.computeControls:  t = 0.645
+CMC.computeControls:  t = 0.646
+CMC.computeControls:  t = 0.647
+CMC.computeControls:  t = 0.648
+CMC.computeControls:  t = 0.649
+CMC.computeControls:  t = 0.65
+CMC.computeControls:  t = 0.651
+CMC.computeControls:  t = 0.652
+CMC.computeControls:  t = 0.653
+CMC.computeControls:  t = 0.654
+CMC.computeControls:  t = 0.655
+CMC.computeControls:  t = 0.656
+CMC.computeControls:  t = 0.657
+CMC.computeControls:  t = 0.658
+CMC.computeControls:  t = 0.659
+CMC.computeControls:  t = 0.66
+CMC.computeControls:  t = 0.661
+CMC.computeControls:  t = 0.662
+CMC.computeControls:  t = 0.663
+CMC.computeControls:  t = 0.664
+CMC.computeControls:  t = 0.665
+CMC.computeControls:  t = 0.666
+CMC.computeControls:  t = 0.667
+CMC.computeControls:  t = 0.668
+CMC.computeControls:  t = 0.669
+CMC.computeControls:  t = 0.67
+CMC.computeControls:  t = 0.671
+CMC.computeControls:  t = 0.672
+CMC.computeControls:  t = 0.673
+CMC.computeControls:  t = 0.674
+CMC.computeControls:  t = 0.675
+CMC.computeControls:  t = 0.676
+CMC.computeControls:  t = 0.677
+CMC.computeControls:  t = 0.678
+CMC.computeControls:  t = 0.679
+CMC.computeControls:  t = 0.68
+CMC.computeControls:  t = 0.681
+CMC.computeControls:  t = 0.682
+CMC.computeControls:  t = 0.683
+CMC.computeControls:  t = 0.684
+CMC.computeControls:  t = 0.685
+CMC.computeControls:  t = 0.686
+CMC.computeControls:  t = 0.687
+CMC.computeControls:  t = 0.688
+CMC.computeControls:  t = 0.689
+CMC.computeControls:  t = 0.69
+CMC.computeControls:  t = 0.691
+CMC.computeControls:  t = 0.692
+CMC.computeControls:  t = 0.693
+CMC.computeControls:  t = 0.694
+CMC.computeControls:  t = 0.695
+CMC.computeControls:  t = 0.696
+CMC.computeControls:  t = 0.697
+CMC.computeControls:  t = 0.698
+CMC.computeControls:  t = 0.699
+CMC.computeControls:  t = 0.7
+CMC.computeControls:  t = 0.701
+CMC.computeControls:  t = 0.702
+CMC.computeControls:  t = 0.703
+CMC.computeControls:  t = 0.704
+CMC.computeControls:  t = 0.705
+CMC.computeControls:  t = 0.706
+CMC.computeControls:  t = 0.707
+CMC.computeControls:  t = 0.708
+CMC.computeControls:  t = 0.709
+CMC.computeControls:  t = 0.71
+CMC.computeControls:  t = 0.711
+CMC.computeControls:  t = 0.712
+CMC.computeControls:  t = 0.713
+CMC.computeControls:  t = 0.714
+CMC.computeControls:  t = 0.715
+CMC.computeControls:  t = 0.716
+CMC.computeControls:  t = 0.717
+CMC.computeControls:  t = 0.718
+CMC.computeControls:  t = 0.719
+CMC.computeControls:  t = 0.72
+CMC.computeControls:  t = 0.721
+CMC.computeControls:  t = 0.722
+CMC.computeControls:  t = 0.723
+CMC.computeControls:  t = 0.724
+CMC.computeControls:  t = 0.725
+CMC.computeControls:  t = 0.726
+CMC.computeControls:  t = 0.727
+CMC.computeControls:  t = 0.728
+CMC.computeControls:  t = 0.729
+CMC.computeControls:  t = 0.73
+CMC.computeControls:  t = 0.731
+CMC.computeControls:  t = 0.732
+CMC.computeControls:  t = 0.733
+CMC.computeControls:  t = 0.734
+CMC.computeControls:  t = 0.735
+CMC.computeControls:  t = 0.736
+CMC.computeControls:  t = 0.737
+CMC.computeControls:  t = 0.738
+CMC.computeControls:  t = 0.739
+CMC.computeControls:  t = 0.74
+CMC.computeControls:  t = 0.741
+CMC.computeControls:  t = 0.742
+CMC.computeControls:  t = 0.743
+CMC.computeControls:  t = 0.744
+CMC.computeControls:  t = 0.745
+CMC.computeControls:  t = 0.746
+CMC.computeControls:  t = 0.747
+CMC.computeControls:  t = 0.748
+CMC.computeControls:  t = 0.749
+CMC.computeControls:  t = 0.75
+CMC.computeControls:  t = 0.751
+CMC.computeControls:  t = 0.752
+CMC.computeControls:  t = 0.753
+CMC.computeControls:  t = 0.754
+CMC.computeControls:  t = 0.755
+CMC.computeControls:  t = 0.756
+CMC.computeControls:  t = 0.757
+CMC.computeControls:  t = 0.758
+CMC.computeControls:  t = 0.759
+CMC.computeControls:  t = 0.76
+CMC.computeControls:  t = 0.761
+CMC.computeControls:  t = 0.762
+CMC.computeControls:  t = 0.763
+CMC.computeControls:  t = 0.764
+CMC.computeControls:  t = 0.765
+CMC.computeControls:  t = 0.766
+CMC.computeControls:  t = 0.767
+CMC.computeControls:  t = 0.768
+CMC.computeControls:  t = 0.769
+CMC.computeControls:  t = 0.77
+CMC.computeControls:  t = 0.771
+CMC.computeControls:  t = 0.772
+CMC.computeControls:  t = 0.773
+CMC.computeControls:  t = 0.774
+CMC.computeControls:  t = 0.775
+CMC.computeControls:  t = 0.776
+CMC.computeControls:  t = 0.777
+CMC.computeControls:  t = 0.778
+CMC.computeControls:  t = 0.779
+CMC.computeControls:  t = 0.78
+CMC.computeControls:  t = 0.781
+CMC.computeControls:  t = 0.782
+CMC.computeControls:  t = 0.783
+CMC.computeControls:  t = 0.784
+CMC.computeControls:  t = 0.785
+CMC.computeControls:  t = 0.786
+CMC.computeControls:  t = 0.787
+CMC.computeControls:  t = 0.788
+CMC.computeControls:  t = 0.789
+CMC.computeControls:  t = 0.79
+CMC.computeControls:  t = 0.791
+CMC.computeControls:  t = 0.792
+CMC.computeControls:  t = 0.793
+CMC.computeControls:  t = 0.794
+CMC.computeControls:  t = 0.795
+CMC.computeControls:  t = 0.796
+CMC.computeControls:  t = 0.797
+CMC.computeControls:  t = 0.798
+CMC.computeControls:  t = 0.799
+CMC.computeControls:  t = 0.8
+CMC.computeControls:  t = 0.801
+CMC.computeControls:  t = 0.802
+CMC.computeControls:  t = 0.803
+CMC.computeControls:  t = 0.804
+CMC.computeControls:  t = 0.805
+CMC.computeControls:  t = 0.806
+CMC.computeControls:  t = 0.807
+CMC.computeControls:  t = 0.808
+CMC.computeControls:  t = 0.809
+CMC.computeControls:  t = 0.81
+CMC.computeControls:  t = 0.811
+CMC.computeControls:  t = 0.812
+CMC.computeControls:  t = 0.813
+CMC.computeControls:  t = 0.814
+CMC.computeControls:  t = 0.815
+CMC.computeControls:  t = 0.816
+CMC.computeControls:  t = 0.817
+CMC.computeControls:  t = 0.818
+CMC.computeControls:  t = 0.819
+CMC.computeControls:  t = 0.82
+CMC.computeControls:  t = 0.821
+CMC.computeControls:  t = 0.822
+CMC.computeControls:  t = 0.823
+CMC.computeControls:  t = 0.824
+CMC.computeControls:  t = 0.825
+CMC.computeControls:  t = 0.826
+CMC.computeControls:  t = 0.827
+CMC.computeControls:  t = 0.828
+CMC.computeControls:  t = 0.829
+CMC.computeControls:  t = 0.83
+CMC.computeControls:  t = 0.831
+CMC.computeControls:  t = 0.832
+CMC.computeControls:  t = 0.833
+CMC.computeControls:  t = 0.834
+CMC.computeControls:  t = 0.835
+CMC.computeControls:  t = 0.836
+CMC.computeControls:  t = 0.837
+CMC.computeControls:  t = 0.838
+CMC.computeControls:  t = 0.839
+CMC.computeControls:  t = 0.84
+CMC.computeControls:  t = 0.841
+CMC.computeControls:  t = 0.842
+CMC.computeControls:  t = 0.843
+CMC.computeControls:  t = 0.844
+CMC.computeControls:  t = 0.845
+CMC.computeControls:  t = 0.846
+CMC.computeControls:  t = 0.847
+CMC.computeControls:  t = 0.848
+CMC.computeControls:  t = 0.849
+CMC.computeControls:  t = 0.85
+CMC.computeControls:  t = 0.851
+CMC.computeControls:  t = 0.852
+CMC.computeControls:  t = 0.853
+CMC.computeControls:  t = 0.854
+CMC.computeControls:  t = 0.855
+CMC.computeControls:  t = 0.856
+CMC.computeControls:  t = 0.857
+CMC.computeControls:  t = 0.858
+CMC.computeControls:  t = 0.859
+CMC.computeControls:  t = 0.86
+CMC.computeControls:  t = 0.861
+CMC.computeControls:  t = 0.862
+CMC.computeControls:  t = 0.863
+CMC.computeControls:  t = 0.864
+CMC.computeControls:  t = 0.865
+CMC.computeControls:  t = 0.866
+CMC.computeControls:  t = 0.867
+CMC.computeControls:  t = 0.868
+CMC.computeControls:  t = 0.869
+CMC.computeControls:  t = 0.87
+CMC.computeControls:  t = 0.871
+CMC.computeControls:  t = 0.872
+CMC.computeControls:  t = 0.873
+CMC.computeControls:  t = 0.874
+CMC.computeControls:  t = 0.875
+CMC.computeControls:  t = 0.876
+CMC.computeControls:  t = 0.877
+CMC.computeControls:  t = 0.878
+CMC.computeControls:  t = 0.879
+CMC.computeControls:  t = 0.88
+CMC.computeControls:  t = 0.881
+CMC.computeControls:  t = 0.882
+CMC.computeControls:  t = 0.883
+CMC.computeControls:  t = 0.884
+CMC.computeControls:  t = 0.885
+CMC.computeControls:  t = 0.886
+CMC.computeControls:  t = 0.887
+CMC.computeControls:  t = 0.888
+CMC.computeControls:  t = 0.889
+CMC.computeControls:  t = 0.89
+CMC.computeControls:  t = 0.891
+CMC.computeControls:  t = 0.892
+CMC.computeControls:  t = 0.893
+CMC.computeControls:  t = 0.894
+CMC.computeControls:  t = 0.895
+CMC.computeControls:  t = 0.896
+CMC.computeControls:  t = 0.897
+CMC.computeControls:  t = 0.898
+CMC.computeControls:  t = 0.899
+CMC.computeControls:  t = 0.9
+CMC.computeControls:  t = 0.901
+CMC.computeControls:  t = 0.902
+CMC.computeControls:  t = 0.903
+CMC.computeControls:  t = 0.904
+CMC.computeControls:  t = 0.905
+CMC.computeControls:  t = 0.906
+CMC.computeControls:  t = 0.907
+CMC.computeControls:  t = 0.908
+CMC.computeControls:  t = 0.909
+CMC.computeControls:  t = 0.91
+CMC.computeControls:  t = 0.911
+CMC.computeControls:  t = 0.912
+CMC.computeControls:  t = 0.913
+CMC.computeControls:  t = 0.914
+CMC.computeControls:  t = 0.915
+CMC.computeControls:  t = 0.916
+CMC.computeControls:  t = 0.917
+CMC.computeControls:  t = 0.918
+CMC.computeControls:  t = 0.919
+CMC.computeControls:  t = 0.92
+CMC.computeControls:  t = 0.921
+CMC.computeControls:  t = 0.922
+CMC.computeControls:  t = 0.923
+CMC.computeControls:  t = 0.924
+CMC.computeControls:  t = 0.925
+CMC.computeControls:  t = 0.926
+CMC.computeControls:  t = 0.927
+CMC.computeControls:  t = 0.928
+CMC.computeControls:  t = 0.929
+CMC.computeControls:  t = 0.93
+CMC.computeControls:  t = 0.931
+CMC.computeControls:  t = 0.932
+CMC.computeControls:  t = 0.933
+CMC.computeControls:  t = 0.934
+CMC.computeControls:  t = 0.935
+CMC.computeControls:  t = 0.936
+CMC.computeControls:  t = 0.937
+CMC.computeControls:  t = 0.938
+CMC.computeControls:  t = 0.939
+CMC.computeControls:  t = 0.94
+CMC.computeControls:  t = 0.941
+CMC.computeControls:  t = 0.942
+CMC.computeControls:  t = 0.943
+CMC.computeControls:  t = 0.944
+CMC.computeControls:  t = 0.945
+CMC.computeControls:  t = 0.946
+CMC.computeControls:  t = 0.947
+CMC.computeControls:  t = 0.948
+CMC.computeControls:  t = 0.949
+CMC.computeControls:  t = 0.95
+CMC.computeControls:  t = 0.951
+CMC.computeControls:  t = 0.952
+CMC.computeControls:  t = 0.953
+CMC.computeControls:  t = 0.954
+CMC.computeControls:  t = 0.955
+CMC.computeControls:  t = 0.956
+CMC.computeControls:  t = 0.957
+CMC.computeControls:  t = 0.958
+CMC.computeControls:  t = 0.959
+CMC.computeControls:  t = 0.96
+CMC.computeControls:  t = 0.961
+CMC.computeControls:  t = 0.962
+CMC.computeControls:  t = 0.963
+CMC.computeControls:  t = 0.964
+CMC.computeControls:  t = 0.965
+CMC.computeControls:  t = 0.966
+CMC.computeControls:  t = 0.967
+CMC.computeControls:  t = 0.968
+CMC.computeControls:  t = 0.969
+CMC.computeControls:  t = 0.97
+CMC.computeControls:  t = 0.971
+CMC.computeControls:  t = 0.972
+CMC.computeControls:  t = 0.973
+CMC.computeControls:  t = 0.974
+CMC.computeControls:  t = 0.975
+CMC.computeControls:  t = 0.976
+CMC.computeControls:  t = 0.977
+CMC.computeControls:  t = 0.978
+CMC.computeControls:  t = 0.979
+CMC.computeControls:  t = 0.98
+CMC.computeControls:  t = 0.981
+CMC.computeControls:  t = 0.982
+CMC.computeControls:  t = 0.983
+CMC.computeControls:  t = 0.984
+CMC.computeControls:  t = 0.985
+CMC.computeControls:  t = 0.986
+CMC.computeControls:  t = 0.987
+CMC.computeControls:  t = 0.988
+CMC.computeControls:  t = 0.989
+CMC.computeControls:  t = 0.99
+CMC.computeControls:  t = 0.991
+CMC.computeControls:  t = 0.992
+CMC.computeControls:  t = 0.993
+CMC.computeControls:  t = 0.994
+CMC.computeControls:  t = 0.995
+CMC.computeControls:  t = 0.996
+CMC.computeControls:  t = 0.997
+CMC.computeControls:  t = 0.998
+----------------------------------------------------------------
+Finished tracking the specified kinematics
+=================================================================
+Start time   = Mon Apr 24 15:32:37 2017
+Finish time  = Mon Apr 24 15:32:46 2017
+Elapsed time = 9 seconds.
+================================================================
+
+
+Printing results of investigation RRA to C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Exoskeleton\testing/RRA_load=normal_time=0.5-1.
+************************************************************
+*                   Final Average Residuals                *
+************************************************************
+* After torso COM and Kinematics adjustments:
+*  FX=-6.77186 FY=12.6176 FZ=1.99341
+*  MX=-5.53684 MY=-2.93357 MZ=-2.87386
+************************************************************
+
+
+Loaded model model_scaled from file C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Exoskeleton\testing_adjusted.osim
+               MODEL: model_scaled
+         coordinates: 23
+              forces: 0
+           actuators: 0
+             muscles: 0
+            analyses: 0
+              probes: 0
+              bodies: 18
+              joints: 17
+         constraints: 0
+             markers: 33
+         controllers: 0
+  contact geometries: 0
+misc modelcomponents: 0
+Running tool ID.
+
+Storage: file=C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Exoskeleton\ik0.mot (nr=495 nc=24)
+
+
+Low-pass filtering coordinates data with a cutoff frequency of 6...
+
+Storage: file=C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Exoskeleton\grf0.mot (nr=2974 nc=19)
+ExternalForce::right
+Data source being set to grf.mot
+ExternalForce::left
+Data source being set to grf.mot
+InverseDynamicsTool: 51 time frames in 0.406s
+
+Loaded model model_scaled from file C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Desired\testing_adjusted.osim
+               MODEL: model_scaled
+         coordinates: 23
+              forces: 0
+           actuators: 0
+             muscles: 0
+            analyses: 0
+              probes: 0
+              bodies: 18
+              joints: 17
+         constraints: 0
+             markers: 33
+         controllers: 0
+  contact geometries: 0
+misc modelcomponents: 0
+Running tool ID.
+
+Storage: file=C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Desired\ik0.mot (nr=495 nc=24)
+
+
+Low-pass filtering coordinates data with a cutoff frequency of 6...
+
+Storage: file=C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Desired\grf0.mot (nr=2974 nc=19)
+ExternalForce::right
+Data source being set to grf.mot
+ExternalForce::left
+Data source being set to grf.mot
+InverseDynamicsTool: 51 time frames in 0.401s
+
+Loaded model model_scaled from file C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Desired\testing_adjusted.osim
+               MODEL: model_scaled
+         coordinates: 23
+              forces: 0
+           actuators: 0
+             muscles: 0
+            analyses: 0
+              probes: 0
+              bodies: 18
+              joints: 17
+         constraints: 0
+             markers: 33
+         controllers: 0
+  contact geometries: 0
+misc modelcomponents: 0
+Running tool ID.
+
+Storage: file=C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Desired\ik0.mot (nr=495 nc=24)
+
+
+Low-pass filtering coordinates data with a cutoff frequency of 6...
+
+Storage: file=C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Desired\grf0.mot (nr=2974 nc=19)
+ExternalForce::right
+Data source being set to grf.mot
+ExternalForce::left
+Data source being set to grf.mot
+InverseDynamicsTool: 51 time frames in 0.818s
+

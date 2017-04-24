@@ -10,20 +10,22 @@ classdef FrameJacobianSet
     %   usage guidelines.
     
     properties (SetAccess = private)
-        States % States e.g. from RRAResults object  
+        Model % Model file.
+        States % States file e.g. from an RRAResults. 
         Names % array of names given to the contact points in the setup file
         JacobianSet % set of FrameJacobian objects
     end
     
     methods
         
-        function obj = FrameJacobianSet(states, ContactPointSettings, dir)
+        function obj = FrameJacobianSet(Model, States, ContactPointSettings, dir)
             % States is a Data/RRAData object for which frame Jacobians
             % are sought. dir is the results directory in which output
             % files are stored. ContactPointSettings is a path to
             % the ContactPointSettings to use.
             if nargin > 0
-                obj.States = states;
+                obj.Model = Model;
+                obj.States = States;
                 dir = createUniqueDirectory(dir);
                 % Do the actual getFrameJacobians call. 
                 obj.calculateFrameJacobianSet(ContactPointSettings, dir)
@@ -36,7 +38,7 @@ classdef FrameJacobianSet
                 for i=1:size(info.textdata,1)
                     point = [info.data(i,1); info.data(i,2); info.data(i,3)];
                     obj.Names{i} = char(info.textdata(i,1));
-                    obj.JacobianSet{i} = FrameJacobian(states, ...
+                    obj.JacobianSet{i} = FrameJacobian(...
                         obj.Names{i}, info.textdata(i,2), point, ...
                         getFullPath([dir '/' obj.Names{i} '.txt']));
                 end
@@ -52,7 +54,7 @@ classdef FrameJacobianSet
             % Remove headers and labels. 
             states_without_header = obj.removeHeaderFromStatesFile(dir);
             [run_status, cmdout] = system(['getFrameJacobians.exe'...
-                ' "' obj.Trial.model_path '" '...
+                ' "' obj.Model '" '...
                 ' "' states_without_header '" '...
                 ' "' ContactPointSettings '" '...
                 ' "' getFullPath(dir) '" ']);
