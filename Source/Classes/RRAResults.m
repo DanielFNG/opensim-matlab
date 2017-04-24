@@ -4,6 +4,7 @@ classdef RRAResults
     % residuals to see if they're good enough. 
     
     properties (SetAccess = private)
+        OpenSimTrial % The OST to which this RRAResult is associated. 
         start % first timestep
         final % last timestep
         forces % Actuation forces 
@@ -25,21 +26,22 @@ classdef RRAResults
         
         % Construct RRAResults object from a directory where the files are
         % located, trialName gives the prefix to the files. 
-        function obj = RRAResults(trialName, directory)
+        function obj = RRAResults(OpenSimTrial, directory)
             if nargin > 0 
+                obj.OpenSimTrial = OpenSimTrial;
                 directory = getFullPath(directory);
                 obj.forces_path = ...
-                    [directory '/' trialName '_Actuation_force.sto'];
+                    [directory '_Actuation_force.sto'];
                 obj.accelerations_path = ...
-                    [directory '/' trialName '_Kinematics_dudt.sto'];
+                    [directory '_Kinematics_dudt.sto'];
                 obj.velocities_path = ...
-                    [directory '/' trialName '_Kinematics_u.sto'];
+                    [directory '_Kinematics_u.sto'];
                 obj.positions_path = ...
-                    [directory '/' trialName '_Kinematics_q.sto'];
+                    [directory '_Kinematics_q.sto'];
                 obj.errors_path = ...
-                    [directory '/' trialName '_pErr.sto'];
+                    [directory '_pErr.sto'];
                 obj.states_path = ...
-                    [directory '/' trialName '_states.sto'];
+                    [directory '_states.sto'];
                 obj.forces = RRAData(obj.forces_path);
                 obj.accelerations = RRAData(obj.accelerations_path);
                 obj.velocities = RRAData(obj.velocities_path);

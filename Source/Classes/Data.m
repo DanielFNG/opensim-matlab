@@ -130,7 +130,7 @@ classdef Data
                                      - obj.Values(1,location);
                 averaged_frequency = ...
                         sum(obj.Values(2:end,location) ...
-                        - obj.Values(1:end-1,location))/size(obj.Values,1);
+                        - obj.Values(1:end-1,location))/(size(obj.Values,1)-1);
                 if abs(apparent_frequency - averaged_frequency) < 1e-4
                     disp('Data is at consistent frequency.');
                     obj.isConsistentFrequency = true;

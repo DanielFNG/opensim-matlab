@@ -15,6 +15,21 @@ classdef OfflineExOptController
         function obj = OfflineExOptController(OpenSimTrial, ...
                     ExoskeletonForceModel, Desired)
             obj.OpenSimTrial = OpenSimTrial;
+            obj.ExoskeletonForceModel = ExoskeletonForceModel;
+            obj.Desired = Desired;
+        end
+        
+        function result = runOptimisation(obj,identifier, startTime, endTime)
+            if strcmp(identifier, 'LLSEE')
+                [A,b,C,d,E,f] = setupLLSEE(obj, startTime, endTime);
+                result = runLLSEE(A,b,C,d,E,f);
+            else 
+                error('Specified optimisation method not recognized.');
+            end
+        end
+        
+        function [A,b,C,d,E,f] = setupLLSEE(obj, startTime, endTime)
+            
         end
         
     end

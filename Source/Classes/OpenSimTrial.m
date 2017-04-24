@@ -33,15 +33,12 @@ classdef OpenSimTrial
         kinematics_path % path to kinematics
         kinematics % kinematics data object 
         results_directory % path to high level results directory
-        rra = 'Not yet calculated.'
-        id = 'Not yet calculated.'
     end
     
     properties (GetAccess = private, SetAccess = private)
         default_rra 
         default_id
         default_ext
-        id_path = 'Not yet calculated.'
     end
     
     methods
@@ -161,7 +158,7 @@ classdef OpenSimTrial
         end
         
         % Run the RRA algorithm.
-        function obj = runRRA(...
+        function RRA = runRRA(...
                 obj, loadType, initialTime, finalTime, body, output)
             % Setup RRATool.
             switch nargin
@@ -186,15 +183,7 @@ classdef OpenSimTrial
             rraTool.run();
             
             % Process resulting RRA data. Default settings has name 'RRA'. 
-            obj.rra = RRAResults('RRA', [obj.results_directory '/' dir]); 
-        end
-        
-        % Function to do RRA from a user-provided file rather than based on
-        % the default.  
-        function obj = runRRAFromFile(obj, file)
-            rraTool = RRATool(file);
-            rraTool.run();
-            obj.rra = RRAResults('RRA', [obj.results_directory '/RRA']);
+            RRA = RRAResults(obj, [obj.results_directory '/' dir '/RRA']); 
         end
         
         % Setup ID from the default settings file, with input initial and
@@ -212,7 +201,7 @@ classdef OpenSimTrial
         end
         
         % Run the ID algorithm. 
-        function obj = runID(obj, loadType, startTime, endTime)
+        function ID = runID(obj, loadType, startTime, endTime)
             
             dir = ['ID_' 'load=' loadType ...
                 '_time=' num2str(startTime) '-' num2str(endTime)];
@@ -229,17 +218,8 @@ classdef OpenSimTrial
             % it afterwards. 
             delete('temp.xml');
             
-            % Store ID results as Data object and path.
-            obj.id = Data([obj.results_directory '/' dir '/id.sto']);
-            obj.id_path = [obj.results_directory '/' dir '/id.sto'];
-        end
-        
-        % Function to do ID from a user-provided file rather than based on
-        % the default. 
-        function obj = runIDFromFile(obj, file)
-            idTool = InverseDynamicsTool(file);
-            idTool.run();
-            obj.id = Data([obj.results_directory '/ID/id.sto']);
+            % Create an IDResult object to store ID result. 
+            ID = IDResult(obj, [obj.results_directory '/' dir '/']);
         end
     end
     

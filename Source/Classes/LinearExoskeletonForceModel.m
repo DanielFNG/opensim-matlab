@@ -5,13 +5,15 @@ classdef LinearExoskeletonForceModel
     % t_exo = P * A_exo + Q
     %
     % Mainly this class just holds P & Q.
+    %
+    % The class contains hard-coded functions for calculating the force
+    % models for specific Exoskeletons given a unique identifier (their
+    % name). 
     
     properties
         name % name of the exoskeleton, just for information
         P % cell array (even if only one element!) containing linear mult's.
         Q % cell array containing linear constants. 
-        dofs_exo % number of degrees of freedom the exoskeleton has
-        dofs_human % number of degrees of freedom of the human model 
     end
     
     methods
@@ -26,8 +28,6 @@ classdef LinearExoskeletonForceModel
                     error('Size discrepancy in LinearExoskeletonForceModel.');
                 end
                 obj.name = name;
-                obj.dofs_exo = size(P{1},2);
-                obj.dofs_human = size(P{1},1);
                 obj.P = P;
                 obj.Q = Q;
             end
