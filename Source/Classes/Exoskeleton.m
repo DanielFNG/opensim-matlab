@@ -27,11 +27,19 @@ classdef Exoskeleton
             end
         end
         
-        function model = constructLinearExoskeletonModel(obj, states, dir)
+        function model = constructExoskeletonForceModel(obj, states, dir, desc)
+            % Desc is a description of the force model to be calculated.
+            % E.g. 'linear', for the linearAPOForceModel.
             if strcmp(obj.Name, 'APO')
-                model = obj.constructOldLinearAPOForceModel(states, dir);
+                if strcmp(desc, 'old_linear')
+                    model = obj.constructOldLinearAPOForceModel(states, dir);
+                elseif strcmp(desc, 'linear')
+                    model = obj.constructLinearAPOForceModel(states, dir);
+                else 
+                    error('Force model not recognised.');
+                end
             else
-                error('No force model function for given exoskeleton.')
+                error('Exoskeleton has no force models!')
             end
         end
         
@@ -90,6 +98,7 @@ classdef Exoskeleton
             Q = 0;
             P{nTimesteps} = 0;
             
+            % Get the left & right hip flexion joint angles in vector form.
             right_hip_flexion = states.getDataCorrespondingToLabel(...
                 'hip_flexion_r');
             left_hip_flexion = states.getDataCorrespondingToLabel(...
