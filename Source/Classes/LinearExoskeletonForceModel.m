@@ -25,7 +25,7 @@ classdef LinearExoskeletonForceModel
             % i.e. working with only one P and one Q, still have to be
             % given as cell arrays!
             if nargin > 0
-                if size(P,1) ~= size(Q,1) 
+                if size(P{1},1) ~= size(Q{1},1) 
                     error('Size discrepancy in LinearExoskeletonForceModel.');
                 end
                 obj.Exoskeleton = exo;

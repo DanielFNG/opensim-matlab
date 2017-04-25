@@ -8,6 +8,15 @@ classdef Exoskeleton
         Model % Human/exoskeleton OpenSim model 
         ContactPoints % Contact points settings file (Jacobians). 
         ExternalLoads % External loads settings files (forward simulation).
+        Exo_dofs = 2; 
+        Human_dofs = 23; 
+        % Want to change ContactPointSettings to be an Exoskeleton
+        % description file including the number of actuated degrees of
+        % freedom, joint limits etc. Then Exo_dofs and the joint limits can
+        % be read in from this. Also, human_dofs should be read in from the
+        % model file. But I'll implement this in a bit. Hard-coding it for
+        % now to avoid breaking the current ContactPointSettings
+        % implementation. 
     end
     
     methods
@@ -95,7 +104,6 @@ classdef Exoskeleton
                 obj.getContactSettings(), dir);
             
             nTimesteps = size(states.Timesteps,1);
-            Q = 0;
             P{nTimesteps} = 0;
             
             % Get the left & right hip flexion joint angles in vector form.
@@ -105,6 +113,7 @@ classdef Exoskeleton
                 'hip_flexion_l');
             
             for i=1:nTimesteps
+                Q{i} = zeros(obj.Human_dofs,1);
                 unit_right_force = [0;0;0; ...
                     cos(right_hip_flexion(i,1));sin(right_hip_flexion(i,1));0];
                 unit_left_force = [0;0;0; ...

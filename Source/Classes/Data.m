@@ -465,6 +465,15 @@ classdef Data
             end
         end
         
+        function index = getIndexCorrespondingToTimestep(obj, timestep)
+            index = 0;
+            for i=1:size(obj.Timesteps,2)
+                if obj.Timesteps(i) == timestep
+                    index = i;
+                end
+            end
+        end
+        
         function obj = scaleColumn(obj,index,multiplier)
             if strcmp(obj.Labels(index), 'time') 
                 error('You probably dont want to be scaling time col.');

@@ -158,7 +158,7 @@ CMC.computeControls:  t = 0.5
 ================================================================
 Using CMC to track the specified kinematics
 Integrating from 0.5 to 1
-Start time = Mon Apr 24 10:21:35 2017
+Start time = Mon Apr 24 18:26:52 2017
 ================================================================
 CMC.computeControls:  t = 0.5
 CMC.computeControls:  t = 0.501
@@ -662,13 +662,13 @@ CMC.computeControls:  t = 0.998
 ----------------------------------------------------------------
 Finished tracking the specified kinematics
 =================================================================
-Start time   = Mon Apr 24 10:21:35 2017
-Finish time  = Mon Apr 24 10:21:45 2017
-Elapsed time = 10 seconds.
+Start time   = Mon Apr 24 18:26:52 2017
+Finish time  = Mon Apr 24 18:27:00 2017
+Elapsed time = 8 seconds.
 ================================================================
 
 
-Printing results of investigation RRA to C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\OpenSimTrial\separating_results/RRA_load=normal_time=0.5-1.
+Printing results of investigation RRA to C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\OpenSimTrial\id_vs_rra_time_discrepancy/RRA_load=normal_time=0.5-1.
 ************************************************************
 *                   Final Average Residuals                *
 ************************************************************
@@ -705,9 +705,9 @@ ExternalForce::right
 Data source being set to grf.mot
 ExternalForce::left
 Data source being set to grf.mot
-InverseDynamicsTool: 51 time frames in 0.416s
+InverseDynamicsTool: 51 time frames in 0.42s
 
-Loaded model model_scaled from file C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\OpenSimTrial\testing_adjusted.osim
+Loaded model model_scaled from file C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Desired\testing_adjusted.osim
                MODEL: model_scaled
          coordinates: 23
               forces: 0
@@ -724,133 +724,17 @@ Loaded model model_scaled from file C:\Users\Daniel\Documents\GitHub\APO-Inverse
 misc modelcomponents: 0
 Running tool ID.
 
-Storage: file=C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\OpenSimTrial\ik0.mot (nr=495 nc=24)
+Storage: file=C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Desired\ik0.mot (nr=495 nc=24)
 
 
 Low-pass filtering coordinates data with a cutoff frequency of 6...
 
-Storage: file=C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\OpenSimTrial\grf0.mot (nr=2974 nc=19)
+Storage: file=C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Desired\grf0.mot (nr=2974 nc=19)
 ExternalForce::right
 Data source being set to grf.mot
 ExternalForce::left
 Data source being set to grf.mot
-InverseDynamicsTool: 51 time frames in 0.415s
-
-Loaded model model_scaled from file C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\OpenSimTrial\testing_adjusted.osim
-               MODEL: model_scaled
-         coordinates: 23
-              forces: 0
-           actuators: 0
-             muscles: 0
-            analyses: 0
-              probes: 0
-              bodies: 18
-              joints: 17
-         constraints: 0
-             markers: 33
-         controllers: 0
-  contact geometries: 0
-misc modelcomponents: 0
-Running tool ID.
-
-Storage: file=C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\OpenSimTrial\ik0.mot (nr=495 nc=24)
-
-
-Low-pass filtering coordinates data with a cutoff frequency of 6...
-
-Storage: file=C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\OpenSimTrial\grf0.mot (nr=2974 nc=19)
-ExternalForce::right
-Data source being set to grf.mot
-ExternalForce::left
-Data source being set to grf.mot
-InverseDynamicsTool: 51 time frames in 0.4s
-
-Loaded model model_scaled from file C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\OpenSimTrial\testing_adjusted.osim
-               MODEL: model_scaled
-         coordinates: 23
-              forces: 0
-           actuators: 0
-             muscles: 0
-            analyses: 0
-              probes: 0
-              bodies: 18
-              joints: 17
-         constraints: 0
-             markers: 33
-         controllers: 0
-  contact geometries: 0
-misc modelcomponents: 0
-Running tool ID.
-
-Storage: file=C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\OpenSimTrial\ik0.mot (nr=495 nc=24)
-
-
-Low-pass filtering coordinates data with a cutoff frequency of 6...
-
-Storage: file=C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\OpenSimTrial\grf0.mot (nr=2974 nc=19)
-ExternalForce::right
-Data source being set to grf.mot
-ExternalForce::left
-Data source being set to grf.mot
-InverseDynamicsTool: 51 time frames in 0.434s
-
-Loaded model model_scaled from file C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\OpenSimTrial\testing_adjusted.osim
-               MODEL: model_scaled
-         coordinates: 23
-              forces: 0
-           actuators: 0
-             muscles: 0
-            analyses: 0
-              probes: 0
-              bodies: 18
-              joints: 17
-         constraints: 0
-             markers: 33
-         controllers: 0
-  contact geometries: 0
-misc modelcomponents: 0
-Running tool ID.
-
-Storage: file=C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\OpenSimTrial\ik0.mot (nr=495 nc=24)
-
-
-Low-pass filtering coordinates data with a cutoff frequency of 6...
-
-Storage: file=C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\OpenSimTrial\grf0.mot (nr=2974 nc=19)
-ExternalForce::right
-Data source being set to grf.mot
-ExternalForce::left
-Data source being set to grf.mot
-InverseDynamicsTool: 51 time frames in 0.402s
-
-Loaded model model_scaled from file C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\OpenSimTrial\testing_adjusted.osim
-               MODEL: model_scaled
-         coordinates: 23
-              forces: 0
-           actuators: 0
-             muscles: 0
-            analyses: 0
-              probes: 0
-              bodies: 18
-              joints: 17
-         constraints: 0
-             markers: 33
-         controllers: 0
-  contact geometries: 0
-misc modelcomponents: 0
-Running tool ID.
-
-Storage: file=C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\OpenSimTrial\ik0.mot (nr=495 nc=24)
-
-
-Low-pass filtering coordinates data with a cutoff frequency of 6...
-
-Storage: file=C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\OpenSimTrial\grf0.mot (nr=2974 nc=19)
-ExternalForce::right
-Data source being set to grf.mot
-ExternalForce::left
-Data source being set to grf.mot
-InverseDynamicsTool: 51 time frames in 0.416s
+InverseDynamicsTool: 51 time frames in 0.412s
 
 AbstractTool RRA loading model 'gait2392_APO.osim'
 Loaded model model_scaled from file gait2392_APO.osim
@@ -1012,7 +896,7 @@ CMC.computeControls:  t = 0.5
 ================================================================
 Using CMC to track the specified kinematics
 Integrating from 0.5 to 1
-Start time = Mon Apr 24 15:32:37 2017
+Start time = Tue Apr 25 09:50:50 2017
 ================================================================
 CMC.computeControls:  t = 0.5
 CMC.computeControls:  t = 0.501
@@ -1516,13 +1400,13 @@ CMC.computeControls:  t = 0.998
 ----------------------------------------------------------------
 Finished tracking the specified kinematics
 =================================================================
-Start time   = Mon Apr 24 15:32:37 2017
-Finish time  = Mon Apr 24 15:32:46 2017
-Elapsed time = 9 seconds.
+Start time   = Tue Apr 25 09:50:50 2017
+Finish time  = Tue Apr 25 09:50:58 2017
+Elapsed time = 8 seconds.
 ================================================================
 
 
-Printing results of investigation RRA to C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Exoskeleton\testing/RRA_load=normal_time=0.5-1.
+Printing results of investigation RRA to C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Exoskeleton\another_test/RRA_load=normal_time=0.5-1.
 ************************************************************
 *                   Final Average Residuals                *
 ************************************************************
@@ -1531,91 +1415,4 @@ Printing results of investigation RRA to C:\Users\Daniel\Documents\GitHub\APO-In
 *  MX=-5.53684 MY=-2.93357 MZ=-2.87386
 ************************************************************
 
-
-Loaded model model_scaled from file C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Exoskeleton\testing_adjusted.osim
-               MODEL: model_scaled
-         coordinates: 23
-              forces: 0
-           actuators: 0
-             muscles: 0
-            analyses: 0
-              probes: 0
-              bodies: 18
-              joints: 17
-         constraints: 0
-             markers: 33
-         controllers: 0
-  contact geometries: 0
-misc modelcomponents: 0
-Running tool ID.
-
-Storage: file=C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Exoskeleton\ik0.mot (nr=495 nc=24)
-
-
-Low-pass filtering coordinates data with a cutoff frequency of 6...
-
-Storage: file=C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Exoskeleton\grf0.mot (nr=2974 nc=19)
-ExternalForce::right
-Data source being set to grf.mot
-ExternalForce::left
-Data source being set to grf.mot
-InverseDynamicsTool: 51 time frames in 0.406s
-
-Loaded model model_scaled from file C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Desired\testing_adjusted.osim
-               MODEL: model_scaled
-         coordinates: 23
-              forces: 0
-           actuators: 0
-             muscles: 0
-            analyses: 0
-              probes: 0
-              bodies: 18
-              joints: 17
-         constraints: 0
-             markers: 33
-         controllers: 0
-  contact geometries: 0
-misc modelcomponents: 0
-Running tool ID.
-
-Storage: file=C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Desired\ik0.mot (nr=495 nc=24)
-
-
-Low-pass filtering coordinates data with a cutoff frequency of 6...
-
-Storage: file=C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Desired\grf0.mot (nr=2974 nc=19)
-ExternalForce::right
-Data source being set to grf.mot
-ExternalForce::left
-Data source being set to grf.mot
-InverseDynamicsTool: 51 time frames in 0.401s
-
-Loaded model model_scaled from file C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Desired\testing_adjusted.osim
-               MODEL: model_scaled
-         coordinates: 23
-              forces: 0
-           actuators: 0
-             muscles: 0
-            analyses: 0
-              probes: 0
-              bodies: 18
-              joints: 17
-         constraints: 0
-             markers: 33
-         controllers: 0
-  contact geometries: 0
-misc modelcomponents: 0
-Running tool ID.
-
-Storage: file=C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Desired\ik0.mot (nr=495 nc=24)
-
-
-Low-pass filtering coordinates data with a cutoff frequency of 6...
-
-Storage: file=C:\Users\Daniel\Documents\GitHub\APO-Inverse-Model\Testing\Desired\grf0.mot (nr=2974 nc=19)
-ExternalForce::right
-Data source being set to grf.mot
-ExternalForce::left
-Data source being set to grf.mot
-InverseDynamicsTool: 51 time frames in 0.818s
 
