@@ -22,10 +22,10 @@ classdef OfflineControllerResults
             obj.EndTime = endTime;
             exo_dofs = OfflineController.Exoskeleton.Exo_dofs;
             human_dofs = OfflineController.Exoskeleton.Human_dofs;
-            obj.MotorCommands = results(1:exo_dofs);
-            obj.ExoskeletonContribution = results(...
+            obj.MotorCommands = results(1:end,1:exo_dofs);
+            obj.ExoskeletonContribution = results(1:end,...
                 exo_dofs + 1:exo_dofs + human_dofs);
-            obj.HumanContribution = results(...
+            obj.HumanContribution = results(1:end,...
                 exo_dofs + human_dofs + 1:end);
         end
         

@@ -98,12 +98,13 @@ classdef Exoskeleton
             
             % Hard coded APO link length for now. But in the future this
             % should be interpreted from the ContactPointSettings file.
-            d = 0.35;
+            d = 0.23;
             
             Jacobians = FrameJacobianSet(obj.Model, states, ...
                 obj.getContactSettings(), dir);
             
             nTimesteps = size(states.Timesteps,1);
+            Q{nTimesteps} = 0; % pre allocation for speed 
             P{nTimesteps} = 0;
             
             % Get the left & right hip flexion joint angles in vector form.
@@ -131,6 +132,51 @@ classdef Exoskeleton
         % points. But first I want to compare that I get the same results
         % as last time using the old model as a validation step. 
         function APO_model = constructLinearAPOForceModel(obj, states, dir)
+            d_link = 0.23; % from torque generation to leg attachment
+            d_weld = 0.183145; % from torque generation to backpack weld 
+            
+            Jacobians = FrameJacobianSet(obj.Model, states, ...,
+                obj.getContactSettings(), dir);
+            
+            nTimesteps = size(states.Timesteps,1);
+            Q{nTimesteps} = 0;
+            P{nTimesteps} = 0; 
+            
+            % Get the left & right hip flexion joint angles in vector form.
+            right_hip_flexion = states.getDataCorrespondingToLabel(...
+                'hip_flexion_r');
+            left_hip_flexion = states.getDataCorrespondingToLabel(...
+                'hip_flexion_l');
+            
+            % And store the constant angle vs the horizontal for the left &
+            % right groups. 
+            group_angle = deg2rad(33.08);
+            
+            for i=1:nTimesteps
+                Q{i} = zeros(obj.Human_dofs,1);
+                % Links
+                unit_right_force = [0;0;0; ...
+                    cos(right_hip_flexion(i,1));sin(right_hip_flexion(i,1));0];
+                unit_left_force = [0;0;0; ...
+                    cos(left_hip_flexion(i,1));sin(left_hip_flexion(i,1));0];
+                right_jacobian = Jacobians.JacobianSet{1}.Jacobian.Values{i};
+                left_jacobian = Jacobians.JacobianSet{2}.Jacobian.Values{i};
+                % Groups
+                unit_right_group_force = [0;0;0; ...
+                    sin(group_angle);cos(group_angle);0];
+                unit_left_group_force = [0;0;0; ...
+                    sin(group_angle);cos(group_angle);0];
+                right_group_jacobian = ...
+                    Jacobians.JacobianSet{3}.Jacobian.Values{i};
+                left_group_jacobian = ...
+                    Jacobians.JacobianSet{4}.Jacobian.Values{i};
+                % Adding it all together 
+                P{i} = [1/d_link * right_jacobian.' * unit_right_force ... 
+                    - 1/d_weld*right_group_jacobian.'*unit_right_group_force,...
+                    1/d_link * left_jacobian.' * unit_left_force ...
+                    - 1/d_weld * left_group_jacobian.' * unit_left_group_force];
+            end
+            APO_model = LinearExoskeletonForceModel(obj, states, P, Q);
         end
         
     end

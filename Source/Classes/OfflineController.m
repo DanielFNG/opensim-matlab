@@ -30,19 +30,21 @@ classdef OfflineController
             end
         end
         
-        function OfflineResult = runOptimisation(...
+        function [OfflineResult, obj] = runOptimisation(...
                 obj,identifier, load, startTime, endTime)
             % First calculate the 
-            ID = obj.processRawData(load, startTime, endTime);
+            [RRA, ID] = obj.processRawData(load, startTime, endTime);
             obj = obj.computeForceModel(RRA);
             obj = obj.advanceDesired(ID);
-            timesteps = size(ID.Timesteps,2);
-            results = zeros(timesteps,1);
-            for i=1:timesteps
+            timesteps = size(ID.id.Timesteps,1);
+            results = zeros(timesteps,2*obj.Exoskeleton.Human_dofs ...
+                + obj.Exoskeleton.Exo_dofs);
+            for i=1:timesteps-20 % somehow force model stops 20 timesteps b4
                 if strcmp(identifier, 'LLSEE')
-                    [A,b,C,d,E,f] = setupLLSEE(obj, startTime, endTime, ...
-                        ID, i);
+                    [A,b,C,d,E,f] = obj.setupLLSEE(ID, i);
                     results(i,1:end) =  lsqlin(A,b,C,d,E,f);
+                    %x = lsqlin(A,b,C,d,E,f);
+                    %results(i,1:end) = x(1:end,i);
                 else 
                     error('Specified optimisation method not recognized.');
                 end
@@ -55,16 +57,17 @@ classdef OfflineController
             n = obj.Exoskeleton.Human_dofs; % human degrees of freedom
             k = obj.Exoskeleton.Exo_dofs; % exoskeleton (active) dofs 
             A = [zeros(n,k), zeros(n), eye(n)]; % coefficient matrix
-            b = obj.Desired.Result.Values(index,1:end).'; % desired vector
+            b = obj.Desired.Result.Values(index,2:end).'; % desired vector
+            % Note going from 2:end is to miss out the time bit!
             C = [];
             d = []; % NO JOINT LIMITS FOR NOW, COME BACK TO THIS!
             P = obj.ForceModel.P{index};
             Q = obj.ForceModel.Q{index};
-            E = [zeros(n,k), eye(n), eye(n); -P, ones(n), zeros(n)];
-            f = [ID.id.Values(index,1:end).'; Q];
+            E = [zeros(n,k), eye(n), eye(n); -P, eye(n), zeros(n)];
+            f = [ID.id.Values(index,2:end).'; Q];
         end
         
-        function ID = processRawData(obj, load, startTime, endTime)
+        function [RRA, ID] = processRawData(obj, load, startTime, endTime)
             % Perform RRA and ID given load type, startTime & endTime from
             % user. 
             RRA = obj.Trial.runRRA(load, startTime, endTime);

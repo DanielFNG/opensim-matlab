@@ -52,3 +52,7 @@ Temporary Items
 
 # Ignore Matlab autosaves. 
 *.asv
+
+# Ignore OpenSim storage files & output data files.
+*.sto
+*.txt

@@ -81,6 +81,7 @@ classdef Desired
                 % Joint size doesn't match multipliers size, but it's ok if
                 % the multiplier is just a scalar. 
                 if size(obj.varargin{2},2) == 1
+                    identifiers = obj.varargin{1};
                     multipliers = ...
                         obj.varargin{2}*ones(1,size(obj.varargin{1},2));
                 else
