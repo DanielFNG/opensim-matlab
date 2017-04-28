@@ -420,6 +420,38 @@ classdef Data
             end
         end
         
+        % Fit the data to a spline using interp1 and sample evenly from
+        % this distribution to obtain smooth data of the desired frequency.
+        function obj = fitToSpline(obj, desired_frequency)
+            if ~obj.isTimeSeries
+                error('Can only spline time series data.');
+            end
+            % Generate the desired sample points. 
+            x = (obj.Timesteps(1,1):1/desired_frequency:obj.Timesteps(end,1))';
+            
+            % Isolate the matrix of values.
+            y = obj.Values(1:end,2:end);
+
+            % Re-allocate the values array. 
+            obj.Values = zeros(size(x,1), size(obj.Values,2));
+            
+            % Fit to spline.
+            obj.Values(1:end,2:end) = interp1(obj.Timesteps, y, x, 'spline');
+            
+            % Re-allocate and set timesteps.
+            obj.Timesteps = zeros(size(x,1),1);
+            obj.Timesteps(1:end,1) = x;
+            obj.Values(1:end,1) = x;
+            
+            % Update header file to reflect changes. 
+            obj = obj.updateHeader();
+            
+            % Update frequency information.
+            obj.Frames = size(obj.Timesteps, 1);
+            obj.isConsistentFrequency = true;
+            obj.Frequency = desired_frequency;
+        end
+        
         % Write data object to a tab delimited file. 
         function writeToFile(obj, filename, withHeader, withLabels)
             fileID = fopen(filename,'w');
@@ -441,6 +473,44 @@ classdef Data
                 fprintf(fileID,'\n');
             end
             fclose(fileID);
+        end
+        
+        % Overload addition. Data objects which share an identical timestep
+        % array can be added together. One is essentially appended on to
+        % the other, and the labels and header are updated accordingly. 
+        function result = plus(obj1,obj2)
+            % Check that the data objects have equal frames and timesteps,
+            % giving a specific error message to each case. 
+            if ~(size(obj1.Frames) == size(obj2.Frames))
+                error(['Data objects can only be added if they have the '...
+                    'same number of frames.']);
+            end
+            if sum(obj1.Timesteps ~= obj2.Timesteps) ~= 0
+                error(['Timesteps must match precisely to use Data '
+                    'addition. If necessary, spline your Data objects.']);
+            end
+            
+            % Define some sizes - number of colums of data in each object. 
+            size1 = size(obj1.Values,2);
+            size2 = size(obj2.Values,2);
+            
+            % Set up and result and re-allocate the Values.
+            new_col_size = size1 + size2 - 1;
+            % We need to -1 above because they both have a time-step
+            % column, if we don't this will be counted twice!
+            result = obj1;
+            result.Values = zeros(size(obj1.Timesteps,1),new_col_size);
+            
+            % Copy over the values from the input objects. 
+            result.Values(1:end,1) = result.Timesteps(1:end,1);
+            result.Values(1:end,2:size1) = obj1.Values(1:end,2:end);
+            result.Values(1:end,size1+1:end) = obj2.Values(1:end,2:end);
+            
+            % Add labels together, and update header to reflect changes.
+            for i=size1+1:size1+size2-1
+                result.Labels{1,i} = obj2.Labels{1,i+1-size1};
+            end
+            result = result.updateHeader();
         end
       
         % Get, as a vector, the data corresponding to a specific label.

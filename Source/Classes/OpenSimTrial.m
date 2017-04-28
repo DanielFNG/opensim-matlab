@@ -16,20 +16,13 @@ classdef OpenSimTrial
     % This class relies on some default settings files e.g. the
     % gait2392_actuators file, & default settings files for ID/RRA. These 
     % are located in the Exopt/Defaults folder.
-    %
-    % NOTE ON USAGE:
-    % It is possible to construct a single OpenSimTrial and do many ID/RRA.
-    % However, OpenSimTrial is intended to be associated with a single set
-    % of rra/id data. Therefore the files and Data objects will be overrun
-    % after each run. If you wanted to do and save the output of multiple
-    % RRA/ID runs on the same input data, you should create separate
-    % OpenSimTrial objects but with different save directories (describing
-    % what you want to do).
     
     properties (SetAccess = private)
         model_path % path to model
-        grfs_path % path to grfs
-        grfs % grfs data object
+        grfs_path % path to external forces data 
+        grfs % external forces data object
+        load % A description of the external forces being applied
+        load_path % Path to the load type file. 
         kinematics_path % path to kinematics
         kinematics % kinematics data object 
         results_directory % path to high level results directory
@@ -45,6 +38,7 @@ classdef OpenSimTrial
         % Construct OpenSimTrial.
         function obj = OpenSimTrial(model, ...
                                     kinematics, ...
+                                    load, ...
                                     grfs, ...
                                     results)
             if nargin > 0
@@ -57,12 +51,14 @@ classdef OpenSimTrial
                 obj.results_directory = getFullPath(new_results);
                 [obj.default_rra, obj.default_id, obj.default_ext] = ...
                         obj.loadDefaults();
+                obj.load = load; 
+                obj.load_path = [obj.default_ext load '.xml'];
             end
         end
         
         % Setup RRA from the default settings file, with input initial and
         % final times, according to the OpenSimTrial properties. 
-        function rraTool = setupRRA(obj, dir, loadType, initialTime, ... 
+        function rraTool = setupRRA(obj, dir, initialTime, ... 
                                     finalTime, body, output)
             % Import OpenSim RRATool class. 
             import org.opensim.modeling.RRATool
@@ -72,13 +68,13 @@ classdef OpenSimTrial
 
             obj.loadModelAndActuators(rraTool);
             obj.setInputsAndOutputs(rraTool, initialTime, finalTime, dir);
-            obj.setupExternalLoads(rraTool, loadType);
+            obj.setupExternalLoads(rraTool);
             
             % Handle logic for whether or not the model should be adjusted.
             switch nargin 
-                case 5
+                case 4
                     display('No model adjustment.');
-                case 7
+                case 6
                     display('Adjusting COM according to specification.');
                     obj.makeAdjustmentsForRRA(rraTool, body, output, dir); 
                 otherwise
@@ -129,7 +125,7 @@ classdef OpenSimTrial
         end
         
         % Setup external loads from type.
-        function setupExternalLoads(obj, Tool, type)
+        function setupExternalLoads(obj, Tool)
             % Here, type defines what type of ExternalLoads case we have.
             % E.g. 2 forces for human walking, 4 for walking with APO.
             % There should be a unique xml file relating to any
@@ -139,7 +135,7 @@ classdef OpenSimTrial
             % file. This file is later deleted in this script (for RRA) or
             % later (for ID) - read runID to see why we can't delete this
             % file here for ID. 
-            external_loads = xmlread([obj.default_ext type '.xml']);
+            external_loads = xmlread(obj.load_path);
             external_loads.getElementsByTagName('datafile').item(0). ...
                 getFirstChild.setNodeValue(obj.grfs_path);
             xmlwrite('temp.xml', external_loads);
@@ -159,22 +155,20 @@ classdef OpenSimTrial
         
         % Run the RRA algorithm.
         function RRA = runRRA(...
-                obj, loadType, initialTime, finalTime, body, output)
+                obj, initialTime, finalTime, body, output)
             % Setup RRATool.
             switch nargin
-                case 4
-                    dir = ['RRA_' 'load=' loadType ...
+                case 3
+                    dir = ['RRA_' 'load=' obj.load ...
                         '_time=' num2str(initialTime) '-' num2str(finalTime)];
                     rraTool = obj.setupRRA(...
-                                dir, loadType, ...
-                                    initialTime, finalTime);
-                case 6
-                    dir = ['RRA_' loadType ...
+                                dir, initialTime, finalTime);
+                case 5
+                    dir = ['RRA_' obj.load ...
                         '_time=' num2str(initialTime) '-' num2str(finalTime)...
                         '_withAdjustment'];
                     rraTool = obj.setupRRA(...
-                                dir, loadType,...
-                                    initialTime, finalTime, body, output);
+                                dir, initialTime, finalTime, body, output);
                 otherwise
                     error('Incorrect number of arguments to setupRRA');
             end
@@ -188,7 +182,7 @@ classdef OpenSimTrial
         
         % Setup ID from the default settings file, with input initial and
         % final times, according to the OpenSimTrial properties. 
-        function idTool = setupID(obj, dir, loadType, startTime, endTime)
+        function idTool = setupID(obj, dir, startTime, endTime)
             % Import OpenSim InverseDynamicsTool class.
             import org.opensim.modeling.InverseDynamicsTool
             
@@ -197,16 +191,16 @@ classdef OpenSimTrial
             
             obj.loadModelAndActuators(idTool);
             obj.setInputsAndOutputs(idTool, startTime, endTime, dir);
-            obj.setupExternalLoads(idTool, loadType);
+            obj.setupExternalLoads(idTool);
         end
         
         % Run the ID algorithm. 
-        function ID = runID(obj, loadType, startTime, endTime)
+        function ID = runID(obj, startTime, endTime)
             
-            dir = ['ID_' 'load=' loadType ...
+            dir = ['ID_' 'load=' obj.load ...
                 '_time=' num2str(startTime) '-' num2str(endTime)];
             
-            idTool = obj.setupID(dir,loadType,startTime,endTime);
+            idTool = obj.setupID(dir,startTime,endTime);
             
             idTool.run();
             
