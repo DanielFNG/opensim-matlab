@@ -4,7 +4,7 @@ dir = 'new_linear';
 % Set up input data a.k.a the OpenSimTrial. 
 startTime = 1.0;
 endTime = 2.2; % low end time just for testing 
-trial = OpenSimTrial('APO.osim', 'ik0.mot', 'grf0.mot', dir);
+trial = OpenSimTrial('APO.osim', 'ik0.mot', 'normal', 'grf0.mot', dir);
 loadType = 'normal'; % Normal external loads e.g. just grfs. 
 
 % Load the Exoskeleton information and specify a force model. 

@@ -36,14 +36,14 @@ classdef Exoskeleton
             end
         end
         
-        function model = constructExoskeletonForceModel(obj, states, dir, desc)
+        function model = constructExoskeletonForceModel(obj, rra, dir, desc)
             % Desc is a description of the force model to be calculated.
             % E.g. 'linear', for the linearAPOForceModel.
             if strcmp(obj.Name, 'APO')
                 if strcmp(desc, 'old_linear')
-                    model = obj.constructOldLinearAPOForceModel(states, dir);
+                    model = obj.constructOldLinearAPOForceModel(rra, dir);
                 elseif strcmp(desc, 'linear')
-                    model = obj.constructLinearAPOForceModel(states, dir);
+                    model = obj.constructLinearAPOForceModel(rra, dir);
                 else 
                     error('Force model not recognised.');
                 end
@@ -93,9 +93,9 @@ classdef Exoskeleton
         
         % Private since only want constructExoskeletonFroceModel to be able
         % to use this.
-        function APO_model = constructOldLinearAPOForceModel(obj, states, dir)
+        function APO_model = constructOldLinearAPOForceModel(obj, rra, dir)
             % Inputs are states & a directory for results to be stored. 
-            
+            states = rra.states;
             % Hard coded APO link length for now. But in the future this
             % should be interpreted from the ContactPointSettings file.
             d = 0.23;
@@ -124,14 +124,17 @@ classdef Exoskeleton
                 P{i} = 1/d*[right_jacobian.' * unit_right_force ...
                     , left_jacobian.' * unit_left_force];
             end
-            APO_model = LinearExoskeletonForceModel(obj, states, P, Q);
+            APO_model = LinearExoskeletonForceModel(obj, rra, P, Q);
             
         end
         
         % This will be for the new APO model with 2 additional contact
         % points. But first I want to compare that I get the same results
         % as last time using the old model as a validation step. 
-        function APO_model = constructLinearAPOForceModel(obj, states, dir)
+        function APO_model = constructLinearAPOForceModel(obj, rra, dir)
+            
+            states = rra.states;
+            
             d_link = 0.23; % from torque generation to leg attachment
             d_weld = 0.183145; % from torque generation to backpack weld 
             
@@ -187,7 +190,7 @@ classdef Exoskeleton
             % These particular forces are UNIT spatial forces meaning the
             % arise from a motor value of 1. 
             forces = ContactForceSet(Jacobians, ContactSet);
-            APO_model = LinearExoskeletonForceModel(obj, states, ...
+            APO_model = LinearExoskeletonForceModel(obj, rra, ...
                 P, Q, Jacobians, forces);
         end
         

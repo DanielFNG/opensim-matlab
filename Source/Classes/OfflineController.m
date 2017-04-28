@@ -31,9 +31,9 @@ classdef OfflineController
         end
         
         function [OfflineResult, obj] = runOptimisation(...
-                obj,identifier, load, startTime, endTime)
+                obj,identifier, startTime, endTime)
             % First calculate the 
-            [RRA, ID] = obj.processRawData(load, startTime, endTime);
+            [RRA, ID] = obj.processRawData(startTime, endTime);
             obj = obj.computeForceModel(RRA);
             obj = obj.advanceDesired(ID);
             timesteps = size(ID.id.Timesteps,1);
@@ -67,29 +67,28 @@ classdef OfflineController
             f = [ID.id.Values(index,2:end).'; Q];
         end
         
-        function [RRA, ID] = processRawData(obj, load, startTime, endTime)
-            % Perform RRA and ID given load type, startTime & endTime from
-            % user. 
-            RRA = obj.Trial.runRRA(load, startTime, endTime);
+        function [RRA, ID] = processRawData(obj, startTime, endTime)
+            % Perform RRA and ID given startTime & endTime from user. 
+            RRA = obj.Trial.runRRA(startTime, endTime);
             
             % Remember that we create a new OpenSimTrial using the RRA
             % kinematics!
             dir = [obj.Trial.results_directory '/IDTrial'];
             IDTrial = OpenSimTrial(obj.Trial.model_path, ...
-                RRA.positions_path, obj.Trial.grfs_path, ...
+                RRA.positions_path, obj.Trial.load, obj.Trial.grfs_path, ...
                 dir);
             
             % NOTE: the - 0.002 here is due to the fact that RRA ends 2
             % timesteps before the given time. Obviously this is a bandaid
             % fix and I need to investigate the root of the problem - I'll
             % come back to this, have made a post it.
-            ID = IDTrial.runID(load, startTime, endTime - 0.002);
+            ID = IDTrial.runID(startTime, endTime - 0.002);
         end
         
         function obj = computeForceModel(obj, RRA)
             dir = [obj.ResultsDirectory '/ForceModel'];
             obj.ForceModel = obj.Exoskeleton.constructExoskeletonForceModel(...
-                RRA.states, dir, obj.ForceModelDescriptor);
+                RRA, dir, obj.ForceModelDescriptor);
         end
         
         function obj = advanceDesired(obj, ID)

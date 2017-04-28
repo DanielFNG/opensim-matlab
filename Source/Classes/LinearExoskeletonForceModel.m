@@ -12,6 +12,7 @@ classdef LinearExoskeletonForceModel
     
     properties (SetAccess = private)
         Exoskeleton % the exoskeleton to which this model relates
+        RRA % an RRAResult, to give access to the underlying OST
         States % time-indexed states of the human-exoskeleton model
         P % cell array (even if only one element!) containing linear mult's.
         Q % cell array containing linear constants.
@@ -21,7 +22,7 @@ classdef LinearExoskeletonForceModel
         
     methods
         
-        function obj = LinearExoskeletonForceModel(exo, states, P, Q, ...
+        function obj = LinearExoskeletonForceModel(exo, rra, P, Q, ...
                 Jacobians, Forces)
             % Name is an identifier and P, Q are cell arrays containing
             % indexed P, Q. Note: even if this is for a single timestep
@@ -32,7 +33,8 @@ classdef LinearExoskeletonForceModel
                     error('Size discrepancy in LinearExoskeletonForceModel.');
                 end
                 obj.Exoskeleton = exo;
-                obj.States = states;
+                obj.RRA = rra;
+                obj.States = rra.states;
                 obj.P = P;
                 obj.Q = Q;
                 obj.FrameJacobians = Jacobians;
