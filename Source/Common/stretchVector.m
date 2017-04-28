@@ -10,7 +10,7 @@ function scaled_vector = stretchVector(input_vector, desired_size)
         input_vector = input_vector.';
     end
     x = 1:1:size(input_vector,1);
-    z = 1:1:desired_size;
+    z = 1:(size(input_vector,1)-1)/(desired_size-1):size(input_vector,1);
     scaled_vector = interp1(x, input_vector, z);
 end
 
