@@ -304,7 +304,7 @@ classdef Data
                         if abs(obj.Values(i,timeLocationForObj) ...
                                - anotherobj.Values(j, ...
                                                    timeLocationForAnotherObj)...
-                              ) < 0.001
+                              ) < 0.0001
                             commonTimes = ...
                                     [commonTimes, ...
                                      obj.Values(i,timeLocationForObj)];
@@ -477,7 +477,8 @@ classdef Data
         
         % Overload addition. Data objects which share an identical timestep
         % array can be added together. One is essentially appended on to
-        % the other, and the labels and header are updated accordingly. 
+        % the other, and the labels and header are updated accordingly. NOTE: 
+        % THE HEADER IS TAKEN FROM THE FIRST ARGUMENT!
         function result = plus(obj1,obj2)
             % Check that the data objects have equal frames and timesteps,
             % giving a specific error message to each case. 
@@ -485,8 +486,8 @@ classdef Data
                 error(['Data objects can only be added if they have the '...
                     'same number of frames.']);
             end
-            if sum(obj1.Timesteps ~= obj2.Timesteps) ~= 0
-                error(['Timesteps must match precisely to use Data '
+            if sum(round(obj1.Timesteps,3) ~= round(obj2.Timesteps,3)) ~= 0
+                error(['Timesteps must match precisely to use Data '...
                     'addition. If necessary, spline your Data objects.']);
             end
             

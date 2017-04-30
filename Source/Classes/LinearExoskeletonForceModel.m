@@ -85,6 +85,85 @@ classdef LinearExoskeletonForceModel
                 spatialForces, scaledMotorTorques);
         end
         
+        % Write the spatial forces contained in a spatialForceSet to file
+        % alongside the existing external forces, so that they can be used in 
+        % an OpenSim simulation. For the purposes of getting my first year
+        % review done on time, I'm going to write this up for the APO only.
+        % But it shouldn't be too difficult to make it general as a
+        % function of the exoskeleton settings file. Basically this entire
+        % function is terrible and fudged right now. Come back to this when
+        % you have more time. 
+        function ext = createExtForcesFileAPOSpecific(obj, spatialForceSet)
+            % Make the labels.
+            labels = {'time',...
+                'apo_force_vx','apo_force_vy','apo_force_vz',...
+                '1_apo_force_vx','1_apo_force_vy','1_apo_force_vz',...
+                'apo_group_force_vx','apo_group_force_vy','apo_group_force_vz',...
+                '1_apo_group_force_vx','1_apo_group_force_vy','1_apo_group_force_vz',...
+                'apo_force_px','apo_force_py','apo_force_pz',...
+                '1_apo_force_px','1_apo_force_py','1_apo_force_pz',...
+                'apo_group_force_px','apo_group_force_py','apo_group_force_pz',...
+                '1_apo_group_force_px','1_apo_group_force_py','1_apo_group_force_pz'};
+            
+            % Arrange the spatialForceSet in to a convenient form (a
+            % Matrix). Only the FX and FY components are non-zero, we still
+            % need to include the FZ as 0's but we can ignore the M's.
+            n_timesteps = size(spatialForceSet.ForceSet,1);
+            n_forces = size(spatialForceSet.ForceSet,2);
+            values = zeros(n_timesteps,6*n_forces+1);
+            for i=1:n_timesteps
+                k = 2;
+                for j=1:n_forces
+                        values(i,k) = spatialForceSet.ForceSet{i,j}(4);
+                        values(i,k+1) = spatialForceSet.ForceSet{i,j}(5);
+                        values(i,k+2) = spatialForceSet.ForceSet{i,j}(6);
+                        k = k + 3;
+                end
+            end
+            values(1:end,1) = spatialForceSet.States.Timesteps(1:end,1);
+            
+            % Now add the centre of pressure columns. This is hard coded
+            % but in practice could and should be read from the Exoskeleton
+            % settings file (either now or possibly at the start and saved
+            % when 'loading' the Exoskeleton - makes more sense.
+            % LoadSettingsFromFile or something.
+            for i=1:n_timesteps
+                values(i,14) = 0;
+                values(i,15) = 0.23;
+                values(i,16) = 0.09;
+                
+                values(i,17) = 0;
+                values(i,18) = 0.23; 
+                values(i,19) = -0.09;
+                
+                values(i,20) = -0.116587;
+                values(i,21) = 0.0999654;
+                values(i,22) = -0.153457;
+                
+                values(i,23) = -0.116587;
+                values(i,24) = 0.0999654;
+                values(i,25) = 0.153457;
+            end
+            
+            % Create an empty data object then assign these labels and
+            % values. 
+            temp = Data();
+            temp.Values = values;
+            temp.Labels = labels;
+            temp.Timesteps = spatialForceSet.States.Timesteps;
+            temp.isTimeSeries = true; 
+            
+            % Fit both this data and the input grf data to 1000Hz. 
+            new_grfs = obj.RRA.OpenSimTrial.grfs.fitToSpline(1000);
+            temp = temp.fitToSpline(1000);
+            
+            % Align the start and end points of the data. 
+            [new_grfs, temp, startime, endtime] = new_grfs.alignData(temp);
+            
+            % Add these together.
+            ext = new_grfs + temp;
+        end
+        
     end
     
 end

@@ -76,6 +76,40 @@
 				<!--Name of the data source (Storage) that will supply the force data.-->
 				<data_source_name> Unassigned </data_source_name>
 			</ExternalForce>
+            <ExternalForce name="apo_group_right">
+				<isDisabled> false </isDisabled>
+				<!--Name of the body the force is applied to.-->
+				<applied_to_body> APO_group_r </applied_to_body>
+				<!--Name of the body the force is expressed in (default is ground).-->
+				<force_expressed_in_body> ground </force_expressed_in_body>
+				<!--Name of the body the point is expressed in (default is ground).-->
+				<point_expressed_in_body> APO_group_r </point_expressed_in_body>
+				<!--Identifier (string) to locate the force to be applied in the data
+				    source.-->
+				<force_identifier> apo_group_force_v </force_identifier>
+				<!--Identifier (string) to locate the point to be applied in the data
+				    source.-->
+				<point_identifier> apo_group_force_p </point_identifier>
+				<!--Name of the data source (Storage) that will supply the force data.-->
+				<data_source_name> Unassigned </data_source_name>
+			</ExternalForce>
+            <ExternalForce name="apo_group_left">
+				<isDisabled> false </isDisabled>
+				<!--Name of the body the force is applied to.-->
+				<applied_to_body> APO_group_l </applied_to_body>
+				<!--Name of the body the force is expressed in (default is ground).-->
+				<force_expressed_in_body> ground </force_expressed_in_body>
+				<!--Name of the body the point is expressed in (default is ground).-->
+				<point_expressed_in_body> APO_group_l </point_expressed_in_body>
+				<!--Identifier (string) to locate the force to be applied in the data
+				    source.-->
+				<force_identifier> 1_apo_group_force_v </force_identifier>
+				<!--Identifier (string) to locate the point to be applied in the data
+				    source.-->
+				<point_identifier> 1_apo_group_force_p </point_identifier>
+				<!--Name of the data source (Storage) that will supply the force data.-->
+				<data_source_name> Unassigned </data_source_name>
+			</ExternalForce>
 		</objects>
 		<groups/>
 		<!--Storage file (.sto) containing (3) components of force and/or torque
