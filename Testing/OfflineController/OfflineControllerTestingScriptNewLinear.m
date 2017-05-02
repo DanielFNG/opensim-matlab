@@ -3,9 +3,9 @@ dir = 'new_linear';
 
 % Set up input data a.k.a the OpenSimTrial. 
 startTime = 1.0;
-endTime = 2.2; % low end time just for testing 
-trial = OpenSimTrial('APO.osim', 'ik0.mot', 'normal', 'grf0.mot', dir);
-loadType = 'normal'; % Normal external loads e.g. just grfs. 
+endTime = 2.2; % low end time just for testing
+loadType = 'normal'; % Normal external loads e.g. just grfs.
+trial = OpenSimTrial('APO.osim', 'ik0.mot', loadType, 'grf0.mot', dir); 
 
 % Load the Exoskeleton information and specify a force model. 
 apo = Exoskeleton('APO');
@@ -21,7 +21,7 @@ des = Desired('percentage_reduction',joints, multiplier);
 controller = OfflineController(trial, apo, descriptor, des, dir);
 
 % Perform the optimisation using LLSEE.
-[result, controller] = controller.runOptimisation('LLSEE', loadType, startTime, endTime);
+[result, controller] = controller.runOptimisation('LLSEE', startTime, endTime);
 
 % Plot results.
 figure; 

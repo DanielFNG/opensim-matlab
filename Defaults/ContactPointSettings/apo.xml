@@ -17,7 +17,7 @@
 			<frame>APO_group_r</frame>
 		</Point>
 		<Point name="left_group">
-			<location> -0.116587 0.0999654 0153457 </location>
+			<location> -0.116587 0.0999654 0.153457 </location>
 			<frame>APO_group_l</frame>
 		</Point>
 	</ContactPointSettings>

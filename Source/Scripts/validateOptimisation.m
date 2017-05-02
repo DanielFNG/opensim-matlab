@@ -1,6 +1,6 @@
 %% Some parameters.
 start_time = 0.0;
-end_time = 0.2;
+end_time = 1.5;
 force_model = 'linear';
 load_type_1 = 'normal';
 load_type_2 = 'APO';
@@ -67,9 +67,9 @@ id_APO_trial = OpenSimTrial('testing_adjusted.osim', rra_APO.positions_path, ...
 id_APO = id_APO_trial.runID(start_time, end_time);
 
 %% Run optimisation. 
-timesteps = size(id_APO.id.Timesteps,1);
+timesteps = size(id_APO.id.Timesteps,1) - 20;
 results = zeros(timesteps, 2*n + k);
-for i=1:timesteps-20
+for i=1:timesteps
     A = [zeros(n,k), zeros(n), eye(n)];
     b = id.id.Values(i,2:end).';
     C = [];
