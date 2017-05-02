@@ -44,8 +44,10 @@ t(2,1:end) = z;
 spatial = model.calculateSpatialForcesFromTorqueTrajectory(t.');
 
 % Create a new external forces data object, and write it to file.
-ext = model.createExtForcesFileAPOSpecific(spatial);
-%ext.writeToFile('grf_withAPO.mot',1,1);
+[ext, apo_only] = model.createExtForcesFileAPOSpecific(spatial);
+ext.writeToFile('grf_withAPO.mot',1,1);
+apo_only.writeToFile('grf_onlyAPO.mot',1,1);
+
 % This has been done, needed to make changes to the file because OpenSim reads
 % them in a certain order. Keep using that one for now. 
 
