@@ -19,6 +19,7 @@ classdef OpenSimTrial
     
     properties (SetAccess = private)
         model_path % path to model
+        human_dofs % degrees of freedom of model 
         grfs_path % path to external forces data 
         grfs % external forces data object
         load % A description of the external forces being applied
@@ -53,6 +54,9 @@ classdef OpenSimTrial
                         obj.loadDefaults();
                 obj.load = load; 
                 obj.load_path = [obj.default_ext load '.xml'];
+                % Import OpenSim Model class to calculate model dofs.  
+                import org.opensim.modeling.Model;
+                obj.human_dofs = Model(obj.model_path).getNumCoordinates();
             end
         end
         
