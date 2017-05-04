@@ -48,19 +48,29 @@ spatial = model.calculateSpatialForcesFromTorqueTrajectory(t.');
 ext.writeToFile('grf_withAPO.mot',1,1);
 apo_only.writeToFile('grf_onlyAPO.mot',1,1);
 
-% This has been done, needed to make changes to the file because OpenSim reads
-% them in a certain order. Keep using that one for now. 
-
 %% Set up input data. 
 % Construct an OpenSimTrial with ground reaction forces and APO forces.
 APO_trial = OpenSimTrial('testing_adjusted.osim', 'ik0.mot', load_type_2, ...
     'grf_withAPO.mot', trial_directory_2);
 
-% Run RRA.
-rra_APO = APO_trial.runRRA(start_time, end_time);
+% This step is commented out because it is slightly incorrect! See below
+% for details.
+    % Run RRA.
+    % rra_APO = APO_trial.runRRA(start_time, end_time);
+ 
+    % Construct a new OpenSimTrial using the RRA-corrected kinematics.
+    % id_APO_trial = OpenSimTrial('testing_adjusted.osim', rra_APO.positions_path, ...
+    %     load_type_2, 'grf_withAPO.mot', trial_directory_2);
 
-% Construct a new OpenSimTrial using the RRA-corrected kinematics.
-id_APO_trial = OpenSimTrial('testing_adjusted.osim', rra_APO.positions_path, ...
+% Construct a new OpenSimTrial using the RRA-corrected kinematics, but from
+% the GRF only run. It is important to do this so that both the input and the 
+% desired ID profiles comes from the same input kinematics data.
+% Additionally, using the APO force model to produce the RRA means there
+% will be errors in the RRA result due to force model inaccuracy. This is
+% not the case when doing RRA on just the grfs which are known accurately.
+% The only downside is we end up with a net (exo + human) RRA, but this is
+% irrelevant here. 
+id_APO_trial = OpenSimTrial('testing_adjusted.osim', rra.positions_path, ...
     load_type_2, 'grf_withAPO.mot', trial_directory_2);
 
 % Run ID.
