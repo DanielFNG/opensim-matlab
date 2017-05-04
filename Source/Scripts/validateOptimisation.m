@@ -1,3 +1,23 @@
+%% validateOptimisation description and strategy
+% This script is designed to validate that the optimisation is being solved
+% correctly. To do this, the strategy is as follows:
+%   - Consider a fixed set of input data (kinematics, ground reaction
+%   forces), a scaled model, and the linear APO force model. 
+%   - Using OpenSim, considering only the ground reaction forces, 
+%   compute the dynamically consistent joint kinematics corresponding to this 
+%   input data (1), and from this compute a set of joint torques (2).
+%   - Consider also a set of arbitrary APO motor torques (3).
+%   - Given these motor torques, use the linear APO force model to compute
+%   the spatial forces which the APO would apply on the system. 
+%   - Use OpenSim again, this time considering the ground reaction forces
+%   and the APO spatial forces, and using the dynamically consistent joint
+%   angles (1), compute another set of joint torques (4).
+%   - Run the optimisation, taking (4) to be the input data and (2) to be
+%   the desired. Among the results will be a set of APO motor torques
+%   calculated via the optimisation (5).
+%   - Compare (3) and (5). If the optimisation is functioning correctly,
+%   they should agree well. 
+
 %% Some parameters.
 start_time = 0.0;
 end_time = 1.5;
