@@ -551,7 +551,42 @@ classdef Data
             end
             obj.Values(1:end,index) = multiplier*obj.Values(1:end,index);
         end
-      
+        
+        % By matching the peaks in a certain column which is shared between
+        % two data objects, shift one to match the other. Data objects have
+        % precisely the same number of frames. To keep from going in to
+        % negative time the timesteps are unchanged, so it's assumed this
+        % won't be an issue.
+        %
+        % This makes use of the xcorr function of the Matlab Signal
+        % Processing Toolbox, in order to calculate the correct time-shift
+        % using cross correlation. The longer the input data the better -
+        % unlikely to be accurate for less than a full gait cycle. Better
+        % for more gait cycles. 
+        function obj = shift(obj, anotherObj, label)
+            if obj.Frames ~= anotherObj.Frames
+                error('To shift, data objects must have the same # of frames.');
+            end
+            x = obj.getDataCorrespondingToLabel(label);
+            y = anotherObj.getDataCorrespondingToLabel(label);
+            [acor,lag] = xcorr(y,x);
+            [~,I] = max(abs(acor));
+            lagDiff = lag(I);
+            copy = obj.Values;
+            if lagDiff < 0 
+                obj.Values(1:end+lagDiff,1:end) = copy(-lagDiff+1:end,1:end);
+                obj.Values(end+lagDiff+1:end,1:end) = copy(1:-lagDiff,1:end);
+            else
+                obj.Values(1:lagDiff,1:end) = copy(end-lagDiff+1:end,1:end);
+                obj.Values(lagDiff+1:end,1:end) = copy(1:end-lagDiff,1:end);
+            end
+            
+            % NEED TO DECIDE HOW TO HANDLE THE FACT THAT YOU LOSE SOME DATA
+            % AT AN EDGE WHEN SHIFTING! WHAT I'VE DONE ABOVE ISN'T QUITE
+            % RIGHT AS IT ASSUMES THAT YOU CAN JUST LOOP THE ENDS BUT THIS
+            % ISN'T THE CASE. LEAVING THIS FOR NOW BUT WILL COME BACK TO
+            % THIS. SEE SAVED GRAPHS TO SEE WHAT I MEAN. 
+        end
     end
     
     methods(Static)
