@@ -25,8 +25,8 @@ controller = OfflineController(trial, apo, descriptor, des, dir);
 
 % Plot results.
 figure; 
-plot(result.HumanContribution(1:end-40,7));
+plot(result.OptimisationResult.HumanContribution(1:end-40,7));
 hold on;
 plot(result.OfflineController.Desired.IDResult.id.Values(1:end-40,8));
 figure;
-plot(result.MotorCommands(1:end,1));
+plot(result.OptimisationResult.MotorCommands(1:end,1));

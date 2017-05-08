@@ -56,3 +56,7 @@ Temporary Items
 # Ignore OpenSim storage files & output data files.
 *.sto
 *.txt
+
+# Ignore RRA controls results.
+*controls.xml
+

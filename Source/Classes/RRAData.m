@@ -53,13 +53,17 @@ classdef RRAData < Data
                     indicesToDelete = [indicesToDelete, i];
                 end
             end
-            % Delete the last row as it always seems to cause issues. Not
-            % sure if it's a duplicate row to tell OpenSim that the RRA has
-            % finished or what.
-            % THIS IS WHY I END UP HAVING TO DELETE THE LAST ROW OF THE GRF
-            % FILE! SEE MAIN MATLAB FUNCTION. HAVE COMMENTED ABOUT THIS.
-            indicesToDelete = [indicesToDelete, size(timeColumn,1)];
             obj.Values(indicesToDelete,:) = [];
+            % For some reason the last row of RRA data is always a duplicate
+            % of the previous row (including the timestep - i.e. it goes 
+            % 1.498 1.499 1.499 instead of 1.500 for the last one. Not sure 
+            % if it's to tell OpenSim that the RRA has finished or what. I 
+            % previously deleted this row, but this is undesirable because you 
+            % end up getting ID's and RRA's with different numbers of frames, 
+            % even if they were run on the same number of timesteps. Instead, I 
+            % will keep the rows duplicated values, but set the value of
+            % the time column to be incremented by 0.001.
+            obj.Values(end,1) = obj.Values(end-1,1) + 0.001;
             obj.Timesteps = obj.getTimeColumn();
             obj.Frames = size(obj.Values,1);
             
