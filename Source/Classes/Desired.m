@@ -103,7 +103,9 @@ classdef Desired
         end
         
         % Desired based on matching some input IDResult. Can also scale the
-        % desired to appropriately match the phase of the input IDResult. 
+        % desired to appropriately match the phase of the input IDResult.
+        % Only really suitable when working with data that is at least 2
+        % gait cycles long. 
         function obj = setupMatchID(obj, IDResult)
             % Proceed by matching a provided desired IDResult across all 
             % joints or a subset of the joints present in InputID.  
@@ -118,12 +120,17 @@ classdef Desired
             
             % Clearly, for meaningful results the desired should ideally
             % share some parameters with the IDResult i.e. end_time - start_time
-            % should be the same, so this is included in a check. The 'shift' 
-            % optional argument is designed to account for the IDResult 
-            % beginning at different points of the gait cycle in each case.
-            % An error will be thrown if the end_time - start_time is too
-            % different. THIS WILL NOT BE ACCURATE IF THE DATA WAS TAKEN AT
-            % DIFFERENT WALKING SPEEDS! 
+            % should be the same. Indeed, the 'shift' optional argument is 
+            % designed to account for the IDResult beginning at different 
+            % points of the gait cycle in each case, but it requires the number
+            % of frames to be the same. To account for this, a check is
+            % performed that the end_time - start_time is pretty much the
+            % same for the desired/input IDTrial, then the desired trial is
+            % splined so that it's on the exact same # of frames as the
+            % input trial. 
+            %
+            % THIS TYPE OF DESIRED IS NOT SUITABLE FOR DATA AT DIFFERING
+            % WALKING SPEEDS!
             
             % Check input arguments. 
             if size(obj.varargin,2) < 1 || size(obj.varargin,2) > 3
@@ -150,26 +157,24 @@ classdef Desired
             
             % Spline the desired ID so that it is on the same number of
             % points as the input IDResult.
-            
-            % Now set the result to be the data object.
-            obj.Result = des.id;
+            des = des.id.fitToSpline(IDResult.id.Frequency);
             
             % If required shift the desired.
             if shift ~= 0
                 des = des.shift(IDResult.id, shift);
             end
+            
+            % Now set the resulting desired.
+            obj.Result = des;
         end
         
         % Parse varargin for the match_id mode. 
         function [identifiers, des, shift] = ...
                 parseMatchIDArguments(obj, IDResult)
-            % First get the number of DOFs from the data. 
-            nDofs = size(IDResult.id.Labels,2) - 1; % -1 to remove the time col
-            
             % Determine whether shifting is to be used or not. 
-            if size(obj.varargin) == 3
+            if size(obj.varargin,2) == 3
                 if isa(obj.varargin{3}, 'char')
-                    shift = obj.varargin{3};
+                    shift = [obj.varargin{3} '_moment']; % add on _moment
                 else
                     error(['If used, third argument for Match ID'...
                         ' mode should be a string.']);
@@ -194,8 +199,8 @@ classdef Desired
             
             % Throw an error if the desired has a different number of
             % coordinates that the input ID.
-            if size(IDResult.id.Labels(2:end) ...
-                    ~= size(obj.varargin{2}.id.Labels(2:end))
+            if size(IDResult.id.Labels(2:end),2) ...
+                    ~= size(obj.varargin{2}.id.Labels(2:end),2)
                 error('Discrepancy in size between input ID and desired ID.');
             end
         end
@@ -212,10 +217,9 @@ classdef Desired
             end
         end
         
-        function obj = formConstraintCoefficientMatrix(obj)
-            matrix = zeros(size(obj.IDResult.Labels(2:end),2));
-            
-        end
+%         function obj = formConstraintCoefficientMatrix(obj)
+%             matrix = zeros(size(obj.IDResult.Labels(2:end),2));  
+%         end
     end
     
 end
