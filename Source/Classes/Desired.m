@@ -1,7 +1,12 @@
 classdef Desired
     % Class for storing & setting up the desired. 
     
-    properties
+    % Note: Joints are input as normal i.e. 'hip_flexion_r', but for comparison 
+    % since we are using IDTrials we need them to be like 
+    % 'hip_flexion_r_moment'. This concatenation is done automatically where 
+    % necessary.
+    
+    properties (SetAccess = private)
         mode
         Joints = 'Not yet parsed.' % Joints for which there are constraints
         IDResult = 'Not yet supplied.'
@@ -22,6 +27,24 @@ classdef Desired
             end
         end
         
+        function obj = evaluateDesired(obj, IDResult)
+            if strcmp(obj.mode, 'percentage_reduction')
+                obj.mode = 'percentage_reduction';
+                obj = obj.setupPercentageReduction(IDResult);
+            elseif strcmp(obj.mode, 'match_id')
+                obj.mode = 'match_id';
+                obj = obj.setupMatchID(IDResult);
+            else
+                error('Unrecognized desired mode.')
+            end
+            obj = obj.formConstraintCoefficientMatrix();
+        end
+        
+
+    end
+    
+    methods (Access = private)
+        
         % Desired corresponds to a percentage increase/decrease over some
         % subset of joints. 
         function obj = setupPercentageReduction(obj,IDResult)
@@ -36,7 +59,8 @@ classdef Desired
             % DOFS are multiplied by the same value, OR an array of the
             % same size as joints (or an n dimensional array if joints ==
             % 'all') meaning there's a 1:1 correspondence of
-            % joint-multiplier.
+            % joint-multiplier. Joints which are not included are assumed
+            % to be unconstrained, as reflected in the coefficient matrix. 
             
             if size(obj.varargin,2) ~= 2
                 error(['Need two input arguments to desired for '...
@@ -53,13 +77,9 @@ classdef Desired
             
             obj.Joints = identifiers;
             
-            % NOTE: we have to append '_moment' to the label we want
-            % because this is what happens to the labels after OpenSim ID.
-            % Don't like having this hard-coded here, potentially revisit
-            % this. 
             for i=1:size(identifiers,2)
                 index = obj.Result.getIndexCorrespondingToLabel(...
-                    [char(identifiers(1,i)) '_moment']);
+                    char(identifiers(1,i)));
                 obj.Result = obj.Result.scaleColumn(index, multipliers(1,i));
             end
                     
@@ -70,7 +90,7 @@ classdef Desired
                 parsePercentageReductionArguments(obj, IDResult)
             % First get the number of DOFs from the data. 
             nDofs = size(IDResult.id.Labels,2) - 1; % -1 to remove the time col
-            
+             
             if isa(obj.varargin{1}, 'char') && strcmp(obj.varargin{1}, 'all')
                 identifiers = IDResult.id.Labels(2:end);
                 if size(obj.varargin{2},2) == 1
@@ -88,7 +108,7 @@ classdef Desired
                 % Joint size doesn't match multipliers size, but it's ok if
                 % the multiplier is just a scalar. 
                 if size(obj.varargin{2},2) == 1
-                    identifiers = obj.varargin{1};
+                    identifiers = strcat(obj.varargin{1},'_moment');
                     multipliers = ...
                         obj.varargin{2}*ones(1,size(obj.varargin{1},2));
                 else
@@ -97,7 +117,7 @@ classdef Desired
                         'multipliers.']);
                 end
             else
-                identifiers = obj.varargin{1};
+                identifiers = strcat(obj.varargin{1},'_moment');
                 multipliers = obj.varargin{2};
             end
         end
@@ -117,6 +137,9 @@ classdef Desired
             % should be shifted to match the phase of the input. It should
             % be a string, describing the joint that is used for comparison
             % to do the shifting. 
+            
+            % Joints which are not included are assumed
+            % to be unconstrained, as reflected in the coefficient matrix. 
             
             % Clearly, for meaningful results the desired should ideally
             % share some parameters with the IDResult i.e. end_time - start_time
@@ -174,7 +197,7 @@ classdef Desired
             % Determine whether shifting is to be used or not. 
             if size(obj.varargin,2) == 3
                 if isa(obj.varargin{3}, 'char')
-                    shift = [obj.varargin{3} '_moment']; % add on _moment
+                    shift = strcat(obj.varargin{3},'_moment'); % add on _moment
                 else
                     error(['If used, third argument for Match ID'...
                         ' mode should be a string.']);
@@ -187,7 +210,7 @@ classdef Desired
             if isa(obj.varargin{1}, 'char') && strcmp(obj.varargin{1}, 'all')
                 identifiers = IDResult.id.Labels(2:end);
             else
-                identifiers = obj.varargin{1};
+                identifiers = strcat(obj.varargin{1}, '_moment');
             end
             
             % Determine the desired. 
@@ -205,21 +228,21 @@ classdef Desired
             end
         end
         
-        function obj = evaluateDesired(obj, IDResult)
-            if strcmp(obj.mode, 'percentage_reduction')
-                obj.mode = 'percentage_reduction';
-                obj = obj.setupPercentageReduction(IDResult);
-            elseif strcmp(obj.mode, 'match_id')
-                obj.mode = 'match_id';
-                obj = obj.setupMatchID(IDResult);
-            else
-                error('Unrecognized desired mode.')
+        % Form the constraint coefficient matrix for use in the
+        % optimisation.
+        function obj = formConstraintCoefficientMatrix(obj)
+            all_joints = obj.IDResult.id.Labels(2:end);
+            n = size(all_joints,2);
+            obj.CoefficientMatrix = zeros(n);
+            for i=1:n
+                for j=1:size(obj.Joints,2)
+                    if strcmp(all_joints(i),obj.Joints{j})
+                        obj.CoefficientMatrix(i,i) = 1;
+                    end
+                end
             end
         end
         
-%         function obj = formConstraintCoefficientMatrix(obj)
-%             matrix = zeros(size(obj.IDResult.Labels(2:end),2));  
-%         end
     end
     
 end
