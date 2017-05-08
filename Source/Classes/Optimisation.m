@@ -49,7 +49,10 @@ classdef Optimisation
         end
         
         % Perform the optimisation.
+        function OptResult = run(obj, identifier)
             % Identifier should identify which optimisation method to use.
+            results = zeros(obj.Frames, 2*obj.HumanDOFS + obj.ExoDOFS);
+            for i=1:obj.Frames
                 if strcmp(identifier, 'LLSEE')
                     [A,b,C,d,E,f] = obj.setupLLSEE(i);
                     results(i,1:end) = lsqlin(A,b,C,d,E,f);
