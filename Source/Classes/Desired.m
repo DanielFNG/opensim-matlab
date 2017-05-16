@@ -1,6 +1,6 @@
 classdef Desired
     % Class for storing & setting up the desired. 
-    
+    %
     % Note: Joints are input as normal i.e. 'hip_flexion_r', but for comparison 
     % since we are using IDTrials we need them to be like 
     % 'hip_flexion_r_moment'. This concatenation is done automatically where 
@@ -137,6 +137,9 @@ classdef Desired
             % should be shifted to match the phase of the input. It should
             % be a string, describing the joint that is used for comparison
             % to do the shifting. 
+            
+            % Note that the desired ID trial is required in addition to the
+            % input id trial, used as part of evaluateDesired.
             
             % Joints which are not included are assumed
             % to be unconstrained, as reflected in the coefficient matrix. 

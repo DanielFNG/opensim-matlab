@@ -426,8 +426,12 @@ classdef Data
             if ~obj.isTimeSeries
                 error('Can only spline time series data.');
             end
-            % Generate the desired sample points. 
-            x = (obj.Timesteps(1,1):1/desired_frequency:obj.Timesteps(end,1))';
+            % Generate the desired sample points. Rounding is necessary to
+            % ensure that the resultant array properly goes from the start
+            % to the end point, inclusive. 
+            x = (round(obj.Timesteps(1,1),4): ...
+                round(1/desired_frequency,4): ...
+                round(obj.Timesteps(end,1),4))';
             
             % Isolate the matrix of values.
             y = obj.Values(1:end,2:end);

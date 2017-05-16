@@ -19,7 +19,7 @@
 %   they should agree well. 
 
 %% Some parameters.
-start_time = 0.0;
+start_time = 0.1; % The IK only starts from 0.1!
 end_time = 1.5;
 force_model = 'linear';
 load_type_1 = 'normal';
@@ -43,10 +43,13 @@ id_trial = OpenSimTrial('testing_adjusted.osim', rra.positions_path, ...
 % Run ID.
 id = id_trial.runID(start_time, end_time);
 
+% Use this to set up the desired.
+des = Desired('match_id', 'all', id);
+
 %% Set up exoskeleton & model.
 % Construct Exoskeleton and compute the force model.
 apo = Exoskeleton('APO');
-n = apo.Human_dofs;
+n = trial.human_dofs;
 k = apo.Exo_dofs;
 model = apo.constructExoskeletonForceModel(rra, model_directory, force_model);
 
@@ -97,36 +100,5 @@ id_APO_trial = OpenSimTrial('testing_adjusted.osim', rra.positions_path, ...
 id_APO = id_APO_trial.runID(start_time, end_time);
 
 %% Run optimisation. 
-timesteps = size(id_APO.id.Timesteps,1) - 20;
-results = zeros(timesteps, 2*n + k);
-for i=1:timesteps
-    A = [zeros(n,k), zeros(n), eye(n)];
-    b = id.id.Values(i,2:end).';
-    C = [];
-    d = [];
-    P = model.P{i};
-    Q = model.Q{i};
-    E = [zeros(n,k), eye(n), eye(n); -P, eye(n), zeros(n)];
-    f = [id_APO.id.Values(i,2:end).'; Q];
-    
-    results(i,1:end) = lsqlin(A,b,C,d,E,f);
-end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+opt = Optimisation(id_APO, des, model);
+OptResult = opt.run('LLSEE');
