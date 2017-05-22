@@ -33,6 +33,8 @@ classdef OpenSimTrial
         default_rra 
         default_id
         default_ext
+        gait2392_model
+        gait2392_proportions
     end
     
     methods
@@ -50,8 +52,9 @@ classdef OpenSimTrial
                 obj.kinematics = Data(obj.kinematics_path);
                 new_results = createUniqueDirectory(results);
                 obj.results_directory = getFullPath(new_results);
-                [obj.default_rra, obj.default_id, obj.default_ext] = ...
-                        obj.loadDefaults();
+                [obj.default_rra, obj.default_id, obj.default_ext, ...
+                    obj.gait2392_model, obj.gait2392_proportions] = ...
+                    obj.loadDefaults();
                 obj.load = load; 
                 obj.load_path = [obj.default_ext load '.xml'];
                 % Import OpenSim Model class to calculate model dofs.  
@@ -128,6 +131,28 @@ classdef OpenSimTrial
                 [obj.results_directory '/' dir '/' output '.osim']);
         end
         
+        % Performs the mass adjustments recommended by the RRA algorithm.
+        function performMassAdjustments(obj, model, log)
+            % Load the model. 
+            import org.opensim.modeling.Model;
+            osim = Model(getFullPath([model '.osim']));
+            
+            % Find the total mass change.
+            mass = obj.getTotalMassChange(log);
+            
+            % Load the gait2392 mass proportion file. 
+            proportions = Data(obj.gait2392_proportions);
+            
+            % Step through the bodies applying the correct mass changes.
+            for i=1:size(proportions.Values,2)
+                osim.getBodySet.get(proportions.Labels(1,i)).setMass(...
+                    osim.getBodySet.get(proportions.Labels(1,i)).getMass() + ...
+                    mass * proportions.Values(1,i));
+            end
+            
+            osim.print([model '_mass_changed.osim']);
+        end
+        
         % Setup external loads from type.
         function setupExternalLoads(obj, Tool)
             % Here, type defines what type of ExternalLoads case we have.
@@ -167,20 +192,23 @@ classdef OpenSimTrial
                         '_time=' num2str(initialTime) '-' num2str(finalTime)];
                     rraTool = obj.setupRRA(...
                                 dir, initialTime, finalTime);
+                    rraTool.run();
                 case 5
                     dir = ['RRA_' obj.load ...
                         '_time=' num2str(initialTime) '-' num2str(finalTime)...
                         '_withAdjustment'];
                     rraTool = obj.setupRRA(...
                                 dir, initialTime, finalTime, body, output);
-                    diary([obj.results_directory '/' dir '/' 'RRA_output.log']);
+                    log = [obj.results_directory '/' 'RRA_output.log'];
+                    diary(log);
+                    rraTool.run();
+                    diary off;
+                    
+                    % Perform mass adjustment. 
+                    obj.performMassAdjustments([obj.results_directory '/' dir '/' output], getFullPath(log));
                 otherwise
                     error('Incorrect number of arguments to setupRRA');
             end
-            
-            % Run RRA.
-            rraTool.run();
-            diary off; % needed for adjustment case 
             
             % Process resulting RRA data. Default settings has name 'RRA'. 
             RRA = RRAResults(obj, [obj.results_directory '/' dir '/RRA']); 
@@ -226,11 +254,34 @@ classdef OpenSimTrial
     methods(Static)
         
         % Load the filenames for default RRA, ID settings etc. 
-        function [rra, id, ext] = loadDefaults()
+        function [rra, id, ext, model, prop] = loadDefaults()
             rra = [getenv('EXOPT_HOME') '/Defaults/RRA/'];
             id = [getenv('EXOPT_HOME') '/Defaults/ID/'];
             ext = [getenv('EXOPT_HOME') '/Defaults/ExternalLoads/'];
-        end 
+            model = [getenv('EXOPT_HOME') '/Defaults/Model/gait2392.osim'];
+            prop = [getenv('EXOPT_HOME') ...
+                '/Defaults/Model/gait2392_mass_proportions.txt'];
+        end
+        
+        % Find the total mass change suggested by an RRA log file. 
+        function mass = getTotalMassChange(log)
+            % Read in log file. 
+            text = fileread(log);
+            
+            % Find correct point in log file. 
+            start_index = strfind(text,'Total mass change: ');
+            % We take the final start_index found, corresponding to the
+            % last matching entry for 'Total mass change: ' in the log file.
+            % i.e. we assume duplicate entries means that a log file has
+            % been appended to, so we choose the latest one. 
+            
+            % Isolate the mass change value as a string, then convert to
+            % type double. 
+            split = strsplit(text(start_index(end):end), '\n');
+            mass_string = strsplit(split{1,1}, ' ');
+            mass = str2double(mass_string(end));
+        end
+        
     end   
 end
 
