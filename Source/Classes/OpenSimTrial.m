@@ -173,12 +173,14 @@ classdef OpenSimTrial
                         '_withAdjustment'];
                     rraTool = obj.setupRRA(...
                                 dir, initialTime, finalTime, body, output);
+                    diary([obj.results_directory '/' dir '/' 'RRA_output.log']);
                 otherwise
                     error('Incorrect number of arguments to setupRRA');
             end
             
             % Run RRA.
             rraTool.run();
+            diary off; % needed for adjustment case 
             
             % Process resulting RRA data. Default settings has name 'RRA'. 
             RRA = RRAResults(obj, [obj.results_directory '/' dir '/RRA']); 

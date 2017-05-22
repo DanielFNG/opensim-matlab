@@ -1,0 +1,1 @@
+setenv('EXOPT_HOME', 'C:\Users\Daniel\Documents\GitHub\exopt');
