@@ -28,5 +28,6 @@ figure;
 plot(result.OptimisationResult.HumanContribution(1:end,7));
 hold on;
 plot(result.OfflineController.Desired.IDResult.id.Values(1:end,8));
+plot(result.OfflineController.Desired.Result.Values(1:end,8));
 figure;
 plot(result.OptimisationResult.MotorCommands(1:end,1));

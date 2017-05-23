@@ -22,12 +22,21 @@ classdef RRAResults
         states_path
     end
     
+    properties (SetAccess = private, GetAccess = private)
+        Adjustment = false
+        AdjustedModel = 'N/A'
+    end
+    
     methods
         
         % Construct RRAResults object from a directory where the files are
         % located, trialName gives the prefix to the files. 
-        function obj = RRAResults(OpenSimTrial, directory)
-            if nargin > 0 
+        function obj = RRAResults(OpenSimTrial, directory, model)
+            if nargin > 0
+                if nargin == 3
+                    obj.Adjustment = true; 
+                    obj.AdjustedModel = model;
+                end
                 obj.OpenSimTrial = OpenSimTrial;
                 directory = getFullPath(directory);
                 obj.forces_path = ...
@@ -73,6 +82,16 @@ classdef RRAResults
             obj.positions.writeToFile(obj.positions_path,1,1);
             obj.errors.writeToFile(obj.errors_path,1,1);
             obj.states.writeToFile(obj.states_path,1,1);
+        end
+        
+        function model = getAdjustedModel(obj)
+            % Return the full path of the adjusted model associated with
+            % this RRA result. Throw an error if this RRAResult is not
+            % associated with an adjusted model. 
+            if ~ obj.Adjustment 
+                error('This RRAResult was obtained without adjustment.');
+            end
+            model = obj.AdjustedModel;
         end
         
     end

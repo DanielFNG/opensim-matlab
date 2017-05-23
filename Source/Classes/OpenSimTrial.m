@@ -183,35 +183,61 @@ classdef OpenSimTrial
         end
         
         % Run the RRA algorithm.
+        % 2 arguments: no adjustment.
+        % 3 arguments: adjustment, from given time to end of IK file.
+        % 4 arguments: adjustment, between given times. 
         function RRA = runRRA(...
                 obj, initialTime, finalTime, body, output)
             % Setup RRATool.
-            switch nargin
-                case 3
-                    dir = ['RRA_' 'load=' obj.load ...
-                        '_time=' num2str(initialTime) '-' num2str(finalTime)];
-                    rraTool = obj.setupRRA(...
-                                dir, initialTime, finalTime);
-                    rraTool.run();
-                case 5
-                    dir = ['RRA_' obj.load ...
-                        '_time=' num2str(initialTime) '-' num2str(finalTime)...
-                        '_withAdjustment'];
-                    rraTool = obj.setupRRA(...
-                                dir, initialTime, finalTime, body, output);
-                    log = [obj.results_directory '/' 'RRA_output.log'];
-                    diary(log);
-                    rraTool.run();
-                    diary off;
+            if nargin == 2 || nargin == 3
+                if nargin == 2
+                    ik_data = Data(obj.kinematics_path);
+                    finalTime = ik_data.Timesteps(end,1);
+                end
+                
+                dir = ['RRA_' 'load=' obj.load ...
+                    '_time=' num2str(initialTime) '-' num2str(finalTime)];
+                rraTool = obj.setupRRA(...
+                            dir, initialTime, finalTime);
+                rraTool.run();
+            elseif nargin == 4 || nargin == 5
+                if nargin == 4
+                    % In this case finalTime is assumed to be excluded.
+                    % Match the arguments accordingly. 
+                    hold_variable = body;
+                    body = finalTime;
+                    output = hold_variable; 
                     
-                    % Perform mass adjustment. 
-                    obj.performMassAdjustments([obj.results_directory '/' dir '/' output], getFullPath(log));
-                otherwise
-                    error('Incorrect number of arguments to setupRRA');
+                    % Calculate the final time as the last frame of the
+                    % kinematic data. 
+                    ik_data = Data(obj.kinematics_path);
+                    finalTime = ik_data.Timesteps(end,1);
+                end
+                    
+                dir = ['RRA_' 'load=' obj.load ... 
+                    '_time=' num2str(initialTime) '-' num2str(finalTime)...
+                    '_withAdjustment'];
+                rraTool = obj.setupRRA(...
+                    dir, initialTime, finalTime, body, output);
+                log = [obj.results_directory '/' 'RRA_output.log'];
+                diary(log);
+                rraTool.run();
+                diary off;
+                    
+                % Perform mass adjustment. 
+                obj.performMassAdjustments([obj.results_directory '/' dir '/' output], getFullPath(log));
+            else
+                error('Incorrect number of arguments to setupRRA');
             end
             
-            % Process resulting RRA data. Default settings has name 'RRA'. 
-            RRA = RRAResults(obj, [obj.results_directory '/' dir '/RRA']); 
+            % Process resulting RRA data. Default settings has name 'RRA'.
+            if nargin > 3
+                RRA = RRAResults(obj, [obj.results_directory '/' dir '/RRA'], ...
+                    getFullPath([obj.results_directory '/' dir '/' output ...
+                    '_mass_changed.osim']));
+            else
+                RRA = RRAResults(obj, [obj.results_directory '/' dir '/RRA']);
+            end
         end
         
         % Setup ID from the default settings file, with input initial and
