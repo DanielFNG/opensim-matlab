@@ -31,9 +31,9 @@ else
 end
 
 % Get the start and end time from the input data. 
-markerData = MarkerData(getFullPath(input));
-initial_time = markerData.getStartFrameTime();
-final_time = markerData.getLastFrameTime();
+markerData = Data(getFullPath(input));
+initial_time = markerData.Timesteps(1,1);
+final_time = markerData.Timesteps(end,1);
 
 % Set the input, times and output for the tool.
 output = [results '\ik.mot'];

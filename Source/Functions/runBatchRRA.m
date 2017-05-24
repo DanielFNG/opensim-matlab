@@ -52,7 +52,7 @@ for i=1:size(ik_struct,1)
     Trial = OpenSimTrial(model, ...
         [ik_folder '/' ik_struct(i,1).name], load, ...
         [grf_folder '/' grf_struct(i,1).name], [results '/' num2str(i)]); 
-    RRA_array{i} = Trial.runRRA(0);
+    RRA_array{i} = Trial.runRRA();
 end
 
 end

@@ -188,11 +188,21 @@ classdef OpenSimTrial
         % 4 arguments: adjustment, between given times. 
         function RRA = runRRA(...
                 obj, initialTime, finalTime, body, output)
-            % Setup RRATool.
-            if nargin == 2 || nargin == 3
-                if nargin == 2
-                    ik_data = Data(obj.kinematics_path);
-                    finalTime = ik_data.Timesteps(end,1);
+            % Setup RRATool. Supports anywhere from 1 to 5 arguments. 
+            % 1 - no adjustment, full file
+            % 2 - no adjustment, from given time to end of file
+            % 3 - either no adjustment, between given times OR
+            %     with adjustment, full file
+            % 4 - with adjustment, from given time to end of file
+            % 5 - width adjustment, between given times. 
+            
+            % No mass adjustment. 
+            if nargin == 1 || nargin == 2 || (nargin == 3 && ~isa(initialTime, 'char'))
+                if nargin == 1
+                    initialTime = obj.kinematics.Timesteps(1,1);
+                    finalTime = obj.kinematics.Timesteps(end,1);
+                elseif nargin == 2
+                    finalTime = obj.kinematics.Timesteps(end,1);
                 end
                 
                 dir = ['RRA_' 'load=' obj.load ...
@@ -200,18 +210,26 @@ classdef OpenSimTrial
                 rraTool = obj.setupRRA(...
                             dir, initialTime, finalTime);
                 rraTool.run();
-            elseif nargin == 4 || nargin == 5
-                if nargin == 4
+                
+                % Process resulting RRA data. 
+                RRA = RRAResults(obj, [obj.results_directory '/' dir '/RRA']);
+                
+            % Mass adjustment. 
+            elseif (nargin == 3 && isa(initialTime, 'char')) || nargin == 4 || nargin == 5
+                if nargin == 3
+                    body = initialTime;
+                    output = finalTime; 
+                    initialTime = obj.kinematics.Timesteps(1,1);
+                    finalTime = obj.kinematics.Timesteps(end,1);
+                elseif nargin == 4
                     % In this case finalTime is assumed to be excluded.
                     % Match the arguments accordingly. 
-                    hold_variable = body;
+                    output = body;
                     body = finalTime;
-                    output = hold_variable; 
                     
                     % Calculate the final time as the last frame of the
                     % kinematic data. 
-                    ik_data = Data(obj.kinematics_path);
-                    finalTime = ik_data.Timesteps(end,1);
+                    finalTime = obj.kinematics.Timesteps(end,1);
                 end
                     
                 dir = ['RRA_' 'load=' obj.load ... 
@@ -226,17 +244,13 @@ classdef OpenSimTrial
                     
                 % Perform mass adjustment. 
                 obj.performMassAdjustments([obj.results_directory '/' dir '/' output], getFullPath(log));
-            else
-                error('Incorrect number of arguments to setupRRA');
-            end
-            
-            % Process resulting RRA data. Default settings has name 'RRA'.
-            if nargin > 3
+                
+                % Process resulting RRA data. 
                 RRA = RRAResults(obj, [obj.results_directory '/' dir '/RRA'], ...
                     getFullPath([obj.results_directory '/' dir '/' output ...
                     '_mass_changed.osim']));
             else
-                RRA = RRAResults(obj, [obj.results_directory '/' dir '/RRA']);
+                error('Incorrect number of arguments to runRRA');
             end
         end
         
@@ -256,6 +270,20 @@ classdef OpenSimTrial
         
         % Run the ID algorithm. 
         function ID = runID(obj, startTime, endTime)
+            
+            % If we just want to do it for the entire file. 
+            if nargin == 1
+                startTime = obj.kinematics.Timesteps(1,1);
+                endTime = obj.kinematics.Timesteps(end,1);
+                
+            % If only a start time is given. 
+            elseif nargin == 2
+                endTime = obj.kinematics.Timesteps(end,1);
+            
+            % If we have both a start time and an end time. 
+            elseif nargin ~= 3
+                error('Incorrect number of arguments to runID.');
+            end
             
             dir = ['ID_' 'load=' obj.load ...
                 '_time=' num2str(startTime) '-' num2str(endTime)];
