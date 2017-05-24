@@ -84,6 +84,9 @@ classdef Data
                         end
                         obj.Values = values;
                         obj.Frames = size(values,1);
+                        
+                        % Close the file.
+                        fclose(id);
                     else
                         dataArray = importdata(filename);
                         % If there is a textdata property, check the last
