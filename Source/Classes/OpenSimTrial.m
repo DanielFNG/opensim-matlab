@@ -182,6 +182,38 @@ classdef OpenSimTrial
             end
         end
         
+        % Modify the pelvis COM in the default RRA_actuators file in order
+        % to match the pelvis COM of the input model. 
+        function modifyPelvisCOM(obj)
+            % Import OpenSim libraries & get default actuators file path.
+            import org.opensim.modeling.*
+            actuators_path = [obj.default_rra 'gait2392_RRA_Actuators.xml'];
+            
+            % Store the pelvis COM from the model file. 
+            model = Model(obj.model_path);
+            com = Vec3();
+            model.getBodySet.get('pelvis').getMassCenter(com);
+            
+            % Convert the pelvis COM to a string. 
+            com_string = sprintf('%s\t', num2str(com.get(0)), ...
+                num2str(com.get(1)), num2str(com.get(2)));
+            com_string = [' ', com_string];
+            
+            % Read in the default actuators xml and identify the body nodes. 
+            actuators = xmlread(actuators_path);
+            bodies = actuators.getElementsByTagName('body');
+            
+            % Change the CoM for each of FX/FY/FZ. We skip i=0 since this
+            % occurs in the 'default' node. 
+            for i=1:3
+                bodies.item(i).getNextSibling().getNextSibling(). ...
+                    setTextContent(com_string);
+            end
+            
+            % Rewrite the actuators file with the changes. 
+            xmlwrite(actuators_path, actuators);
+        end
+        
         % Run the RRA algorithm.
         % 2 arguments: no adjustment.
         % 3 arguments: adjustment, from given time to end of IK file.
@@ -194,7 +226,11 @@ classdef OpenSimTrial
             % 3 - either no adjustment, between given times OR
             %     with adjustment, full file
             % 4 - with adjustment, from given time to end of file
-            % 5 - width adjustment, between given times. 
+            % 5 - width adjustment, between given times.
+            
+            % Adjust the pelvis COM in the default RRA actuators file to
+            % match the current model.
+            obj.modifyPelvisCOM();
             
             % No mass adjustment. 
             if nargin == 1 || nargin == 2 || (nargin == 3 && ~isa(initialTime, 'char'))

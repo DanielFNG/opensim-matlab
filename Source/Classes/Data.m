@@ -66,6 +66,8 @@ classdef Data
                         % Construct the last bit of the header. 
                         line = fgetl(id);
                         obj.Header{5,1} = line;
+                        line = fgetl(id);
+                        obj.Header{6,1} = line; % this is the empty line
                         
                         % Now get the values.
                         n_cols = size(obj.Labels,2);
@@ -76,6 +78,11 @@ classdef Data
                                 break;
                             end
                             str_values{count} = strsplit(line);
+                            % Sometimes the last column can be just a new
+                            % line, which we don't want.
+                            if isempty(str_values{count}{end})
+                                str_values{count} = str_values{count}(1:end-1);
+                            end
                             count = count + 1;
                         end
                         values = zeros(size(str_values,2), n_cols);
