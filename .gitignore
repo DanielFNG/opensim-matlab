@@ -60,3 +60,9 @@ Temporary Items
 # Ignore RRA controls results.
 *controls.xml
 
+# Ignore data and model files in the Testing folder.
+Testing/*.sto
+Testing/*.mot
+Testing/*.trc
+Testing/*.osim
+
