@@ -26,7 +26,7 @@ fclose(fileID);
 setenv('EXOPT_HOME', pwd);
 
 % Modify the Matlab path to include all exopt directories. 
-addpath(genpath(getenv('EXOPT_HOME')));
+addpath(genpath([getenv('EXOPT_HOME') filesep 'Source']));
 savepath;
 
 % Go back to the setup folder. 
