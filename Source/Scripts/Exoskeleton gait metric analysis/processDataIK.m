@@ -19,7 +19,7 @@ root = ['C:\Users\Daniel\University of Edinburgh\OneDrive - University '...
 % Loop over the nine subjects. 
 for subject=1:9
     % Skip the missing data. 
-    if ~ subject == 5
+    if ~ (subject == 5)
         % There are four dates which need to be represented in the path.
         if subject == 1 || subject == 3 || subject == 4
             date = '18';
