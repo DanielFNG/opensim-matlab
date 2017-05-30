@@ -53,10 +53,6 @@ Temporary Items
 # Ignore Matlab autosaves. 
 *.asv
 
-# Ignore OpenSim storage files & output data files.
-*.sto
-*.txt
-
 # Ignore RRA controls results.
 *controls.xml
 
