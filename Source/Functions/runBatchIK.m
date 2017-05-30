@@ -24,7 +24,7 @@ Input_Markers_array{size(trc_struct,1)} = {};
 for i=1:size(trc_struct,1)
     [IK_array{i}, Input_Markers_array{i}, Output_Markers_array{i}] = ...
         runIK(model, [input_folder '\' trc_struct(i,1).name], ...
-        [results_folder '\' num2str(i)]);
+        results_folder, num2str(i));
 end
 
 end

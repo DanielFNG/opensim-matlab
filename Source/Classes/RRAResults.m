@@ -14,6 +14,9 @@ classdef RRAResults
         errors % Position error between desired & achieved kinematics. 
         states
         
+        Residuals % Class for storing residual results. 
+        Grade % Whether residuals are all okay or not. 
+        
         forces_path
         accelerations_path
         velocities_path
@@ -63,6 +66,9 @@ classdef RRAResults
                 % Rewrite RRA data files to account for intermediate
                 % timestep removal.
                 obj.rewriteRRA();
+                
+                % Analyse the RRA residuals.
+                obj = obj.analyseResiduals();
             end
         end
         
@@ -92,6 +98,12 @@ classdef RRAResults
                 error('This RRAResult was obtained without adjustment.');
             end
             model = obj.AdjustedModel;
+        end
+        
+        % Compute the RRA thresholds for this RRAResult.
+        function obj = analyseResiduals(obj)
+            obj.Residuals = RRAResiduals(obj);
+            obj.Grade = obj.Residuals.getTotalGrade();
         end
         
     end

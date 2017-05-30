@@ -302,7 +302,7 @@
 				<on> true </on>
 				<!--Weight with which a task is tracked relative to other tasks. To track
 				    a task more tightly, make the weight larger.-->
-				<weight>       100 </weight>
+				<weight>       75 </weight>
 				<!--Name of body frame with respect to which a tracking objective is
 				    specified. The special name 'center_of_mass' refers to the system
 				    center of mass. This property is not used for tracking joint angles.-->

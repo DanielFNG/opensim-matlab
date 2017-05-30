@@ -53,6 +53,9 @@ for i=1:size(ik_struct,1)
         [ik_folder '/' ik_struct(i,1).name], load, ...
         [grf_folder '/' grf_struct(i,1).name], [results '/' num2str(i)]); 
     RRA_array{i} = Trial.runRRA();
+    % For convenience when later doing ID etc, copy the kinematics file in
+    % to one folder.
+    copyfile(RRA_array{i}.positions_path,[results '/' 'RRA_q_' num2str(i) '.sto']);
 end
 
 end

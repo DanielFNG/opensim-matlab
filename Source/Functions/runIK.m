@@ -1,4 +1,4 @@
-function [IK, InputMarkers, OutputMarkers] = runIK(model, input, results)
+function [IK, InputMarkers, OutputMarkers] = runIK(model, input, results, append)
 % Performs IK using default settings on given model and input data.
 %   Takes model, input data and a results directory. Files are written to
 %   the results directory and saved with the same name as the input file
@@ -36,11 +36,11 @@ initial_time = markerData.Timesteps(1,1);
 final_time = markerData.Timesteps(end,1);
 
 % Set the input, times and output for the tool.
-output = [results '\ik.mot'];
+output = [results '\ik' append '.mot'];
 tool.setMarkerDataFileName(getFullPath(input));
 tool.setStartTime(initial_time);
 tool.setEndTime(final_time);
-tool.setResultsDir(results);
+tool.setResultsDir([results '\' append 'MarkerData']);
 tool.setOutputMotionFileName(output);
 
 % Run IK.
@@ -50,10 +50,10 @@ tool.run();
 IK = Data(output);
 
 % Also interpret the marker trajectories as a Data object.
-OutputMarkers = Data([results '\ik_model_marker_locations.sto']);
+OutputMarkers = Data([results '\' append 'MarkerData\' 'ik_model_marker_locations.sto']);
 
 % Store the input file in the same as the output for posterity.
-InputMarkers.writeToFile([results '\raw_marker_locations.trc'],1,0);
+InputMarkers.writeToFile([results '\' append 'MarkerData\' 'raw_marker_locations.trc'],1,0);
 
 end
 
