@@ -1,2 +1,0 @@
-right_link	APO_r_link	0	0.35	0
-left_link	APO_l_link	0	0.35	0
