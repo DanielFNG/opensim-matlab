@@ -62,3 +62,5 @@ Testing/*.mot
 Testing/*.trc
 Testing/*.osim
 
+# Don't sync the startup.m file if it's in the Setup folder.
+Setup/startup.m
