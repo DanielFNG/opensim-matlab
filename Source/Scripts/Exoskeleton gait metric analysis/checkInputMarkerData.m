@@ -52,12 +52,17 @@ for subject=1:9
                         try
                             test = Data([ik_folder{k} '\' trc_struct(loop,1).name]);
                         catch ME
+                            % Check for NaN values in the data. 
                             switch ME.identifier
                                 case 'Data:NaNValues'
-                                    warning('NaN values for subject %u, foot %u, context %u, assistance level %u., gait cycle %u', subject, j, i, k, loop);
+                                    warning('NaN values for subject %u, foot %u, context %u, assistance level %u, gait cycle %u', subject, j, i, k, loop);
                                 otherwise
                                     rethrow(ME)
                             end
+                        end
+                        % Check incorrect force plate usage. 
+                        if test.Timesteps(end) - test.Timesteps(1) > 1.75
+                            warning('Long data for subject %u, foot %u, context %u, assistance level %u, gait cycle %u', subject, j, i, k, loop);
                         end
                     end
                 end
