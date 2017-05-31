@@ -16,6 +16,19 @@ Output_Markers_array{9,3,2,10} = {};
 root = ['C:\Users\Daniel\University of Edinburgh\OneDrive - University '...
     'of Edinburgh\Exoskeleton metrics data\Data files\'];
 
+% Total number of IK's to perform. 
+% 8 subjects. 2 leading foot types. 3 exoskeleton assistance mode.
+% 5 contexts associated with 2 gait cycles, another 5 contexts associated
+% with 5 gait cycles.
+% 8*2*3*(5*2 + 5*5)
+total_iks = 1680;
+
+% IK's performed so far. 
+current_ik = 0;
+
+% Construct a loading bar. 
+h = waitbar(current_ik, 'Performing batch IK.');
+
 % Loop over the nine subjects. 
 for subject=1:9
     % Skip the missing data. 
@@ -55,28 +68,39 @@ for subject=1:9
                 else
                     folder = [gait 'StSt'];
                 end
-
-                % No APO
-                ik_folder = [folder '\NE' num2str(i)];
-                [IK_array{subject,1,j,i}, Input_Markers_array{subject,1,j,i},...
-                    Output_Markers_array{subject,1,j,i}] = runBatchIK(...
-                    human_model, ik_folder, [ik_folder '\IK_Results']);
-
-                % With APO, transparent.
-                ik_folder = [folder '\ET' num2str(i)];
-                [IK_array{subject,2,j,i}, Input_Markers_array{subject,2,j,i},...
-                    Output_Markers_array{subject,2,j,i}] = runBatchIK(...
-                    APO_model, ik_folder, [ik_folder '\IK_Results']);
-
-                % With APO, assisted.
-                ik_folder = [folder '\EA' num2str(i)];
-                [IK_array{subject,3,j,i}, Input_Markers_array{subject,3,j,i},...
-                    Output_Markers_array{subject,3,j,i}] = runBatchIK(...
-                    APO_model, ik_folder, [ik_folder '\IK_Results']);
+                
+                for assistance_level=1:3
+                    if assistance_level == 1
+                        % No APO.
+                        ik_folder = [folder '\NE' num2str(i)];
+                        model = human_model;
+                    elseif assistance_level == 2
+                        % With APO, transparent.
+                        ik_folder = [folder '\ET' num2str(i)];
+                        model = APO_model;
+                    elseif assistance_level == 3
+                        % With APO, assisted. 
+                        ik_folder = [folder '\EA' num2str(i)];
+                        model = APO_model;
+                    end
+                    [IK_array{subject,assistance_level,j,i}, ...
+                    Input_Markers_array{subject,assistance_level,j,i},...
+                    Output_Markers_array{subject,assistance_level,j,i}] ...
+                        = runBatchIK(model, ik_folder, [ik_folder '\IK_Results']);
+                    if mod(i,2) == 1
+                        current_ik = current_ik + 2;
+                    else
+                        current_ik = current_ik + 5;
+                    end
+                    waitbar(current_ik/total_iks);
+                end
             end
         end
     end
 end
+
+% Close the loading bar.
+close(h);
 
 % Save the results to a Matlab save file.
 save([root 'IK_Results.mat'], 'IK_array', 'Input_Markers_array', ... 
