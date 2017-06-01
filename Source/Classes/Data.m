@@ -32,37 +32,101 @@ classdef Data
         function obj = Data(filename)
             if nargin > 0
                 if ischar(filename)
-                    dataArray = importdata(filename);
-                    % If there is a textdata property, check the last
-                    % (potentially only) row. If this is a single cell
-                    % (i.e. 1x1 rather than 1xn), run it through detectSpaces
-                    % to see if it's a long string of headers. If it is
-                    % (i.e. you get at least a 1x2 cell array) OR if the
-                    % original thing was at least a 1x2 cell array, assume
-                    % that this row corresponds to labels.
-                    
-                    % If there is anything else in textdata before this,
-                    % put it as a header. 
-                    
-                    % Not using colheaders of the importdata function because 
-                    % sometimes in my testcases this property doesn't exist 
-                    % even when the data is labelled. 
-                    if isa(dataArray,'struct')
-                        obj = obj.getHeaderAndLabels(dataArray.textdata);
-                        if sum(strcmp('',obj.Labels)) > 0 
-                            error('Data file has one or more empty labels.')
+                    % Different behaviour for TRC files. 
+                    if strcmp(filename(end-3:end), '.trc')
+                        obj.hasHeader = true;
+                        obj.isLabelled = true;
+                        
+                        % Open the file.
+                        id = fopen(filename);
+                        
+                        % Read in the header to a cell array.
+                        line = fgetl(id);
+                        obj.Header{1,1} = line;
+                        line = fgetl(id);
+                        obj.Header{2,1} = line;
+                        line = fgetl(id);
+                        obj.Header{3,1} = line;
+                        line = fgetl(id);
+                        obj.Header{4,1} = line;
+                        
+                        % Construct the labels.
+                        labels = strsplit(line);
+                        
+                        obj.Labels{1} = labels{1,1};
+                        obj.Labels{2} = labels{1,2};
+                        k = 3;
+                        for i=3:size(labels,2)-1
+                            obj.Labels{k} = [labels{1,i} 'X'];
+                            obj.Labels{k+1} = [labels{1,i} 'Y'];
+                            obj.Labels{k+2} = [labels{1,i} 'Z'];
+                            k = k + 3;
                         end
-                        obj.Values = dataArray.data;
-                        if size(obj.Labels, 2) ~= size(obj.Values, 2)
-                            error(['Number of labels does not match the '...
-                                   'number of columns of data.'])
+                        
+                        % Construct the last bit of the header. 
+                        line = fgetl(id);
+                        obj.Header{5,1} = line;
+                        line = fgetl(id);
+                        obj.Header{6,1} = line; % this is the empty line
+                        
+                        % Now get the values.
+                        n_cols = size(obj.Labels,2);
+                        count = 1;
+                        while true
+                            line = fgetl(id);
+                            if ~ischar(line)
+                                break;
+                            end
+                            str_values{count} = strsplit(line);
+                            % Sometimes the last column can be just a new
+                            % line, which we don't want.
+                            if isempty(str_values{count}{end})
+                                str_values{count} = str_values{count}(1:end-1);
+                            end
+                            count = count + 1;
                         end
-                        obj.Frames = size(dataArray.data,1);
-                    elseif isa(dataArray,'double')
-                        obj.Values = dataArray;
-                        obj.Frames = size(dataArray,1);
+                        values = zeros(size(str_values,2), n_cols);
+                        for i=1:size(str_values,2)
+                            values(i,1:end) = str2double(str_values{1,i});
+                        end
+                        obj.Values = values;
+                        obj.Frames = size(values,1);
+                        
+                        % Close the file.
+                        fclose(id);
                     else
-                        error('Unrecognised data file format.')
+                        dataArray = importdata(filename);
+                        % If there is a textdata property, check the last
+                        % (potentially only) row. If this is a single cell
+                        % (i.e. 1x1 rather than 1xn), run it through detectSpaces
+                        % to see if it's a long string of headers. If it is
+                        % (i.e. you get at least a 1x2 cell array) OR if the
+                        % original thing was at least a 1x2 cell array, assume
+                        % that this row corresponds to labels.
+
+                        % If there is anything else in textdata before this,
+                        % put it as a header. 
+
+                        % Not using colheaders of the importdata function because 
+                        % sometimes in my testcases this property doesn't exist 
+                        % even when the data is labelled. 
+                        if isa(dataArray,'struct')
+                            obj = obj.getHeaderAndLabels(dataArray.textdata);
+                            if sum(strcmp('',obj.Labels)) > 0 
+                                error('Data file has one or more empty labels.')
+                            end
+                            obj.Values = dataArray.data;
+                            if size(obj.Labels, 2) ~= size(obj.Values, 2)
+                                error(['Number of labels does not match the '...
+                                       'number of columns of data.'])
+                            end
+                            obj.Frames = size(dataArray.data,1);
+                        elseif isa(dataArray,'double')
+                            obj.Values = dataArray;
+                            obj.Frames = size(dataArray,1);
+                        else
+                            error('Unrecognised data file format.')
+                        end
                     end
                 else
                     error(['Error in construction: expected input filename '...
@@ -108,12 +172,12 @@ classdef Data
         % return an error.
         function obj = checkValues(obj)
             if sum(sum(isnan(obj.Values))) ~= 0
-                error(['One or more elements of the data array interpreted '...
-                       'as NaN. Could be an error in the data set, or a '...
-                       'blank cell/row/column. There should be no space '...
-                       'between the data labels/header (if they exist) and '...
-                       'the beginning of the data entries. Check your data '...
-                       'set.'])
+                error('Data:NaNValues', ['One or more elements of the data '...
+                       'array interpreted as NaN. Could be an error in the '...
+                       'data set, or a blank cell/row/column. There should '...
+                       'be no space between the data labels/header '...
+                       '(if they exist) and the beginning of the data '...
+                       'entries. Check your data set.'])
             end
         end
             
@@ -125,17 +189,15 @@ classdef Data
                       'series.'])
             else
                 % Find the time column. 
-                [~, location] = max(strcmp('time', obj.Labels));
+                [~, location] = max(strcmpi('time', obj.Labels));
                 apparent_frequency = obj.Values(2,location) ...
                                      - obj.Values(1,location);
                 averaged_frequency = ...
                         sum(obj.Values(2:end,location) ...
                         - obj.Values(1:end-1,location))/(size(obj.Values,1)-1);
                 if abs(apparent_frequency - averaged_frequency) < 1e-4
-                    disp('Data is at consistent frequency.');
                     obj.isConsistentFrequency = true;
                     obj.Frequency = round(1/apparent_frequency, 2);
-                    disp('Frequency calculated.');
                 else
                     disp('Data is not at a consistent frequency.')
                 end
@@ -184,7 +246,7 @@ classdef Data
                 error(['Can''t find the time column if the data isn''t a '...
                        'time series.'])
             end
-            [~, timeLocation] = max(strcmp('time', obj.Labels));
+            [~, timeLocation] = max(strcmpi('time', obj.Labels));
             timeColumn = obj.Values(1:end,timeLocation);
         end
         
@@ -457,6 +519,9 @@ classdef Data
         end
         
         % Write data object to a tab delimited file. 
+        % TRC files should be written with headers ONLY because of the
+        % difference in labelling between the actual file and the Data
+        % interpretation.
         function writeToFile(obj, filename, withHeader, withLabels)
             fileID = fopen(filename,'w');
             if obj.hasHeader && (withHeader == 1)

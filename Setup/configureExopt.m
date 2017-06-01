@@ -25,8 +25,10 @@ fclose(fileID);
 % don't have to restart Matlab).
 setenv('EXOPT_HOME', pwd);
 
-% Modify the Matlab path to include all exopt directories. 
-addpath(genpath(getenv('EXOPT_HOME')));
+% Modify the Matlab path to include the source folder and the setup folder
+% (so it has access to the startup file if it's here).
+addpath(genpath([getenv('EXOPT_HOME') filesep 'Source']));
+addpath(genpath([getenv('EXOPT_HOME') filesep 'Setup']));
 savepath;
 
 % Go back to the setup folder. 

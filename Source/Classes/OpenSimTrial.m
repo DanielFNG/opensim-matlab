@@ -33,6 +33,8 @@ classdef OpenSimTrial
         default_rra 
         default_id
         default_ext
+        gait2392_model
+        gait2392_proportions
     end
     
     methods
@@ -50,8 +52,9 @@ classdef OpenSimTrial
                 obj.kinematics = Data(obj.kinematics_path);
                 new_results = createUniqueDirectory(results);
                 obj.results_directory = getFullPath(new_results);
-                [obj.default_rra, obj.default_id, obj.default_ext] = ...
-                        obj.loadDefaults();
+                [obj.default_rra, obj.default_id, obj.default_ext, ...
+                    obj.gait2392_model, obj.gait2392_proportions] = ...
+                    obj.loadDefaults();
                 obj.load = load; 
                 obj.load_path = [obj.default_ext load '.xml'];
                 % Import OpenSim Model class to calculate model dofs.  
@@ -128,6 +131,28 @@ classdef OpenSimTrial
                 [obj.results_directory '/' dir '/' output '.osim']);
         end
         
+        % Performs the mass adjustments recommended by the RRA algorithm.
+        function performMassAdjustments(obj, model, log)
+            % Load the model. 
+            import org.opensim.modeling.Model;
+            osim = Model(getFullPath([model '.osim']));
+            
+            % Find the total mass change.
+            mass = obj.getTotalMassChange(log);
+            
+            % Load the gait2392 mass proportion file. 
+            proportions = Data(obj.gait2392_proportions);
+            
+            % Step through the bodies applying the correct mass changes.
+            for i=1:size(proportions.Values,2)
+                osim.getBodySet.get(proportions.Labels(1,i)).setMass(...
+                    osim.getBodySet.get(proportions.Labels(1,i)).getMass() + ...
+                    mass * proportions.Values(1,i));
+            end
+            
+            osim.print([model '_mass_changed.osim']);
+        end
+        
         % Setup external loads from type.
         function setupExternalLoads(obj, Tool)
             % Here, type defines what type of ExternalLoads case we have.
@@ -157,31 +182,112 @@ classdef OpenSimTrial
             end
         end
         
-        % Run the RRA algorithm.
-        function RRA = runRRA(...
-                obj, initialTime, finalTime, body, output)
-            % Setup RRATool.
-            switch nargin
-                case 3
-                    dir = ['RRA_' 'load=' obj.load ...
-                        '_time=' num2str(initialTime) '-' num2str(finalTime)];
-                    rraTool = obj.setupRRA(...
-                                dir, initialTime, finalTime);
-                case 5
-                    dir = ['RRA_' obj.load ...
-                        '_time=' num2str(initialTime) '-' num2str(finalTime)...
-                        '_withAdjustment'];
-                    rraTool = obj.setupRRA(...
-                                dir, initialTime, finalTime, body, output);
-                otherwise
-                    error('Incorrect number of arguments to setupRRA');
+        % Modify the pelvis COM in the default RRA_actuators file in order
+        % to match the pelvis COM of the input model. 
+        function modifyPelvisCOM(obj)
+            % Import OpenSim libraries & get default actuators file path.
+            import org.opensim.modeling.*
+            actuators_path = [obj.default_rra 'gait2392_RRA_Actuators.xml'];
+            
+            % Store the pelvis COM from the model file. 
+            model = Model(obj.model_path);
+            com = Vec3();
+            model.getBodySet.get('pelvis').getMassCenter(com);
+            
+            % Convert the pelvis COM to a string. 
+            com_string = sprintf('%s\t', num2str(com.get(0)), ...
+                num2str(com.get(1)), num2str(com.get(2)));
+            com_string = [' ', com_string];
+            
+            % Read in the default actuators xml and identify the body nodes. 
+            actuators = xmlread(actuators_path);
+            bodies = actuators.getElementsByTagName('body');
+            
+            % Change the CoM for each of FX/FY/FZ. We skip i=0 since this
+            % occurs in the 'default' node. 
+            for i=1:3
+                bodies.item(i).getNextSibling().getNextSibling(). ...
+                    setTextContent(com_string);
             end
             
-            % Run RRA.
-            rraTool.run();
+            % Rewrite the actuators file with the changes. 
+            xmlwrite(actuators_path, actuators);
+        end
+        
+        % Run the RRA algorithm.
+        % 2 arguments: no adjustment.
+        % 3 arguments: adjustment, from given time to end of IK file.
+        % 4 arguments: adjustment, between given times. 
+        function RRA = runRRA(...
+                obj, initialTime, finalTime, body, output)
+            % Setup RRATool. Supports anywhere from 1 to 5 arguments. 
+            % 1 - no adjustment, full file
+            % 2 - no adjustment, from given time to end of file
+            % 3 - either no adjustment, between given times OR
+            %     with adjustment, full file
+            % 4 - with adjustment, from given time to end of file
+            % 5 - width adjustment, between given times.
             
-            % Process resulting RRA data. Default settings has name 'RRA'. 
-            RRA = RRAResults(obj, [obj.results_directory '/' dir '/RRA']); 
+            % Adjust the pelvis COM in the default RRA actuators file to
+            % match the current model.
+            obj.modifyPelvisCOM();
+            
+            % No mass adjustment. 
+            if nargin == 1 || nargin == 2 || (nargin == 3 && ~isa(initialTime, 'char'))
+                if nargin == 1
+                    initialTime = obj.kinematics.Timesteps(1,1);
+                    finalTime = obj.kinematics.Timesteps(end,1);
+                elseif nargin == 2
+                    finalTime = obj.kinematics.Timesteps(end,1);
+                end
+                
+                dir = ['RRA_' 'load=' obj.load ...
+                    '_time=' num2str(initialTime) '-' num2str(finalTime)];
+                rraTool = obj.setupRRA(...
+                            dir, initialTime, finalTime);
+                rraTool.run();
+                
+                % Process resulting RRA data. 
+                RRA = RRAResults(obj, [obj.results_directory '/' dir '/RRA']);
+                
+            % Mass adjustment. 
+            elseif (nargin == 3 && isa(initialTime, 'char')) || nargin == 4 || nargin == 5
+                if nargin == 3
+                    body = initialTime;
+                    output = finalTime; 
+                    initialTime = obj.kinematics.Timesteps(1,1);
+                    finalTime = obj.kinematics.Timesteps(end,1);
+                elseif nargin == 4
+                    % In this case finalTime is assumed to be excluded.
+                    % Match the arguments accordingly. 
+                    output = body;
+                    body = finalTime;
+                    
+                    % Calculate the final time as the last frame of the
+                    % kinematic data. 
+                    finalTime = obj.kinematics.Timesteps(end,1);
+                end
+                    
+                dir = ['RRA_' 'load=' obj.load ... 
+                    '_time=' num2str(initialTime) '-' num2str(finalTime)...
+                    '_withAdjustment'];
+                rraTool = obj.setupRRA(...
+                    dir, initialTime, finalTime, body, output);
+                log = [obj.results_directory '/' 'RRA_output.log'];
+                diary(log);
+                rraTool.run();
+                diary off;
+                    
+                % Perform mass adjustment. 
+                obj.performMassAdjustments([obj.results_directory '/' dir '/' output], getFullPath(log));
+                
+                % Process resulting RRA data. 
+                RRA = RRAResults(obj, [obj.results_directory '/' dir '/RRA'], ...
+                    getFullPath([obj.results_directory '/' dir '/' output ...
+                    '_mass_changed.osim']));
+            else
+                error('Incorrect number of arguments to runRRA');
+            end
         end
         
         % Setup ID from the default settings file, with input initial and
@@ -200,6 +306,20 @@ classdef OpenSimTrial
         
         % Run the ID algorithm. 
         function ID = runID(obj, startTime, endTime)
+            
+            % If we just want to do it for the entire file. 
+            if nargin == 1
+                startTime = obj.kinematics.Timesteps(1,1);
+                endTime = obj.kinematics.Timesteps(end,1);
+                
+            % If only a start time is given. 
+            elseif nargin == 2
+                endTime = obj.kinematics.Timesteps(end,1);
+            
+            % If we have both a start time and an end time. 
+            elseif nargin ~= 3
+                error('Incorrect number of arguments to runID.');
+            end
             
             dir = ['ID_' 'load=' obj.load ...
                 '_time=' num2str(startTime) '-' num2str(endTime)];
@@ -224,11 +344,34 @@ classdef OpenSimTrial
     methods(Static)
         
         % Load the filenames for default RRA, ID settings etc. 
-        function [rra, id, ext] = loadDefaults()
+        function [rra, id, ext, model, prop] = loadDefaults()
             rra = [getenv('EXOPT_HOME') '/Defaults/RRA/'];
             id = [getenv('EXOPT_HOME') '/Defaults/ID/'];
             ext = [getenv('EXOPT_HOME') '/Defaults/ExternalLoads/'];
-        end 
+            model = [getenv('EXOPT_HOME') '/Defaults/Model/gait2392.osim'];
+            prop = [getenv('EXOPT_HOME') ...
+                '/Defaults/Model/gait2392_mass_proportions.txt'];
+        end
+        
+        % Find the total mass change suggested by an RRA log file. 
+        function mass = getTotalMassChange(log)
+            % Read in log file. 
+            text = fileread(log);
+            
+            % Find correct point in log file. 
+            start_index = strfind(text,'Total mass change: ');
+            % We take the final start_index found, corresponding to the
+            % last matching entry for 'Total mass change: ' in the log file.
+            % i.e. we assume duplicate entries means that a log file has
+            % been appended to, so we choose the latest one. 
+            
+            % Isolate the mass change value as a string, then convert to
+            % type double. 
+            split = strsplit(text(start_index(end):end), '\n');
+            mass_string = strsplit(split{1,1}, ' ');
+            mass = str2double(mass_string(end));
+        end
+        
     end   
 end
 
