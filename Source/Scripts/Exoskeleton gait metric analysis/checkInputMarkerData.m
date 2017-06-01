@@ -6,7 +6,7 @@ root = ['C:\Users\Daniel\University of Edinburgh\OneDrive - University '...
     'of Edinburgh\Exoskeleton metrics data\Data files\'];
 
 % Loop over the nine subjects. 
-for subject=1:9
+for subject=1:8
     % Skip the missing data. 
     if ~ (subject == 5)
         % There are four dates which need to be represented in the path.
@@ -61,8 +61,10 @@ for subject=1:9
                             end
                         end
                         % Check incorrect force plate usage. 
-                        if test.Timesteps(end) - test.Timesteps(1) > 1.75
-                            warning('Long data for subject %u, foot %u, context %u, assistance level %u, gait cycle %u', subject, j, i, k, loop);
+                        if (test.Timesteps(end) - test.Timesteps(1) > 1.75) 
+                            warning('Long data for subject %u, foot %u, context %u, assistance level %u, gait cycle %u, time %f', subject, j, i, k, loop, test.Timesteps(end) - test.Timesteps(1));
+                        elseif (test.Timesteps(end) - test.Timesteps(1) < 0.5)
+                            warning('Short data for subject %u, foot %u, context %u, assistance level %u, gait cycle %u, time %f', subject, j, i, k, loop, test.Timesteps(end) - test.Timesteps(1));
                         end
                     end
                 end

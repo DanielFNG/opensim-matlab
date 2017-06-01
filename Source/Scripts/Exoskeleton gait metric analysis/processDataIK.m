@@ -30,7 +30,7 @@ current_ik = 0;
 h = waitbar(current_ik, 'Performing batch IK.');
 
 % Loop over the nine subjects. 
-for subject=1:9
+for subject=1:8
     % Skip the missing data. 
     if ~ (subject == 5)
         % There are four dates which need to be represented in the path.
