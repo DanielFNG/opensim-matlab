@@ -52,21 +52,21 @@ for subject=1:9
         % with and without the APO. We also arbitrarily take the first gait
         % cycle. 
         ik_no_APO = [subject_path ...
-            '\dynamicElaborations\right\StSt\NE2\IK_Results\ik1.mot'];
+            '\dynamicElaborations\rightStSt\NE2\IK_Results\ik1.mot'];
         grf_no_APO = [subject_path ...
-            '\dynamicElaborations\right\StSt\NE2\NE21.mot'];
+            '\dynamicElaborations\rightStSt\NE2\NE21.mot'];
         ik_APO = [subject_path ...
-            '\dynamicElaborations\right\StSt\ET2\IK_Results\ik1.mot'];
+            '\dynamicElaborations\rightStSt\ET2\IK_Results\ik1.mot'];
         grf_APO = [subject_path ...
-            '\dynamicElaborations\right\StSt\ET2\ET21.mot'];
+            '\dynamicElaborations\rightStSt\ET2\ET21.mot'];
         
         % Perform the adjustment RRA's.
         RRA_adjustments{subject,1} = adjustmentRRA(...
             human_model, ik_no_APO, grf_no_APO, ...
-            [subject_path '\dynamicElaborations\right\StSt\NE2\RRA_Results']);
+            [subject_path '\dynamicElaborations\rightStSt\NE2\RRA_Results']);
         RRA_adjustments{subject,2} = adjustmentRRA(...
             APO_model, ik_APO, grf_APO, ...
-            [subject_path '\dynamicElaborations\right\StSt\ET2\RRA_Results']);
+            [subject_path '\dynamicElaborations\rightStSt\ET2\RRA_Results']);
         
         % Update the loading bar post adjustment. 
         current_RRA = current_RRA + 2;

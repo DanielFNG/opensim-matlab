@@ -47,7 +47,18 @@ for subject=1:8
                 ik_folder{3} = [folder '\EA' num2str(i)];
                 
                 for k=1:3
+                    
+                    if i == 1 || mod(i,2) == 0
+                        expected_size = 5;
+                    else
+                        expected_size = 2;
+                    end
+                    
                     trc_struct = dir([ik_folder{k} '/*.trc']);
+                    
+                    if size(trc_struct,1) ~= expected_size
+                        warning('Duplicate data for subject %u, foot %u, context %u, assistance level %u', subject, j, i, k);
+                    end
                     for loop=1:size(trc_struct,1)
                         try
                             test = Data([ik_folder{k} '\' trc_struct(loop,1).name]);

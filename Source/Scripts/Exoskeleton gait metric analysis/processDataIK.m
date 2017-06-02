@@ -27,7 +27,7 @@ total_iks = 1680;
 current_ik = 0;
 
 % Construct a loading bar. 
-h = waitbar(current_ik, 'Performing batch IK.');
+loadbar = waitbar(current_ik, 'Performing batch IK.');
 
 % Loop over the nine subjects. 
 for subject=1:8
@@ -100,7 +100,7 @@ for subject=1:8
 end
 
 % Close the loading bar.
-close(h);
+close(loadbar);
 
 % Save the results to a Matlab save file.
 save([root 'IK_Results.mat'], 'IK_array', 'Input_Markers_array', ... 
