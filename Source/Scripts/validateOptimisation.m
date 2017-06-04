@@ -30,15 +30,15 @@ model_directory = 'jacobians';
 
 %% Set up desired.
 % Construct an OpenSimTrial with only ground reaction forces.
-trial = OpenSimTrial('testing_adjusted.osim', 'ik0.mot', load_type_1, ...
-    'grf0.mot', trial_directory_1);
+trial = OpenSimTrial('APO.osim', 'ik1.mot', load_type_1, ...
+    'grf1.mot', trial_directory_1);
 
 % Run RRA.
 rra = trial.runRRA(start_time, end_time);
 
 % Construct a new OpenSimTrial using the RRA-corrected kinematics.
-id_trial = OpenSimTrial('testing_adjusted.osim', rra.positions_path, ...
-    load_type_1, 'grf0.mot', trial_directory_1);
+id_trial = OpenSimTrial('APO.osim', rra.positions_path, ...
+    load_type_1, 'grf1.mot', trial_directory_1);
 
 % Run ID.
 id = id_trial.runID(start_time, end_time);
@@ -73,7 +73,7 @@ apo_only.writeToFile('grf_onlyAPO.mot',1,1);
 
 %% Set up input data. 
 % Construct an OpenSimTrial with ground reaction forces and APO forces.
-APO_trial = OpenSimTrial('testing_adjusted.osim', 'ik0.mot', load_type_2, ...
+APO_trial = OpenSimTrial('APO.osim', 'ik1.mot', load_type_2, ...
     'grf_withAPO.mot', trial_directory_2);
 
 % This step is commented out because it is slightly incorrect! See below
@@ -93,7 +93,7 @@ APO_trial = OpenSimTrial('testing_adjusted.osim', 'ik0.mot', load_type_2, ...
 % not the case when doing RRA on just the grfs which are known accurately.
 % The only downside is we end up with a net (exo + human) RRA, but this is
 % irrelevant here. 
-id_APO_trial = OpenSimTrial('testing_adjusted.osim', rra.positions_path, ...
+id_APO_trial = OpenSimTrial('APO.osim', rra.positions_path, ...
     load_type_2, 'grf_withAPO.mot', trial_directory_2);
 
 % Run ID.
