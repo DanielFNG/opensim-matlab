@@ -1,4 +1,0 @@
-right_link	APO_r_link	0	0.23	0.09
-left_link	APO_l_link	0	0.23	-0.09
-right_group	APO_group_r	-0.116587	0.0999654	-0.153457
-left_group	APO_group_l	-0.116587	0.0999654	0.153457
