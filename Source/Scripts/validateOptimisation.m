@@ -19,8 +19,8 @@
 %   they should agree well. 
 
 %% Some parameters.
-start_time = 0.1; % The IK only starts from 0.1!
-end_time = 1.5;
+start_time = 0.46; % The IK only starts from 0.1!
+end_time = 1.6;
 force_model = 'linear';
 load_type_1 = 'normal';
 load_type_2 = 'APO';
