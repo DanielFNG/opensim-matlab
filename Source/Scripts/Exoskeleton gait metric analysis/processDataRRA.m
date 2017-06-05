@@ -4,8 +4,8 @@
 % RRA_adjustments is indexed by the subject and then whether the model is
 % with (2) or without (1) the APO.
 % RRA_array follows the same indexing style as described in 'processDataIK.m'.
-RRA_adjustments{9,2} = {};
-RRA_array{9,3,2,10} = {};
+% RRA_adjustments{9,2} = {};
+% RRA_array{9,3,2,10} = {};
 
 % Get the root folder.
 root = ['C:\Users\Daniel\University of Edinburgh\OneDrive - University '...
@@ -25,7 +25,7 @@ current_RRA = 0;
 h = waitbar(current_RRA, 'Performing batch RRA with adjustment.');
 
 % Loop over the nine subjects. 
-for subject=1:9
+for subject=6:8
     % Skip the missing data.
     if ~ (subject == 5)
         % There are four dates which need to be represented in the path.
@@ -112,7 +112,7 @@ for subject=1:9
                         elseif assistance_level == 3
                             % With APO, assisted. 
                             ik_folder = [folder '\EA' num2str(i) '\IK_Results'];
-                            grf_folder = [folder '\ET' num2str(i)];
+                            grf_folder = [folder '\EA' num2str(i)];
                             model = adjusted_model_APO;
                         end
                         
@@ -138,4 +138,4 @@ end
 close(h);
 
 % Save the results to a Matlab save file. 
-save([root 'RRA_Results.mat'], 'RRA_array', 'RRA_adjustments');
+% save([root 'RRA_Results.mat'], 'RRA_array', 'RRA_adjustments');
