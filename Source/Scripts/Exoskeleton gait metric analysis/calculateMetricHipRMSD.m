@@ -8,8 +8,8 @@ for subject=1:8
     % Skip the missing data. 
     if ~ (subject == 5)
         
-        % Loop over the three assistance levels. 
-        for assistance_level=1:3
+        % Loop over the two assistance levels. 
+        for assistance_level=2:3
             
             % Loop over left and right
             for j = 1:2
@@ -22,8 +22,9 @@ for subject=1:8
                         % Loop over the five gait cycles for the relevant
                         % contexts
                         for k = 1:5
-                           Hip_RoM_array{subject,assistance_level,j,i}{k} = ...
-                           getHipRoM(IK_array{subject,assistance_level,j,i}{k},j); 
+                           Hip_RMSD_array{subject,assistance_level,j,i}{k} = ...
+                           getHipRMSD(IK_array{subject,assistance_level,j,i}{k},...
+                           IK_array{subject,1,j,i}{k},j); 
                         end
 
                     else
@@ -31,8 +32,9 @@ for subject=1:8
                         % Loop over the two gait cycles for the relevant
                         % contexts
                         for k = 1:2
-                           Hip_RoM_array{subject,assistance_level,j,i}{k} = ...
-                           getHipRoM(IK_array{subject,assistance_level,j,i}{k},j); 
+                           Hip_RMSD_array{subject,assistance_level,j,i}{k} = ...
+                           getHipRMSD(IK_array{subject,assistance_level,j,i}{k},...
+                           IK_array{subject,1,j,i}{k},j); 
                         end
                     end                    
                 end

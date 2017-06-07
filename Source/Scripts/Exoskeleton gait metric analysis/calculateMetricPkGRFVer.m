@@ -8,7 +8,7 @@ root = 'C:\Users\Graham\SharePoint\GORDON Daniel\Exoskeleton metrics data\Data f
 Subject_weight = [76.4 67.1 58.8 77.2 132 83 61.4 66.6 75.8];
 Subject_weight = Subject_weight*9.80665;
 
-% FZ1 or FZ2?
+% FZ1 peak = 1 or FZ2 peak = 2
 
 peak = 2;
 

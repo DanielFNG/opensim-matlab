@@ -11,7 +11,7 @@
 % B = fieldnames(A);
 % A = A.(B{1});
 
-A = PkGRFVer2_array;
+A = Hip_RMSD_array;
 
 
 
@@ -21,7 +21,7 @@ A = PkGRFVer2_array;
 
  b = [];
 % % Loop over the assistance levels.
-for assistance_level=1:3
+for assistance_level=2:3
             
     % Loop over the five steady state contexts. 
     for i=[2 4 6 8 10]      
@@ -38,8 +38,8 @@ for assistance_level=1:3
     end
 end
    
-% Average_array = Average_array/10;
-% Stdev_array = Stdev_array/10;    
+ Average_array = Average_array(2:3,:);
+ Stdev_array = Stdev_array(2:3,:);    
 
 %% Print array to appropriate folder
 
@@ -49,7 +49,7 @@ end
 
 
  
-for i = 1:3
+for i = 1:2
     for j = 1:5
          String_Av = num2str(Average_array(i,j),'%4.2f, '); 
          String_Stdev = num2str(Stdev_array(i,j),'%4.2f, ');
@@ -63,7 +63,7 @@ end
   matrix2latex(matrix, 'out.tex', 'rowLabels', rowLabels, 'columnLabels', columnLabels, 'alignment', 'c', 'format', '%-6.2f', 'size', 'tiny');
 
 %% Plot values
-Metric_Label = 'GRF-v_{peak2}';
+Metric_Label = ['Hip angle RMS (' char(176) ')'];
 
 ThreeDBarWithErrorBars(Average_array,Stdev_array,Metric_Label)
 

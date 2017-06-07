@@ -1,5 +1,5 @@
 
-% root = 'C:\Users\Graham\SharePoint\GORDON Daniel\Exoskeleton metrics data\Data files\Exoskeleton metrics data\Data files\';
+% root = 'C:\Users\Graham\SharePoint\GORDON Daniel\Exoskeleton metrics data\Data files\';
 % 
 % load ([root 'IK_Results.mat'])
 
