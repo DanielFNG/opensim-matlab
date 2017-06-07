@@ -78,7 +78,7 @@ for subject=7:7
         adjusted_model_APO = RRA_adjustments{subject,2}.getAdjustedModel();
         
         % Loop over left/right gait cycles. 
-        for j=1:1
+        for j=2:2
             switch j
                 case 1
                     gait = [subject_path '\dynamicElaborations\right'];
@@ -87,7 +87,7 @@ for subject=7:7
             end
             
             % Loop over the ten contexts. 
-            for i=6:10 
+            for i=1:10 
                 % Ignore contexts 3 and 5.
                 if ~(subject == 3 || subject == 5)
                 % Filenames are different for steady state vs non steady state.
