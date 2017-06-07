@@ -1,5 +1,5 @@
 
-% root = 'C:\Users\Graham\Documents\MATLAB\MOtoNMS_v2_2\MyData\ElaboratedData';
+% root = 'C:\Users\Graham\SharePoint\GORDON Daniel\Exoskeleton metrics data\Data files\Exoskeleton metrics data\Data files\';
 % 
 % load ([root 'IK_Results.mat'])
 
@@ -14,7 +14,7 @@ for subject=1:8
             % Loop over the ten contexts. 
             for i=1:10  
                 
-                if i == 1 || i == 2 || i == 4 || i == 6 || i == 8
+                if i == 1 || i == 2 || i == 4 || i == 6 || i == 8 || i == 10
                     
                     % Loop over the five gait cycles for the relevant
                     % contexts
@@ -82,3 +82,6 @@ for subject=1:8
         end      
     end
 end
+
+% Save the results to a Matlab save file.
+% save([root 'Step_width_array.mat'], 'step_Width_array');
