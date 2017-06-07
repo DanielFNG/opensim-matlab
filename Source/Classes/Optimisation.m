@@ -52,29 +52,55 @@ classdef Optimisation
         function OptResult = run(obj, identifier)
             % Identifier should identify which optimisation method to use.
             
+            % Load the dofs for the human and exoskeleton models.
+            [n, k] = obj.loadDegreesOfFreedom();
+            
             % Construct a results array of the correct size for the number
             % of frames and optimisation variables.
             results = zeros(obj.Frames, 2*obj.HumanDOFS + obj.ExoDOFS);
             
-            % Load the dofs for the human and exoskeleton models.
-            [n, k] = obj.loadDegreesOfFreedom();
+            % Construct the inequality constraints from the exoskeleton
+            % torque limits.
+            [C, d] = obj.setupTorqueLimits();
             
-            % Solve the optimisation problem at each frame.
-            for i=1:obj.Frames
-                % Construct the inequality constraints from the exoskeleton
-                % torque limits.
-                [C, d] = obj.setupTorqueLimits();
+            % If the identifer is HQP, setup an array to hold the slack results,
+            % then setup and run the optimisation. If it's not, try to run
+            % setup for one of the LLS methods. 
+            if strcmp(identifier, 'HQP')
+                % Setup array to hold slack variable results.
+                slack_variables = 3; % Need 3 slack variables currently. 
+                slack = zeros(slack_variables, obj.Frames, obj.HumanDOFS);
                 
-                % Get access to the force model parameters.
-                [P, Q] = obj.getForceModelParameters(i);
+                % Solve the optimisation problem at each frame.
+                for i=1:obj.Frames
+                    % Get access to the force model parameters.
+                    [P, Q] = obj.getForceModelParameters(i);
+                    
+                    % Set up and run optimisation.
+                    [results(i,1:end), slack(1:end,i,1:end)]  = ...
+                        obj.setupAndRunHQP(i, n, k, C, d, P, Q);
+                end
                 
-                % Set up and run optimisation. 
-                [A,b,E,f] = obj.setupOptimisation(identifier, i, n, k, P, Q);
-                results(i,1:end) = obj.runOptimisation(identifier,A,b,C,d,E,f);
+                % Process results.
+                OptResult = OptimisationResult(obj, identifier, results, slack);
+            else
+                % Solve the optimisation problem at each frame.
+                for i=1:obj.Frames
+                    % Get access to the force model parameters.
+                    [P, Q] = obj.getForceModelParameters(i);
+                    
+                    % Setup and run optimisation.
+                    [A,b,E,f] = ...
+                        obj.setupOptimisation(identifier, i, n, k, P, Q);
+                    results(i,1:end) = ...
+                        obj.runOptimisation(identifier,A,b,C,d,E,f);
+                end
+                
+                % Process results. 
+                OptResult = OptimisationResult(obj, identifier, results);
             end
-            
-            % Process results as an OptimisationResult. 
-            OptResult = OptimisationResult(obj, identifier, results);
+            % Note: thought it better to have two loops rather than a check
+            % for the identifier in every loop. 
         end
         
     end
@@ -88,8 +114,6 @@ classdef Optimisation
                 [A,b,E,f] = obj.setupLLS(index, n, k, P, Q);
             elseif strcmp(identifier, 'LLSE')
                 [A,b,E,f] = obj.setupLLSE(index, n, k, P, Q);
-            elseif strcmp(identifier, 'HQP')
-                [A,b,E,f] = obj.setupHQP(index, n, k, P, Q);
             else
                 error('Specified optimisation method not recognised.');
             end
@@ -150,6 +174,61 @@ classdef Optimisation
             A = [zeros(n,k), zeros(n), eye(n)]; % coefficient matrix
             b = obj.DesiredTorques.getDesiredVector(index); % desired         
         end
+        
+        function [results, slack] = setupAndRunHQP(index, n, k, C, d, P, Q)
+            % Initialise the slack array. Hard-coded as 3 slack variables
+            % now... better way of doing this though... 
+            slack = zeros(3,n);
+            
+            % The objective function is eqivalent to minimising the squared
+            % error in the slack variable. The slack variable joints the
+            % usual optimisation variable set, at the end, and is 23
+            % dimensional. 
+            H = 2*[zeros(48), zeros(48,23); zeros(23,48), eye(23)];
+            f = [];
+            
+            % Setup first QP level. Equality constraint is simply the dynamics 
+            % equation.
+            A = [zeros(n,k), eye(n), eye(n), eye(n)];
+            b = obj.InputTorques.getVector(index);
+            
+            % Solve first QP level.
+            full_results = quadprog(H,f,C,d,A,b);
+            
+            % Save the first slack variable. 
+            slack(1,1:end) = full_results(k + 2*n + 1:end);
+            
+            % Setup second QP level. Equality constraint now adds the force
+            % model.
+            A = [zeros(n,k), eye(n), eye(n), zeros(n); ...
+                -P, eye(n), zeros(n), -eye(n)];
+            b = [obj.InputTorques.getVector(index) - slack(1,1:end); Q];
+            
+            % Solve second QP level.
+            full_results = quadprog(H,f,C,d,A,b);
+            
+            % Save the second slack variable.
+            slack(2,1:end) = full_results(k + 2*n + 1:end);
+            
+            % Setup third QP level. Now includes desired. 
+            A = [zeros(n,k), eye(n), eye(n), zeros(n); ...
+                -P, eye(n), zeros(n), zeros(n); ...
+                zeros(n,k), zeros(n), eye(n), -eye(n)];
+            b = [obj.InputTorques.getVector(index) - slack(1,1:end); ...
+                Q + slack(2,1:end); ...
+                obj.DesiredTorques.getDesiredVector(index)];
+            
+            % Solve third QP level.
+            full_results = quadprog(H,f,C,d,A,b);
+            
+            % Save the third slack variable.
+            slack(3,1:end) = full_results(k + 2*n + 1:end);
+            
+            % Save the final, overall results.
+            results = full_results(1:k + 2*n);
+            
+        end
+        
     end
     
     methods (Access = private, Static)
@@ -160,8 +239,6 @@ classdef Optimisation
             if strcmp(identifier, 'LLS') || strcmp (identifier, 'LLSE') || ...
                     strcmp(identifier, 'LLSEE')
                 results = lsqlin(A,b,C,d,E,f);
-            elseif strcmp(identifier, 'HQP')
-                % Do HQP.
             else
                 error('Specified optimisation method not recognised.');
             end

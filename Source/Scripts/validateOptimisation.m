@@ -110,3 +110,6 @@ llse_time = toc;
 tic;
 OptResultLLSEE = opt.run('LLSEE');
 llsee_time = toc;
+tic;
+OptResultHQP = opt.run('HQP');
+hqp_time = toc;
