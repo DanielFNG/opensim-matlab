@@ -25,7 +25,7 @@ current_RRA = 0;
 h = waitbar(current_RRA, 'Performing batch RRA with adjustment.');
 
 % Loop over the nine subjects. 
-for subject=6:8
+for subject=7:7
     % Skip the missing data.
     if ~ (subject == 5)
         % There are four dates which need to be represented in the path.
@@ -78,7 +78,7 @@ for subject=6:8
         adjusted_model_APO = RRA_adjustments{subject,2}.getAdjustedModel();
         
         % Loop over left/right gait cycles. 
-        for j=1:2
+        for j=1:1
             switch j
                 case 1
                     gait = [subject_path '\dynamicElaborations\right'];
@@ -87,7 +87,7 @@ for subject=6:8
             end
             
             % Loop over the ten contexts. 
-            for i=1:10 
+            for i=6:10 
                 % Ignore contexts 3 and 5.
                 if ~(subject == 3 || subject == 5)
                 % Filenames are different for steady state vs non steady state.
