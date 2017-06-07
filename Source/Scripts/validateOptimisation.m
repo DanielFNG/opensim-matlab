@@ -102,6 +102,9 @@ id_APO = id_APO_trial.runID(start_time, end_time);
 %% Run optimisation. 
 opt = Optimisation(id_APO, des, model);
 tic;
+OptResultHQP = opt.run('HQP');
+hqp_time = toc;
+tic;
 OptResultLLS = opt.run('LLS');
 lls_time = toc;
 tic;
@@ -110,6 +113,3 @@ llse_time = toc;
 tic;
 OptResultLLSEE = opt.run('LLSEE');
 llsee_time = toc;
-tic;
-OptResultHQP = opt.run('HQP');
-hqp_time = toc;

@@ -68,7 +68,7 @@ classdef Optimisation
             % setup for one of the LLS methods. 
             if strcmp(identifier, 'HQP')
                 % Setup array to hold slack variable results.
-                slack_variables = 3; % Need 3 slack variables currently. 
+                slack_variables = 2; % Need 2 slack variables currently. 
                 slack = zeros(slack_variables, obj.Frames, obj.HumanDOFS);
                 
                 % Solve the optimisation problem at each frame.
@@ -175,54 +175,49 @@ classdef Optimisation
             b = obj.DesiredTorques.getDesiredVector(index); % desired         
         end
         
-        function [results, slack] = setupAndRunHQP(index, n, k, C, d, P, Q)
+        function [results, slack] = setupAndRunHQP(obj, index, n, k, C, d, P, Q)
             % Initialise the slack array. Hard-coded as 3 slack variables
             % now... better way of doing this though... 
-            slack = zeros(3,n);
+            slack = zeros(2,n);
+            
+            % Append zero-matrices of size n on to the inequality
+            % constraint matrix to account for the slack variable at each
+            % step.
+            C = [C, zeros(2*k,n)];
             
             % The objective function is eqivalent to minimising the squared
             % error in the slack variable. The slack variable joints the
             % usual optimisation variable set, at the end, and is 23
             % dimensional. 
-            H = 2*[zeros(48), zeros(48,23); zeros(23,48), eye(23)];
+            H = 2*[zeros(2*n + k), zeros(2*n + k, n); ...
+                zeros(n, 2*n + k), eye(n)];
             f = [];
             
-            % Setup first QP level. Equality constraint is simply the dynamics 
-            % equation.
-            A = [zeros(n,k), eye(n), eye(n), eye(n)];
-            b = obj.InputTorques.getVector(index);
+            % Setup first QP level. Equality constraint now adds the force
+            % model.
+            A = [zeros(n,k), eye(n), eye(n), zeros(n); ...
+                -P, eye(n), zeros(n), -eye(n)];
+            b = [obj.InputTorques.getVector(index); Q];
             
             % Solve first QP level.
             full_results = quadprog(H,f,C,d,A,b);
             
-            % Save the first slack variable. 
+            % Save the first slack variable.
             slack(1,1:end) = full_results(k + 2*n + 1:end);
             
-            % Setup second QP level. Equality constraint now adds the force
-            % model.
+            % Setup second QP level. Now includes desired. 
             A = [zeros(n,k), eye(n), eye(n), zeros(n); ...
-                -P, eye(n), zeros(n), -eye(n)];
-            b = [obj.InputTorques.getVector(index) - slack(1,1:end); Q];
+                -P, eye(n), zeros(n), zeros(n); ...
+                zeros(n,k), zeros(n), eye(n), -eye(n)];
+            b = [obj.InputTorques.getVector(index); ...
+                Q + slack(1,1:end).'; ...
+                obj.DesiredTorques.getDesiredVector(index)];
             
             % Solve second QP level.
             full_results = quadprog(H,f,C,d,A,b);
             
             % Save the second slack variable.
             slack(2,1:end) = full_results(k + 2*n + 1:end);
-            
-            % Setup third QP level. Now includes desired. 
-            A = [zeros(n,k), eye(n), eye(n), zeros(n); ...
-                -P, eye(n), zeros(n), zeros(n); ...
-                zeros(n,k), zeros(n), eye(n), -eye(n)];
-            b = [obj.InputTorques.getVector(index) - slack(1,1:end); ...
-                Q + slack(2,1:end); ...
-                obj.DesiredTorques.getDesiredVector(index)];
-            
-            % Solve third QP level.
-            full_results = quadprog(H,f,C,d,A,b);
-            
-            % Save the third slack variable.
-            slack(3,1:end) = full_results(k + 2*n + 1:end);
             
             % Save the final, overall results.
             results = full_results(1:k + 2*n);
