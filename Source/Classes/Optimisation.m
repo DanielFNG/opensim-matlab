@@ -149,8 +149,9 @@ classdef Optimisation
             % Construct system to solve.
             A = [zeros(n,k), eye(n), eye(n);
                 -P, eye(n), zeros(n);
-                zeros(n,k), zeros(n), eye(n)];
-            b = [obj.InputTorques.getVector(index); Q ; ...
+                zeros(n,k), zeros(n), obj.DesiredTorques.CoefficientMatrix];
+            b = [obj.InputTorques.getVector(index); ...
+                Q ; ...
                 obj.DesiredTorques.getDesiredVector(index)];
            
         end
@@ -161,7 +162,8 @@ classdef Optimisation
             f = obj.InputTorques.getVector(index);
             
             % Construct system to solve.
-            A = [-P, eye(n), zeros(n); zeros(n,k), zeros(n), eye(n)];
+            A = [-P, eye(n), zeros(n); ...
+                zeros(n,k), zeros(n), obj.DesiredTorques.CoefficientMatrix];
             b = [Q ; obj.DesiredTorques.getDesiredVector(index)];
         end
         
@@ -171,7 +173,7 @@ classdef Optimisation
             f = [obj.InputTorques.getVector(index); Q];
             
             % Construct system to solve.
-            A = [zeros(n,k), zeros(n), eye(n)]; % coefficient matrix
+            A = [zeros(n,k), zeros(n), obj.DesiredTorques.CoefficientMatrix]; 
             b = obj.DesiredTorques.getDesiredVector(index); % desired         
         end
         
@@ -208,7 +210,7 @@ classdef Optimisation
             % Setup second QP level. Now includes desired. 
             A = [zeros(n,k), eye(n), eye(n), zeros(n); ...
                 -P, eye(n), zeros(n), zeros(n); ...
-                zeros(n,k), zeros(n), eye(n), -eye(n)];
+                zeros(n,k), zeros(n), obj.DesiredTorques.CoefficientMatrix, -eye(n)];
             b = [obj.InputTorques.getVector(index); ...
                 Q + slack(1,1:end).'; ...
                 obj.DesiredTorques.getDesiredVector(index)];
