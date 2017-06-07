@@ -27,6 +27,13 @@ classdef Desired
             end
         end
         
+        % Return the vector of desired torques at a given time index. This
+        % is given as a column vector, and has no time column. This is used
+        % during the optimisation. 
+        function desired_vector = getDesiredVector(obj, index)
+            desired_vector = obj.Result.Values(index,2:end).';
+        end
+        
         function obj = evaluateDesired(obj, IDResult)
             if strcmp(obj.mode, 'percentage_reduction')
                 obj.mode = 'percentage_reduction';
