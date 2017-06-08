@@ -3,19 +3,19 @@
 % adjustments array just for simplicity.
 
 % Create cell array to hold results.
-RRA_array{9,3,2,10} = {};
+% RRA_array{9,3,2,10} = {};
 
 % Create a temporary storage directory to be used as the Trial results
 % folder.
-results = ['C:\Users\danie\University of Edinburgh\OneDrive - University '...
-    'of Edinburgh\Exoskeleton metrics data\Storage\'];
+results = ['C:\Users\Daniel\University of Edinburgh\OneDrive - University '...
+    'of Edinburgh\Exoskeleton metrics data\Storage'];
 
 % Get the root folder.
-root = ['C:\Users\danie\University of Edinburgh\OneDrive - University '...
+root = ['C:\Users\Daniel\University of Edinburgh\OneDrive - University '...
     'of Edinburgh\Exoskeleton metrics data\Data files\'];
 
-% Loop over the four subjects for which we have RRA data.
-for subject=2:4
+% Loop over the eight subjects. 
+for subject=4:8
     % There are four dates which need to be represented in the path.
     if subject == 1 || subject == 3 || subject == 4
         date = '18';
@@ -115,8 +115,8 @@ for subject=2:4
 
                     % Interpret the RRA data within each subfolder.
                     inside_rra_folder = dir([rra_folder{k} '\' num2str(loop-2)]);
-                    inner_rra_folder{k} = [rra_folder{k} '\' num2str(loop-2) '\' inside_rra_folder(3,1).name '\RRA'];
-                    inner_rra_array{1,loop-2} = RRAResults(trial, inner_rra_folder{k});
+                    inner_rra_array{1,loop-2} = RRAResults(trial, ...
+                        [rra_folder{k} '\' num2str(loop-2) '\' inside_rra_folder(3,1).name '\RRA']);
                 end
                 
                 % Add the inner rra result to the main RRA array.
@@ -127,5 +127,12 @@ for subject=2:4
             end
         end
     end
+    
+    % Save the results in a separate file incase we run out of memory. 
+    RRA_subject_array = RRA_array(subject,:,:,:);
+    save([root ['RRA_Results_' int2str(subject) '.mat']], 'RRA_subject_array');
 end
+
+% Finally, if we don't run out of memory, save the entire thing.
+save([root 'RRA_Results.mat'], 'RRA_array');
     

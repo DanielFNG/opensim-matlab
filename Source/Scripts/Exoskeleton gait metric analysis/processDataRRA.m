@@ -4,8 +4,8 @@
 % RRA_adjustments is indexed by the subject and then whether the model is
 % with (2) or without (1) the APO.
 % RRA_array follows the same indexing style as described in 'processDataIK.m'.
-% RRA_adjustments{9,2} = {};
-% RRA_array{9,3,2,10} = {};
+RRA_adjustments{9,2} = {};
+RRA_array{9,3,2,10} = {};
 
 % Get the root folder.
 root = ['C:\Users\Daniel\University of Edinburgh\OneDrive - University '...
@@ -25,7 +25,7 @@ current_RRA = 0;
 h = waitbar(current_RRA, 'Performing batch RRA with adjustment.');
 
 % Loop over the nine subjects. 
-for subject=7:7
+for subject=8:8
     % Skip the missing data.
     if ~ (subject == 5)
         % There are four dates which need to be represented in the path.
@@ -78,7 +78,7 @@ for subject=7:7
         adjusted_model_APO = RRA_adjustments{subject,2}.getAdjustedModel();
         
         % Loop over left/right gait cycles. 
-        for j=2:2
+        for j=1:2
             switch j
                 case 1
                     gait = [subject_path '\dynamicElaborations\right'];
@@ -138,4 +138,4 @@ end
 close(h);
 
 % Save the results to a Matlab save file. 
-% save([root 'RRA_Results.mat'], 'RRA_array', 'RRA_adjustments');
+save([root 'RRA_Results.mat'], 'RRA_array', 'RRA_adjustments');
