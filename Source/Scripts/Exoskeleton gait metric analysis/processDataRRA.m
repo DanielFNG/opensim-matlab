@@ -5,7 +5,7 @@
 % with (2) or without (1) the APO.
 % RRA_array follows the same indexing style as described in 'processDataIK.m'.
 RRA_adjustments{9,2} = {};
-RRA_array{9,3,2,10} = {};
+% RRA_array{9,3,2,10} = {};
 
 % Get the root folder.
 root = ['C:\Users\Daniel\University of Edinburgh\OneDrive - University '...
@@ -25,7 +25,7 @@ current_RRA = 0;
 h = waitbar(current_RRA, 'Performing batch RRA with adjustment.');
 
 % Loop over the nine subjects. 
-for subject=8:8
+for subject=3:3
     % Skip the missing data.
     if ~ (subject == 5)
         % There are four dates which need to be represented in the path.
@@ -89,7 +89,7 @@ for subject=8:8
             % Loop over the ten contexts. 
             for i=1:10 
                 % Ignore contexts 3 and 5.
-                if ~(subject == 3 || subject == 5)
+                if ~(i == 3 || i == 5)
                 % Filenames are different for steady state vs non steady state.
                     if mod(i,2) == 1
                         folder = [gait 'Non-StSt'];
@@ -132,10 +132,13 @@ for subject=8:8
             end
         end
     end
+    % Save single subject result. 
+RRA_subject_array = RRA_array(subject,:,:,:);
+    save([root ['RRA_Results_' int2str(subject) '.mat']], 'RRA_subject_array');
 end
 
 % Close the loading bar.
 close(h);
 
 % Save the results to a Matlab save file. 
-save([root 'RRA_Results.mat'], 'RRA_array', 'RRA_adjustments');
+save([root 'RRA_Results.mat'], 'RRA_array', '-v7.3');
