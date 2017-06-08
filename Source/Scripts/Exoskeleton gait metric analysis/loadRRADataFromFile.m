@@ -15,7 +15,7 @@ root = ['C:\Users\Daniel\University of Edinburgh\OneDrive - University '...
     'of Edinburgh\Exoskeleton metrics data\Data files\'];
 
 % Loop over the eight subjects. 
-for subject=4:8
+for subject=6:8
     % There are four dates which need to be represented in the path.
     if subject == 1 || subject == 3 || subject == 4
         date = '18';
