@@ -17,7 +17,7 @@ else
 end
 
 % Obtain the files in the ik and grf folders. 
-ik_struct = dir([ik_folder '/*.mot']);
+ik_struct = dir([ik_folder '/*.sto']);
 grf_struct = dir([grf_folder '/*.mot']);
 
 % Check we have the same number of files. 

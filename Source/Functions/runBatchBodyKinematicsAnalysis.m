@@ -13,6 +13,11 @@ end
 % Obtain the files in the input folder.
 ik_struct = dir([input_folder '/*.mot']);
 
+% If there were no mot files, assume we're doing it with an RRA instead. 
+if size(ik_struct,1) == 0
+    ik_struct = dir([input_folder '/*.sto']);
+end
+
 % Create a cell array to hold the results.
 n_files = size(ik_struct,1);
 Positions_array{n_files} = {};
