@@ -188,9 +188,13 @@ classdef Desired
                     'desired ID is too large (>5%).']);
             end 
             
-            % Spline the desired ID so that it is on the same number of
-            % points as the input IDResult.
+            % Spline the desired ID so that it is at the same frequency as
+            % the input IDResult.
             des = des.id.fitToSpline(IDResult.id.Frequency);
+            
+            % Stretch/compress the desired ID so that it is on the exact
+            % same number of frames as the input IDResult.
+            des = des.stretchOrCompress(IDResult.id.Frames);
             
             % If required shift the desired.
             if shift ~= 0

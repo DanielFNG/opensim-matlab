@@ -64,7 +64,9 @@ spatial = force_model.calculateSpatialForcesFromTorqueTrajectory(t.');
 ext.writeToFile('grf_withAPO.mot',1,1);
 
 % Create the trial for doing id.
-id_APO_trial = OpenSimTrial(model, LLSResult.OfflineController.ForceModel.RRA.positions_path, load_apo, 'grf_withAPO.mot', apo_osim_dir);
+id_APO_trial = OpenSimTrial(model, ...
+    LLSResult.OfflineController.ForceModel.RRA.positions_path, ...
+    load_apo, 'grf_withAPO.mot', apo_osim_dir);
 
 % Run ID, i.e. calculate simulated human contribution. 
 id_APO = id_APO_trial.runID();

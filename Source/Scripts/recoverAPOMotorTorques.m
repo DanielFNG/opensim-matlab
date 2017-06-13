@@ -36,13 +36,15 @@ apo_data = 'APO_data_right_StSt_EA2.mat';
 
 %% Set up desired AKA the net torque case. 
 % Construct an OpenSimTrial with only ground reaction forces.
-trial = OpenSimTrial(system_model, ik, load_type_1, grf, trial_directory_1);
+trial = OpenSimTrial(...
+    system_model, ik, load_type_1, grf, trial_directory_1);
 
 % Run RRA.
 rra = trial.runRRA();
 
 % Construct a new OpenSimTrial using the RRA-corrected kinematics.
-id_trial = OpenSimTrial(system_model, rra.positions_path, load_type_1, grf, trial_directory_1);
+id_trial = OpenSimTrial(...
+    system_model, rra.positions_path, load_type_1, grf, trial_directory_1);
 
 % Run ID.
 id = id_trial.runID();
@@ -54,7 +56,8 @@ des = Desired('match_id', 'all', id);
 apo = Exoskeleton('APO');
 n = trial.human_dofs;
 k = apo.Exo_dofs;
-model = apo.constructExoskeletonForceModel(rra, model_directory, force_model);
+model = apo.constructExoskeletonForceModel(...
+    rra, model_directory, force_model);
 
 %% Set up APO torques.
 % Load in APO data.
@@ -64,9 +67,11 @@ load(apo_data);
 APO_data = zeros(112,5);
 APO_data(1:17,1:end) = APO_data_copy2(28:44,1:end);
 APO_data(18,1) = 0.44;
-APO_data(18,2:end) = APO_data_copy2(44,2:end) + 0.5*(APO_data_copy2(46,2:end) - APO_data_copy2(44,2:end))/2;
+APO_data(18,2:end) = APO_data_copy2(44,2:end) ...
+    + 0.5*(APO_data_copy2(46,2:end) - APO_data_copy2(44,2:end))/2;
 APO_data(19,1) = 0.45;
-APO_data(19,2:end) = APO_data_copy2(46,2:end) - 0.5*(APO_data_copy2(46,2:end) - APO_data_copy2(44,2:end))/2;
+APO_data(19,2:end) = APO_data_copy2(46,2:end) ...
+    - 0.5*(APO_data_copy2(46,2:end) - APO_data_copy2(44,2:end))/2;
 APO_data(20:end,1:end) = APO_data_copy2(46:138,1:end);
 
 % Save the left and right motor torques to arrays. 
@@ -87,7 +92,8 @@ apo_only.writeToFile('grf_onlyAPO.mot',1,1);
 %% Set up input data aka taking the APO in to account. 
 % Construct an OpenSimTrial using the RRA-corrected kinematics from the
 % grf-only run, but the new grfs. 
-id_APO_trial = OpenSimTrial(system_model, rra.positions_path, load_type_2, 'grf_withAPO.mot', trial_directory_2);
+id_APO_trial = OpenSimTrial(system_model, rra.positions_path, ...
+    load_type_2, 'grf_withAPO.mot', trial_directory_2);
 
 % Run ID.
 id_APO = id_APO_trial.runID();

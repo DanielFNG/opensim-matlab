@@ -678,6 +678,21 @@ classdef Data
             % ISN'T THE CASE. LEAVING THIS FOR NOW BUT WILL COME BACK TO
             % THIS. SEE SAVED GRAPHS TO SEE WHAT I MEAN. 
         end
+    
+        % Stretch or compress a data object to lie on the given number of
+        % frames.
+        function obj = stretchOrCompress(obj, frames)
+            new_values = zeros(frames, size(obj.Values,2));
+            for i=1:size(obj.Values,2)
+                new_values(1:end,i) = ...
+                    stretchVector(obj.Values(1:end,i), frames);
+            end
+            obj.Values = new_values;
+            obj.Frames = frames;
+            obj = obj.updateHeader();
+        end
+            
+        
     end
     
     methods(Static)
