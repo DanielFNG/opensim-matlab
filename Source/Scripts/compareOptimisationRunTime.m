@@ -72,11 +72,11 @@ model = apo.constructExoskeletonForceModel(...
     tilted_rra, model_directory, force_model);
 
 %% Run the different optimisations. 
-LLSTime{3} = {};
-LLSETime{3} = {};
-LLSEETime{3} = {};
-HQPTime{3} = {};
-for j=1:2
+LLSTime{3,10} = {};
+LLSETime{3,10} = {};
+LLSEETime{3,10} = {};
+HQPTime{3,10} = {};
+for j=1:10
     for i=1:3
         if i == 1
             opt = Optimisation(tilted_id, pred_des, model);
