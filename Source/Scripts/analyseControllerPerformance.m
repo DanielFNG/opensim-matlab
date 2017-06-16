@@ -14,6 +14,7 @@ load_type = 'normal';
 trial_directory = 'ost_normal';
 tilted_directory = 'ost_tilted';
 model_directory = 'jacobians';
+tilted_model_directory = 'jacobians_tilted';
 
 %% Set up the input tilted trial and a flat trial to use as a desired.  
 
@@ -69,18 +70,20 @@ match_des = Desired('match_id', 'all', id);
 %% Set up exoskeleton and model.
 apo = Exoskeleton('APO');
 model = apo.constructExoskeletonForceModel(...
-    tilted_rra, model_directory, force_model);
+    rra, model_directory, force_model);
+tilted_model = apo.constructExoskeletonForceModel(...
+    tilted_rra, tilted_model_directory, force_model);
 
 %% Run LLSEE for each of the desireds. 
 
 LLSEEResult{3} = {};
 for i=1:3
     if i == 1
-        opt = Optimisation(tilted_id, pred_des, model);
+        opt = Optimisation(id, pred_des, model);
     elseif i == 2
-        opt = Optimisation(tilted_id, med_des, model);
+        opt = Optimisation(id, med_des, model);
     elseif i == 3
-        opt = Optimisation(tilted_id, match_des, model);
+        opt = Optimisation(tilted_id, match_des, tilted_model);
     end
     LLSEEResult{i} = opt.run('LLSEE');
 end
