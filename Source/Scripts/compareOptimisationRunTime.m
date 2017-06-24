@@ -75,7 +75,12 @@ model = apo.constructExoskeletonForceModel(...
 LLSTime{3,10} = {};
 LLSETime{3,10} = {};
 LLSEETime{3,10} = {};
+LLSEESparseTime{3,10} = {};
 HQPTime{3,10} = {};
+OASESTime{3,10} = {};
+OASES_SparseTime{3,10} = {};
+OASES_FastTime{3,10} = {};
+OASES_FastAndSparseTime{3,10} = {};
 for j=1:10
     for i=1:3
         if i == 1
@@ -85,18 +90,67 @@ for j=1:10
         else
             opt = Optimisation(tilted_id, match_des, model);
         end
-        tic;
-        LLSResult = opt.run('LLS');
-        LLSTime{i,j} = toc;
-        tic;
-        LLSEResult = opt.run('LLSE');
-        LLSETime{i,j} = toc;
-        tic;
-        LLSEEResult = opt.run('LLSEE');
-        LLSEETime{i,j} = toc;
+%         tic;
+%         LLSResult = opt.run('LLS');
+%         LLSTime{i,j} = toc;
+%         tic;
+%         LLSEResult = opt.run('LLSE');
+%         LLSETime{i,j} = toc;
+%         tic;
+%         LLSEEResult = opt.run('LLSEE');
+%         LLSEETime{i,j} = toc;
+%         tic;
+%         LLSEESparseResult = opt.run('LLSEESparse');
+%         LLSEESparseTime{i,j} = toc;
         tic;
         HQPResult = opt.run('HQP');
-        HQPTime{i,j} = toc;
-        toc
+        HQPTime{i,j} = toc;  
+        tic;
+        OASESResult = opt.run('LLS_OASES');
+        OASESTime{i,j} = toc;
+        tic;
+        OASES_SparseResult = opt.run('LLS_OASES_SPARSE');
+        OASES_SparseTime{i,j} = toc;
+%         tic;
+%         OASES_FastResult = opt.run('LLS_OASES_FAST');
+%         OASES_FastTime{i,j} = toc;
+%         tic;
+%         OASES_FastAndSparseResult = opt.run('LLS_OASES_FAST_SPARSE');
+%         OASES_FastAndSparseTime{i,j} = toc;
     end
+end
+
+%% Compute the averages.
+
+averages = zeros(9,3);
+lls_time = zeros(10,1);
+llse_time = zeros(10,1);
+llsee_time = zeros(10,1);
+llsee_sparse_time = zeros(10,1);
+hqp_time = zeros(10,1);
+oases_time = zeros(10,1);
+oases_sparse_time = zeros(10,1);
+oases_fast_time = zeros(10,1);
+oases_sparse_fast_time = zeros(10,1);
+for i=1:3
+    for j=1:10
+        lls_time(j,1) = LLSTime{i,j};
+        llse_time(j,1) = LLSETime{i,j};
+        llsee_time(j,1) = LLSEETime{i,j};
+        llsee_sparse_time(j,1) = LLSEESparseTime{i,j};
+        hqp_time(j,1) = HQPTime{i,j};
+        oases_time(j,1) = OASESTime{i,j};
+        oases_sparse_time(j,1) = OASES_SparseTime{i,j};
+        oases_fast_time(j,1) = OASES_FastTime{i,j};
+        oases_sparse_fast_time(j,1) = OASES_FastAndSparseTime{i,j};
+    end
+    averages(1,i) = mean(lls_time);
+    averages(2,i) = mean(llse_time);
+    averages(3,i) = mean(llsee_time);
+    averages(4,i) = mean(llsee_sparse_time);
+    averages(5,i) = mean(hqp_time);
+    averages(6,i) = mean(oases_time);
+    averages(7,i) = mean(oases_sparse_time);
+    averages(8,i) = mean(oases_fast_time);
+    averages(9,i) = mean(oases_sparse_fast_time);
 end

@@ -29,6 +29,8 @@ setenv('EXOPT_HOME', pwd);
 % (so it has access to the startup file if it's here).
 addpath(genpath([getenv('EXOPT_HOME') filesep 'Source']));
 addpath(genpath([getenv('EXOPT_HOME') filesep 'Setup']));
+addpath(genpath([getenv('EXOPT_HOME') filesep 'Libraries' filesep ...
+    'qpOASES-3.2.1' filesep 'interfaces' filesep 'matlab']));
 savepath;
 
 % Go back to the setup folder. 
