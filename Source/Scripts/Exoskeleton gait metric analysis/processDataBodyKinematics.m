@@ -4,7 +4,7 @@
 % Follows the same indexing style as described in 'processDataCoM.m'.
 Positions_array{9,3,2,10} = {};
 Velocities_array{9,3,2,10} = {};
-Accelerations_array{9,3,2,10} = [];
+Accelerations_array{9,3,2,10} = {};
 
 % Get the root folder. 
 root = ['C:\Users\Daniel\University of Edinburgh\OneDrive - University '...
@@ -124,4 +124,4 @@ for subject=1:8
     end
 end
 
-save ([root 'BodyKinematics_Results.mat'], 'Positions_array', 'Velocities_array', 'Accelerations_array');
+save([root 'Updated_BodyKinematics_Results.mat'], 'Positions_array', 'Velocities_array', 'Accelerations_array');

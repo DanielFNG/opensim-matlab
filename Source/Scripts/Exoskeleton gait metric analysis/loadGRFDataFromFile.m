@@ -2,7 +2,7 @@
 % and save these to a Matlab save file for future use.
 
 % Create cell array to hold results.
-GRF_array{9,3,2,10} = {};
+GRF_array{8,3,2,10} = {};
 
 % Get the root folder.
 root = ['C:\Users\Daniel\University of Edinburgh\OneDrive - University '...
@@ -78,5 +78,5 @@ for subject=1:8
 end
 
 % Finally, save.
-save([root 'GRF_Data.mat'], 'GRF_array');
+save([root 'Updated_GRF_Data.mat'], 'GRF_array');
     

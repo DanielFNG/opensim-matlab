@@ -8,9 +8,9 @@
 % Third index is the number of gait cycles among the trials. (EA1, EA2
 % etc). These are in the same order as they were recorded. So EA1 is
 % nonstst, EA2 stst, etc.
-IK_array{9,3,2,10} = {};
-Input_Markers_array{9,3,2,10} = {};
-Output_Markers_array{9,3,2,10} = {};
+IK_array{8,3,2,10} = {};
+Input_Markers_array{8,3,2,10} = {};
+Output_Markers_array{8,3,2,10} = {};
 
 % Get the root folder. 
 root = ['C:\Users\Daniel\University of Edinburgh\OneDrive - University '...
@@ -103,6 +103,6 @@ end
 close(loadbar);
 
 % Save the results to a Matlab save file.
-save([root 'IK_Results.mat'], 'IK_array', 'Input_Markers_array', ... 
+save([root 'Updated_IK_Results.mat'], 'IK_array', 'Input_Markers_array', ... 
     'Output_Markers_array');
 

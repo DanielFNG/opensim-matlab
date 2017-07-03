@@ -20,6 +20,12 @@ end
 ik_struct = dir([ik_folder '/*.sto']);
 grf_struct = dir([grf_folder '/*.mot']);
 
+% If the ik_struct is empty, assume we have to use IK results instead of
+% RRA ones.
+if size(ik_struct,1) == 0
+    ik_struct = dir([ik_folder '/*.mot']);
+end
+
 % Check we have the same number of files. 
 if size(ik_struct,1) ~= size(grf_struct,1) 
     error('Number of IK and GRF files do not match.');

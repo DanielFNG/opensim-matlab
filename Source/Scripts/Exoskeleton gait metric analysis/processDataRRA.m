@@ -4,8 +4,8 @@
 % RRA_adjustments is indexed by the subject and then whether the model is
 % with (2) or without (1) the APO.
 % RRA_array follows the same indexing style as described in 'processDataIK.m'.
-% RRA_adjustments{9,2} = {};
-% RRA_array{9,3,2,10} = {};
+RRA_adjustments{8,2} = {};
+RRA_array{8,3,2,10} = {};
 
 % Get the root folder.
 root = ['C:\Users\Daniel\University of Edinburgh\OneDrive - University '...
@@ -25,10 +25,7 @@ current_RRA = 0;
 h = waitbar(current_RRA, 'Performing batch RRA with adjustment.');
 
 % Loop over the nine subjects. 
-for subject=1:1
-    % Load the RRA_array for this subject. 
-    load(['C:\Users\Daniel\University of Edinburgh\OneDrive - University of Edinburgh\Exoskeleton metrics data\Data files\RRA_Results_' num2str(subject) '.mat']);
-    
+for subject=8:8
     % Skip the missing data.
     if ~ (subject == 5)
         % There are four dates which need to be represented in the path.
@@ -100,7 +97,7 @@ for subject=1:1
                         folder = [gait 'StSt'];
                     end
 
-                    for assistance_level=2:3
+                    for assistance_level=1:3
                         % Get the IK and GRF folders. 
                         if assistance_level == 1
                             % No APO.
@@ -138,11 +135,18 @@ for subject=1:1
     
     % Save single subject result.
     RRA_subject_array = RRA_array(subject,:,:,:);
-    save([root ['RRA_Results_Retry_' int2str(subject) '.mat']], 'RRA_subject_array');
+    save([root ['Updated_RRA_Results_' int2str(subject) '.mat']], 'RRA_subject_array', '-v7.3');
+    
+    % Clear to save memory.
+    clear('RRA_subject_array');
+    clear('RRA_array');
+    
+    % Re-allocate RRA_array. 
+    RRA_array{8,3,2,10} = {};
 end
 
 % Close the loading bar.
 close(h);
 
 % % Save the results to a Matlab save file. 
-% save([root 'RRA_Results.mat'], 'RRA_array', '-v7.3');
+% save([root 'Updated_RRA_Results.mat'], 'RRA_array', '-v7.3');

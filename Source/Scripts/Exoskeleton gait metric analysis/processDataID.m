@@ -3,7 +3,7 @@
 % Create cell arrays to hold the results.
 % ID_array follows the same indexing style as described in
 % 'processDataIK.m'.
-% ID_array{9,3,2,10} = {};
+ ID_array{9,3,2,10} = {};
 
 % Get the root folder.
 root = ['C:\Users\Daniel\University of Edinburgh\OneDrive - University '...
@@ -81,24 +81,42 @@ for subject=1:8
                         folder = [gait 'StSt'];
                     end
 
-                    for assistance_level=3:3
-                        % Get the IK and GRF folders.
-                        if assistance_level == 1
-                            % No APO.
+                for assistance_level=1:3
+                    % Get the IK and GRF folders.
+                    if assistance_level == 1
+                        % No APO.
+                        grf_folder = [folder '\NE' num2str(i)];
+                        % Change model and use IK if context is 3 or 5.
+                        if i == 3 || i == 5
+                            ik_folder = [folder '\NE' num2str(i) '\IK_Results'];
+                            model = human_model;
+                        else
                             ik_folder = [folder '\NE' num2str(i) '\RRA_Results'];
-                            grf_folder = [folder '\NE' num2str(i)];
                             model = human_adjusted_model;
-                        elseif assistance_level == 2
-                            % With APO, transparent.
+                        end
+                    elseif assistance_level == 2
+                        % With APO, transparent.
+                        grf_folder = [folder '\ET' num2str(i)];
+                        % Change model and use IK if context is 3 or 5.
+                        if i == 3 || i == 5
+                            ik_folder = [folder '\ET' num2str(i) '\IK_Results'];
+                            model = APO_model;
+                        else
                             ik_folder = [folder '\ET' num2str(i) '\RRA_Results'];
-                            grf_folder = [folder '\ET' num2str(i)];
-                            model = APO_adjusted_model;
-                        elseif assistance_level == 3
-                            % With APO, assisted.
-                            ik_folder = [folder '\EA' num2str(i) '\RRA_Results'];
-                            grf_folder = [folder '\EA' num2str(i)];
                             model = APO_adjusted_model;
                         end
+                    elseif assistance_level == 3
+                        % With APO, assisted.
+                        grf_folder = [folder '\EA' num2str(i)];
+                        % Change model and use IK if context is 3 or 5.
+                        if i == 3 || i == 5
+                            ik_folder = [folder '\EA' num2str(i) '\IK_Results'];
+                            model = APO_model;
+                        else
+                            ik_folder = [folder '\EA' num2str(i) '\RRA_Results'];
+                            model = APO_adjusted_model;
+                        end
+                    end
 
                         % Perform batch RRA.
                         ID_array{subject,assistance_level,j,i} = ...
@@ -122,5 +140,5 @@ end
 close(h);
 
 % Save the results to a Matlab save file. 
-save([root 'ID_Results_Fixed.mat'], 'ID_array');
+save([root 'Updated_ID_Results.mat'], 'ID_array', '-v7.3');
     
