@@ -21,6 +21,8 @@ classdef Optimisation
     
     methods
         
+        % Create an optimisation object from an input IDResult, a desired,
+        % and an exoskeleton force model. 
         function obj = Optimisation(id, des, model)
             if nargin > 0
                 % Check that each input is of the correct type.
@@ -49,8 +51,30 @@ classdef Optimisation
         end
         
         % Perform the optimisation.
-        function OptResult = run(obj, identifier)
+        function OptResult = run(obj, identifier, sparse, fast)
             % Identifier should identify which optimisation method to use.
+            
+            % Determine whether sparse and/or fast are activated. After
+            % this, sparse and fast are set to 0 if inactive or 1 if
+            % active.
+            if nargin == 3
+                if strcmp(sparse, 'sparse')
+                    sparse = 1;
+                    fast = 0;
+                elseif strcmp(sparse, 'fast')
+                    sparse = 0;
+                    fast = 1;
+                else
+                    error('Input argument for optimisation.run not recognised');
+                end
+            elseif nargin == 4
+                if strcmp(sparse, 'sparse') && strcmp(fast, 'fast')
+                    sparse = 1;
+                    fast = 1;
+                else
+                    error('Input argument for optimisation.run not recognised');
+                end
+            end
             
             % Load the dofs for the human and exoskeleton models.
             [n, k] = obj.loadDegreesOfFreedom();
@@ -63,12 +87,15 @@ classdef Optimisation
             % torque limits.
             [C, d] = obj.setupTorqueLimits();
             
-            % If the identifer is HQP, setup an array to hold the slack results,
-            % then setup and run the optimisation. If it's not, try to run
-            % setup for one of the LLS methods. 
-            if strcmp(identifier, 'HQP')
+            % NOTE: the structure of the following code seems repetitive,
+            % but it avoids checking for the identifier within the loop
+            % over the states, which is desirable. 
+            
+            % If the identifer starts with 'HQP', setup an array to hold the
+            % slack results, then setup and run the optimisation.
+            if strcmp(identifier(1:3), 'HQP')
                 % Setup array to hold slack variable results.
-                slack_variables = 2; % Need 2 slack variables currently. 
+                slack_variables = 2; % Need 2 slack variables currently.
                 slack = zeros(slack_variables, obj.Frames, obj.HumanDOFS);
                 
                 % Solve the optimisation problem at each frame.
@@ -83,205 +110,81 @@ classdef Optimisation
                 
                 % Process results.
                 OptResult = OptimisationResult(obj, identifier, results, slack);
-            elseif strcmp(identifier, 'LLS_OASES_SPARSE')
-                % Setup Hessian matrix.
-                H = 2*[zeros(k + n, k + 2*n); zeros(n, k + n), eye(n)];
-                H = sparse(H);
-                
-                % Setup gradient vector. 
-                g = zeros(k + 2*n, 1);
-                
-                % Solve the optimisation problem at each frame.
-                for i=1:obj.Frames
-                    % Get access to the force model parameters.
-                    [P, ~] = obj.getForceModelParameters(i);
-                    
-                    % Construct the coefficient matrix.
-                    C = [P, eye(n), zeros(n); ...
-                        zeros(n,k), obj.DesiredTorques.CoefficientMatrix, -eye(n); ...
-                        eye(k), zeros(k,n), zeros(k,n)];
-                    C = sparse(C);
-                    
-                    % Construct lower bounds. 
-                    lbC = [obj.InputTorques.getVector(i); ...
-                        obj.DesiredTorques.getDesiredVector(i); ...
-                        -15; ...
-                        -15];
-                    
-                    % Construct upper bounds. 
-                    ubC = [obj.InputTorques.getVector(i); ...
-                        obj.DesiredTorques.getDesiredVector(i); ...
-                        15; ...
-                        15];
-                    
-                    % Run optimisation. 
-                    [x, ~, ~, ~, ~, ~] = qpOASES(H, g, C, [], [], lbC, ubC);
-                    
-                    % Save results.
-                    results(i,1:end) = x(1:k+2*n);
-                end
-                
-                % Process results. 
-                
-                OptResult = OptimisationResult(obj, identifier, results);
-                
-            elseif strcmp(identifier, 'LLS_OASES')
+               
+            % If the identifier starts with 'QP', setup the Hessian and
+            % gradient vector for running QPOases, then setup and run the
+            % optimisation.
+            elseif strcmp(identifier(1:2), 'QP')
                 % Setup Hessian matrix.
                 H = 2*[zeros(k + n, k + 2*n); zeros(n, k + n), eye(n)];
                 
-                % Setup gradient vector. 
+                % Setup gradient vector.
                 g = zeros(k + 2*n, 1);
-                
-                % Solve the optimisation problem at each frame.
-                for i=1:obj.Frames
-                    % Get access to the force model parameters.
-                    [P, ~] = obj.getForceModelParameters(i);
-                    
-                    % Construct the coefficient matrix.
-                    C = [P, eye(n), zeros(n); ...
-                        zeros(n,k), obj.DesiredTorques.CoefficientMatrix, -eye(n); ...
-                        eye(k), zeros(k,n), zeros(k,n)];
-                    
-                    % Construct lower bounds. 
-                    lbC = [obj.InputTorques.getVector(i); ...
-                        obj.DesiredTorques.getDesiredVector(i); ...
-                        -15; ...
-                        -15];
-                    
-                    % Construct upper bounds. 
-                    ubC = [obj.InputTorques.getVector(i); ...
-                        obj.DesiredTorques.getDesiredVector(i); ...
-                        15; ...
-                        15];
-                    
-                    % Run optimisation. 
-                    [x, ~, ~, ~, ~, ~] = qpOASES(H, g, C, [], [], lbC, ubC);
-                    
-                    % Save results.
-                    results(i,1:end) = x(1:k+2*n);
-                end
-                
-                % Process results. 
-                
-                OptResult = OptimisationResult(obj, identifier, results);
-            elseif strcmp(identifier, 'LLS_OASES_FAST')
-                % Setup Hessian matrix.
-                H = 2*[zeros(k + n, k + 2*n); zeros(n, k + n), eye(n)];
-                
-                % Setup gradient vector. 
-                g = zeros(k + 2*n, 1);
-                
-                % Solve the optimisation problem at each frame.
-                for i=1:obj.Frames
-                    % Get access to the force model parameters.
-                    [P, ~] = obj.getForceModelParameters(i);
-                    
-                    % Construct the coefficient matrix.
-                    C = [P, eye(n), zeros(n); ...
-                        zeros(n,k), obj.DesiredTorques.CoefficientMatrix, -eye(n); ...
-                        eye(k), zeros(k,n), zeros(k,n)];
-                    
-                    % Construct lower bounds. 
-                    lbC = [obj.InputTorques.getVector(i); ...
-                        obj.DesiredTorques.getDesiredVector(i); ...
-                        -15; ...
-                        -15];
-                    
-                    % Construct upper bounds. 
-                    ubC = [obj.InputTorques.getVector(i); ...
-                        obj.DesiredTorques.getDesiredVector(i); ...
-                        15; ...
-                        15];
-                    
-                    % Run optimisation. 
-                    options = qpOASES_options('fast');
-                    [x, ~, ~, ~, ~, ~] = qpOASES(H, g, C, [], [], lbC, ubC, options);
-                    
-                    % Save results.
-                    results(i,1:end) = x(1:k+2*n);
-                end
-                
-                % Process results. 
-                
-                OptResult = OptimisationResult(obj, identifier, results);
-            elseif strcmp(identifier, 'LLS_OASES_FAST_SPARSE')
-                                % Setup Hessian matrix.
-                H = 2*[zeros(k + n, k + 2*n); zeros(n, k + n), eye(n)];
-                H = sparse(H);
-                
-                % Setup gradient vector. 
-                g = zeros(k + 2*n, 1);
-                
-                % Solve the optimisation problem at each frame.
-                for i=1:obj.Frames
-                    % Get access to the force model parameters.
-                    [P, ~] = obj.getForceModelParameters(i);
-                    
-                    % Construct the coefficient matrix.
-                    C = [P, eye(n), zeros(n); ...
-                        zeros(n,k), obj.DesiredTorques.CoefficientMatrix, -eye(n); ...
-                        eye(k), zeros(k,n), zeros(k,n)];
-                    C = sparse(C);
-                    
-                    % Construct lower bounds. 
-                    lbC = [obj.InputTorques.getVector(i); ...
-                        obj.DesiredTorques.getDesiredVector(i); ...
-                        -15; ...
-                        -15];
-                    
-                    % Construct upper bounds. 
-                    ubC = [obj.InputTorques.getVector(i); ...
-                        obj.DesiredTorques.getDesiredVector(i); ...
-                        15; ...
-                        15];
-                    
-                    % Run optimisation. 
-                    options = qpOASES_options('fast');
-                    [x, ~, ~, ~, ~, ~] = qpOASES(H, g, C, [], [], lbC, ubC, options);
-                    
-                    % Save results.
-                    results(i,1:end) = x(1:k+2*n);
-                end
-                
-                % Process results. 
-                
-                OptResult = OptimisationResult(obj, identifier, results);
-            elseif strcmp(identifier, 'LLSEESparse')
-                % Convert the torque limits to be sparse.
-                C = sparse(C);
                 
                 % Solve the optimisation problem at each frame.
                 for i=1:obj.Frames
                     % Get access to the force model parameters.
                     [P, Q] = obj.getForceModelParameters(i);
                     
-                    % Setup and run optimisation.
+                    % Setup optimisation.
+                    [D, lbC, ubC] = obj.setupQPOases(i, n, k, P, Q);
+                    
+                    % Apply sparsity if necessary.
+                    if sparse == 1
+                        C = sparse(C);
+                        D = sparse(D);
+                        H = sparse(H);
+                    end
+                    
+                    % Use fast option if necessary and run qpoases.
+                    if fast == 1
+                        options = qpOASES_options('fast');
+                        [x, ~, ~, ~, ~, ~] = ...
+                            qpOASES(H, g, D, [], [], lbC, ubC, options);
+                    else
+                        [x, ~, ~, ~, ~, ~] = ...
+                            qpOASES(H, g, D, [], [], lbC, ubC);
+                    end
+                    
+                    % Save results.
+                    results(i,1:end) = x(1:k+2*n);
+                end
+                
+                % Process results.
+                OptResult = OptimisationResult(obj, identifier, results);
+                
+            % If the identifier starts with 'LLS', setup and run the
+            % appropriate method. 
+            elseif strcmp(identifier(1:3), 'LLS')
+                
+                % Solve the optimisation problem at each frame. 
+                for i=1:obj.Frames
+                    
+                    % Get access to the force model parameters.
+                    [P, Q] = obj.getForceModelParameters(i);
+                    
+                    % Setup and run optimisation. Slightly different behaviour
+                    % for LLS vs QPOases based methods.
                     [A,b,E,f] = ...
                         obj.setupOptimisation(identifier, i, n, k, P, Q);
+                    
+                    % Apply sparsity if necessary. 
+                    if sparse == 1
+                        C = sparse(C);
+                        E = sparse(E);
+                        A = sparse(A);
+                    end
+                    
+                    % Run optimisation. 
                     results(i,1:end) = ...
                         obj.runOptimisation(identifier,A,b,C,d,E,f);
                 end
                 
-                % Process results. 
+                % Process results.
                 OptResult = OptimisationResult(obj, identifier, results);
             else
-                % Solve the optimisation problem at each frame.
-                for i=1:obj.Frames
-                    % Get access to the force model parameters.
-                    [P, Q] = obj.getForceModelParameters(i);
-                    
-                    % Setup and run optimisation.
-                    [A,b,E,f] = ...
-                        obj.setupOptimisation(identifier, i, n, k, P, Q);
-                    results(i,1:end) = ...
-                        obj.runOptimisation(identifier,A,b,C,d,E,f);
-                end
-                
-                % Process results. 
-                OptResult = OptimisationResult(obj, identifier, results);
+                error('Requested optimisation method not recognised.');
             end
-            % Note: thought it better to have two loops rather than a check
-            % for the identifier in every loop. 
         end
         
     end
@@ -295,8 +198,6 @@ classdef Optimisation
                 [A,b,E,f] = obj.setupLLS(index, n, k, P, Q);
             elseif strcmp(identifier, 'LLSE')
                 [A,b,E,f] = obj.setupLLSE(index, n, k, P, Q);
-            elseif strcmp(identifier, 'LLSEESparse')
-                [A,b,E,f] = obj.setupLLSEESparse(index, n, k, P, Q);
             else
                 error('Specified optimisation method not recognised.');
             end
@@ -360,17 +261,25 @@ classdef Optimisation
             b = obj.DesiredTorques.getDesiredVector(index); % desired         
         end
         
-        function [A,b,E,f] = setupLLSEESparse(obj, index, n, k, P, Q)
-            % Construct equality constraints.
-            E = [zeros(n,k), eye(n), eye(n); -P, eye(n), zeros(n)];
-            f = [obj.InputTorques.getVector(index); Q];
-            E = sparse(E);
+        function [D, lbC, ubC] = setupQPOases(obj, index, n, k, P, Q)
+            % Construct the coefficient matrix.
+            D = [P, eye(n), zeros(n); ...
+                zeros(n,k), obj.DesiredTorques.CoefficientMatrix, -eye(n); ...
+                eye(k), zeros(k,n), zeros(k,n)];
             
-            % Construct system to solve.
-            A = [zeros(n,k), zeros(n), obj.DesiredTorques.CoefficientMatrix]; 
-            b = obj.DesiredTorques.getDesiredVector(index); % desired
-            A = sparse(A);
+            % Construct lower bounds.
+            lbC = [obj.InputTorques.getVector(index) - Q; ...
+                obj.DesiredTorques.getDesiredVector(index); ...
+                -15; ...
+                -15];
+            
+            % Construct upper bounds.
+            ubC = [obj.InputTorques.getVector(index) - Q; ...
+                obj.DesiredTorques.getDesiredVector(index); ...
+                15; ...
+                15];
         end
+            
         
         function [results, slack] = setupAndRunHQP(obj, index, n, k, C, d, P, Q)
             % Turn display option off.
