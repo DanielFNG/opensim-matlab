@@ -84,8 +84,8 @@ n_methods = 11;
 n_desireds = 3;
 n_trials = 10;
 
-% MethodTimes{n_methods, n_desireds, n_trials} = {};
-% MethodResults{n_methods, n_desireds, n_trials} = {};
+MethodTimes{n_methods, n_desireds, n_trials} = {};
+MethodResults{n_methods, n_desireds, n_trials} = {};
 
 for j=1:n_trials
     for i=1:3
