@@ -51,29 +51,36 @@ classdef Optimisation
         end
         
         % Perform the optimisation.
-        function OptResult = run(obj, identifier, sparse, fast)
+        function OptResult = run(obj, identifier, sparse_matrices, fast)
             % Identifier should identify which optimisation method to use.
             
             % Determine whether sparse and/or fast are activated. After
             % this, sparse and fast are set to 0 if inactive or 1 if
             % active.
             if nargin == 3
-                if strcmp(sparse, 'sparse')
-                    sparse = 1;
+                if strcmp(sparse_matrices, 'sparse')
+                    sparse_matrices = 1;
                     fast = 0;
-                elseif strcmp(sparse, 'fast')
-                    sparse = 0;
+                elseif strcmp(sparse_matrices, 'fast')
+                    sparse_matrices = 0;
                     fast = 1;
                 else
                     error('Input argument for optimisation.run not recognised');
                 end
             elseif nargin == 4
-                if strcmp(sparse, 'sparse') && strcmp(fast, 'fast')
-                    sparse = 1;
+                if strcmp(sparse_matrices, 'sparse') && strcmp(fast, 'fast')
+                    sparse_matrices = 1;
                     fast = 1;
                 else
                     error('Input argument for optimisation.run not recognised');
                 end
+            elseif nargin < 2 
+                error('Not enough input arguments.');
+            elseif nargin > 4 
+                error('Too many input arguments.');
+            else
+                sparse_matrices = 0;
+                fast = 0;
             end
             
             % Load the dofs for the human and exoskeleton models.
@@ -93,7 +100,7 @@ classdef Optimisation
             
             % If the identifer starts with 'HQP', setup an array to hold the
             % slack results, then setup and run the optimisation.
-            if strcmp(identifier(1:3), 'HQP')
+            if strcmp(identifier, 'HQP')
                 % Setup array to hold slack variable results.
                 slack_variables = 2; % Need 2 slack variables currently.
                 slack = zeros(slack_variables, obj.Frames, obj.HumanDOFS);
@@ -109,12 +116,13 @@ classdef Optimisation
                 end
                 
                 % Process results.
-                OptResult = OptimisationResult(obj, identifier, results, slack);
+                OptResult = OptimisationResult(...
+                    obj, identifier, results, sparse_matrices, fast, slack);
                
             % If the identifier starts with 'QP', setup the Hessian and
             % gradient vector for running QPOases, then setup and run the
             % optimisation.
-            elseif strcmp(identifier(1:2), 'QP')
+            elseif strcmp(identifier, 'QPOases')
                 % Setup Hessian matrix.
                 H = 2*[zeros(k + n, k + 2*n); zeros(n, k + n), eye(n)];
                 
@@ -130,7 +138,7 @@ classdef Optimisation
                     [D, lbC, ubC] = obj.setupQPOases(i, n, k, P, Q);
                     
                     % Apply sparsity if necessary.
-                    if sparse == 1
+                    if sparse_matrices == 1
                         C = sparse(C);
                         D = sparse(D);
                         H = sparse(H);
@@ -151,7 +159,8 @@ classdef Optimisation
                 end
                 
                 % Process results.
-                OptResult = OptimisationResult(obj, identifier, results);
+                OptResult = OptimisationResult(...
+                    obj, identifier, results, sparse_matrices, fast);
                 
             % If the identifier starts with 'LLS', setup and run the
             % appropriate method. 
@@ -169,7 +178,7 @@ classdef Optimisation
                         obj.setupOptimisation(identifier, i, n, k, P, Q);
                     
                     % Apply sparsity if necessary. 
-                    if sparse == 1
+                    if sparse_matrices == 1
                         C = sparse(C);
                         E = sparse(E);
                         A = sparse(A);
@@ -181,7 +190,8 @@ classdef Optimisation
                 end
                 
                 % Process results.
-                OptResult = OptimisationResult(obj, identifier, results);
+                OptResult = OptimisationResult(...
+                    obj, identifier, results, sparse_matrices, fast);
             else
                 error('Requested optimisation method not recognised.');
             end

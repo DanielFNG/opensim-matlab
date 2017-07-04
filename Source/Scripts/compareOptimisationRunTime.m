@@ -14,6 +14,7 @@ load_type = 'normal';
 trial_directory = 'ost_normal';
 tilted_directory = 'ost_tilted';
 model_directory = 'jacobians';
+flat_model_directory = 'jacobians_flat';
 
 %% Set up the input tilted trial and a flat trial to use as a desired.  
 
@@ -70,87 +71,78 @@ match_des = Desired('match_id', 'all', id);
 apo = Exoskeleton('APO');
 model = apo.constructExoskeletonForceModel(...
     tilted_rra, model_directory, force_model);
+flat_model = apo.constructExoskeletonForceModel(...
+    rra, flat_model_directory, force_model);
 
 %% Run the different optimisations. 
-LLSTime{3,10} = {};
-LLSETime{3,10} = {};
-LLSEETime{3,10} = {};
-LLSEESparseTime{3,10} = {};
-HQPTime{3,10} = {};
-OASESTime{3,10} = {};
-OASES_SparseTime{3,10} = {};
-OASES_FastTime{3,10} = {};
-OASES_FastAndSparseTime{3,10} = {};
-for j=1:10
+% LLS, LLSE, LLSEE, HQP.
+% QPOasesNormal, QPOasesFast. 
+% All of the above sparse, too, except HQP which doesn't have coding for sparse
+% at the moment. So 11 in total. 
+
+n_methods = 11;
+n_desireds = 3;
+n_trials = 10;
+
+% MethodTimes{n_methods, n_desireds, n_trials} = {};
+% MethodResults{n_methods, n_desireds, n_trials} = {};
+
+for j=1:n_trials
     for i=1:3
         if i == 1
-            opt = Optimisation(tilted_id, pred_des, model);
+            opt = Optimisation(id, pred_des, flat_model);
         elseif i == 2
-            opt = Optimisation(tilted_id, med_des, model);
+            opt = Optimisation(id, med_des, flat_model);
         else
             opt = Optimisation(tilted_id, match_des, model);
         end
-%         tic;
-%         LLSResult = opt.run('LLS');
-%         LLSTime{i,j} = toc;
-%         tic;
-%         LLSEResult = opt.run('LLSE');
-%         LLSETime{i,j} = toc;
-%         tic;
-%         LLSEEResult = opt.run('LLSEE');
-%         LLSEETime{i,j} = toc;
-%         tic;
-%         LLSEESparseResult = opt.run('LLSEESparse');
-%         LLSEESparseTime{i,j} = toc;
         tic;
-        HQPResult = opt.run('HQP');
-        HQPTime{i,j} = toc;  
+        MethodResults{1,i,j} = opt.run('LLS');
+        MethodTimes{1,i,j} = toc;
         tic;
-        OASESResult = opt.run('LLS_OASES');
-        OASESTime{i,j} = toc;
+        MethodResults{2,i,j} = opt.run('LLS', 'sparse');
+        MethodTimes{2,i,j} = toc;
         tic;
-        OASES_SparseResult = opt.run('LLS_OASES_SPARSE');
-        OASES_SparseTime{i,j} = toc;
-%         tic;
-%         OASES_FastResult = opt.run('LLS_OASES_FAST');
-%         OASES_FastTime{i,j} = toc;
-%         tic;
-%         OASES_FastAndSparseResult = opt.run('LLS_OASES_FAST_SPARSE');
-%         OASES_FastAndSparseTime{i,j} = toc;
+        MethodResults{3,i,j} = opt.run('LLSE');
+        MethodTimes{3,i,j} = toc;
+        tic;
+        MethodResults{4,i,j} = opt.run('LLSE', 'sparse');
+        MethodTimes{4,i,j} = toc;
+        tic;
+        MethodResults{5,i,j} = opt.run('LLSEE');
+        MethodTimes{5,i,j} = toc;  
+        tic;
+        MethodResults{6,i,j} = opt.run('LLSEE', 'sparse');
+        MethodTimes{6,i,j} = toc;
+        tic;
+        MethodResults{7,i,j} = opt.run('HQP');
+        MethodTimes{7,i,j} = toc;
+        tic;
+        MethodResults{8,i,j} = opt.run('QPOases');
+        MethodTimes{8,i,j} = toc;
+        tic;
+        MethodResults{9,i,j} = opt.run('QPOases', 'sparse');
+        MethodTimes{9,i,j} = toc;
+        tic;
+        MethodResults{10,i,j} = opt.run('QPOases', 'fast');
+        MethodTimes{10,i,j} = toc;
+        tic;
+        MethodResults{11,i,j} = opt.run('QPOases', 'sparse', 'fast');
+        MethodTimes{11,i,j} = toc;
     end
 end
 
 %% Compute the averages.
 
-averages = zeros(9,3);
-lls_time = zeros(10,1);
-llse_time = zeros(10,1);
-llsee_time = zeros(10,1);
-llsee_sparse_time = zeros(10,1);
-hqp_time = zeros(10,1);
-oases_time = zeros(10,1);
-oases_sparse_time = zeros(10,1);
-oases_fast_time = zeros(10,1);
-oases_sparse_fast_time = zeros(10,1);
-for i=1:3
-    for j=1:10
-        lls_time(j,1) = LLSTime{i,j};
-        llse_time(j,1) = LLSETime{i,j};
-        llsee_time(j,1) = LLSEETime{i,j};
-        llsee_sparse_time(j,1) = LLSEESparseTime{i,j};
-        hqp_time(j,1) = HQPTime{i,j};
-        oases_time(j,1) = OASESTime{i,j};
-        oases_sparse_time(j,1) = OASES_SparseTime{i,j};
-        oases_fast_time(j,1) = OASES_FastTime{i,j};
-        oases_sparse_fast_time(j,1) = OASES_FastAndSparseTime{i,j};
+average_times = zeros(n_methods,n_desireds);
+for i=1:n_desireds
+    for j=1:n_methods
+        temp = 0;
+        for k=1:n_trials
+            temp = temp + MethodTimes{j,i,k};
+        end
+        average_times(j,i) = temp/n_trials;
     end
-    averages(1,i) = mean(lls_time);
-    averages(2,i) = mean(llse_time);
-    averages(3,i) = mean(llsee_time);
-    averages(4,i) = mean(llsee_sparse_time);
-    averages(5,i) = mean(hqp_time);
-    averages(6,i) = mean(oases_time);
-    averages(7,i) = mean(oases_sparse_time);
-    averages(8,i) = mean(oases_fast_time);
-    averages(9,i) = mean(oases_sparse_fast_time);
 end
+
+bar3(average_times);
