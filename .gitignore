@@ -56,5 +56,5 @@ Temporary Items
 # Ignore RRA controls results.
 *controls.xml
 
-# Don't sync the startup.m file if it's in the Setup folder.
-Setup/startup.m
+# Don't sync the startup.m file.
+*startup.m

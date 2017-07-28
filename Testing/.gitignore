@@ -46,16 +46,6 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-# Ignore logs 
-*.tlog
-*.log
-
-# Ignore Matlab autosaves. 
-*.asv
-
-# Ignore RRA controls results.
-*controls.xml
-
 # Ignore data and model files in the Testing folder.
 *.sto
 *.mot
