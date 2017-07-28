@@ -9,11 +9,23 @@ function configureExopt()
 cd('..');
 
 % Modify startup.m file so that we have EXPORT_HOME environment variable
-% for future sessions, and to automatically import the OpenSim Matlab API. 
-% Checks if startup.m file exists, if not one is created, if yes the existing 
-% one is appended to.
+% for future sessions. 
+% Checks if startup.m file exists, if not one is created in matlabroot if we 
+% have access to it, or to the 'Setup/startup' folder of this directory 
+% otherwise, if yes the existing one is appended to.
 if isempty(which('startup.m'))
-    [fileID,err] = fopen('Setup/startup.m', 'w');
+    [fileID,~] = fopen([matlabroot filesep 'startup.m'], 'w');
+    if fileID == -1
+        display(['Attempted to create startup.m file in matlabroot, but' ...
+            ' access was denied. Created it in setup\startup folder instead.' ...
+            ' Consider changing this as having the startup.m file tied' ...
+            ' to a repository can be undesirable.']);
+        mkdir(['Setup' filesep 'startup']);
+        [fileID,~] = fopen(['Setup' filesep 'startup' filesep 'startup.m'], 'w');
+        flag = 1;
+    else
+        flag = 0;
+    end
     fprintf(fileID, '%s', ['setenv(''EXOPT_HOME'', ''' pwd ''');']);
 else
     fileID = fopen(which('startup.m'), 'a');
@@ -25,10 +37,17 @@ fclose(fileID);
 % don't have to restart Matlab).
 setenv('EXOPT_HOME', pwd);
 
-% Modify the Matlab path to include the source folder and the setup folder
-% (so it has access to the startup file if it's here).
+% Modify the Matlab path to include the source folder.
 addpath(genpath([getenv('EXOPT_HOME') filesep 'Source']));
-addpath(genpath([getenv('EXOPT_HOME') filesep 'Setup']));
+if flag
+    addpath(genpath([getenv('EXOPT_HOME') filesep 'Setup' filesep 'startup']));
+else
+    addpath(matlabroot);
+end
+% Originally setup was also added to the path, but this is a terrible idea
+% since this script uses the assumption of being in the setup folder!!
+% Instead I added a startup folder to the setup folder and added this to
+% the path only. 
 savepath;
 
 % Go back to the setup folder. 
