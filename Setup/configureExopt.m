@@ -41,7 +41,7 @@ setenv('EXOPT_HOME', pwd);
 addpath(genpath([getenv('EXOPT_HOME') filesep 'Source']));
 
 % Include any additional libraries. 
-addpath(genpath([getenv('EXOPT_HOME') filesep 'Libraries' filesep ...
+addpath(genpath([getenv('EXOPT_HOME') filesep 'External' filesep ...
     'qpOASES-3.2.1' filesep 'interfaces' filesep 'matlab']));
     
 % Originally setup was also added to the path, but this is a terrible idea
