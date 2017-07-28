@@ -3,7 +3,7 @@ function configureExopt()
 % to the matlab path. Not sure if this is necessarily the best way of doing
 % it so might revisit this. In fact, I think I should definitely change it
 % to not include directories which are likely to change i.e. results
-% directories. 
+% directories.
 
 % Move to the 'main' exopt directory. 
 cd('..');
@@ -39,19 +39,23 @@ setenv('EXOPT_HOME', pwd);
 
 % Modify the Matlab path to include the source folder.
 addpath(genpath([getenv('EXOPT_HOME') filesep 'Source']));
+
+% Include any additional libraries. 
+addpath(genpath([getenv('EXOPT_HOME') filesep 'Libraries' filesep ...
+    'qpOASES-3.2.1' filesep 'interfaces' filesep 'matlab']));
+    
+% Originally setup was also added to the path, but this is a terrible idea
+% since this script uses the assumption of being in the setup folder!!
+% Instead I added a startup folder to the setup folder and added this to
+% the path only.
 if flag
     addpath(genpath([getenv('EXOPT_HOME') filesep 'Setup' filesep 'startup']));
 else
     addpath(matlabroot);
 end
-% Originally setup was also added to the path, but this is a terrible idea
-% since this script uses the assumption of being in the setup folder!!
-% Instead I added a startup folder to the setup folder and added this to
-% the path only. 
 savepath;
 
 % Go back to the setup folder. 
 cd('Setup');
 
 end
-

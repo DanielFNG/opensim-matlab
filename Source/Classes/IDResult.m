@@ -23,6 +23,13 @@ classdef IDResult
             end
         end
         
+        % Return the vector of torques at a given time index. This is
+        % returned as a column vector, and has no time entry. This is used
+        % during the optimisation. 
+        function input_vector = getVector(obj, index)
+            input_vector = obj.id.Values(index,2:end).';
+        end
+        
     end
     
 end

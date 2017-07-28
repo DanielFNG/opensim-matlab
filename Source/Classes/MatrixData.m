@@ -68,7 +68,7 @@ classdef MatrixData
         % (NO TIMESTEPS) of a given rowsize, return a cell array containing the
         % individual matrices. 
         function matrix_array = getMatrixArray(rows, data)
-            matrix_array = cell(rows);
+            matrix_array = cell(size(data,1)/rows,1);
             index = 1;
             for i=1:size(data,1)/rows
                 matrix_array{i} = data(index:index+rows-1,1:end);

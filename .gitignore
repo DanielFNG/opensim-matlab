@@ -56,11 +56,5 @@ Temporary Items
 # Ignore RRA controls results.
 *controls.xml
 
-# Ignore data and model files in the Testing folder.
-Testing/*.sto
-Testing/*.mot
-Testing/*.trc
-Testing/*.osim
-
 # Don't sync the startup.m file if it's in the Setup folder.
 Setup/startup.m

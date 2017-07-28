@@ -27,6 +27,13 @@ classdef Desired
             end
         end
         
+        % Return the vector of desired torques at a given time index. This
+        % is given as a column vector, and has no time column. This is used
+        % during the optimisation. 
+        function desired_vector = getDesiredVector(obj, index)
+            desired_vector = obj.Result.Values(index,2:end).';
+        end
+        
         function obj = evaluateDesired(obj, IDResult)
             if strcmp(obj.mode, 'percentage_reduction')
                 obj.mode = 'percentage_reduction';
@@ -181,9 +188,13 @@ classdef Desired
                     'desired ID is too large (>5%).']);
             end 
             
-            % Spline the desired ID so that it is on the same number of
-            % points as the input IDResult.
+            % Spline the desired ID so that it is at the same frequency as
+            % the input IDResult.
             des = des.id.fitToSpline(IDResult.id.Frequency);
+            
+            % Stretch/compress the desired ID so that it is on the exact
+            % same number of frames as the input IDResult.
+            des = des.stretchOrCompress(IDResult.id.Frames);
             
             % If required shift the desired.
             if shift ~= 0
