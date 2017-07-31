@@ -30,6 +30,7 @@ if isempty(which('startup.m'))
 else
     fileID = fopen(which('startup.m'), 'a');
     fprintf(fileID, '\n%s', ['setenv(''EXOPT_HOME'', ''' pwd ''');']);
+	flag = -1;
 end
 fclose(fileID);
 
@@ -48,9 +49,9 @@ addpath(genpath([getenv('EXOPT_HOME') filesep 'External' filesep ...
 % since this script uses the assumption of being in the setup folder!!
 % Instead I added a startup folder to the setup folder and added this to
 % the path only.
-if flag
+if flag == 1
     addpath(genpath([getenv('EXOPT_HOME') filesep 'Setup' filesep 'startup']));
-else
+elseif flag == 0
     addpath(matlabroot);
 end
 savepath;
