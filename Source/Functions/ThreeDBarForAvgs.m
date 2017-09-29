@@ -1,4 +1,4 @@
-function ThreeDBarWithErrorBars(PeakVals, ErrorBarSizes, metric, x_axis, y_axis)
+function ThreeDBarForAvgs(PeakVals, ErrorBarSizes, metric, x_axis)
 
 %{
 %to test the function run the following code at the matlab prompt:
@@ -53,17 +53,17 @@ end
 
 
 % Create xlabel
-xlabel({'Walking context'});
+xlabel(x_axis.label);
 
 % Create zlabel
 zlabel({metric});
 
 % Create ylabel
-ylabel({'Assistance scenario'});
+ylabel({'Metric'});
 
 % Set tick labels
 set(axes1,'XTick',[1 2 3 4 5],...
-    'XTickLabel',{'BW','IW','DW','FW','SW'},'YTick',[1 2 3],'YTickLabel',...
-    {'NE','ET','EA'});
+    'XTickLabel',x_axis.ticks,'YTick',[1 2 3 4 5 6 7 8 9 10],'YTickLabel',...
+    {'sw','sf','hr','hp','cpa','cpm','cv','cmm','cpa','mm'});
 
 

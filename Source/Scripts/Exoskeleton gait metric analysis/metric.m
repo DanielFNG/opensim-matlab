@@ -56,6 +56,26 @@ classdef metric
             diff = reshape(diff,1,[]);
             overall = mean(diff);
         end
+        
+        % For a metric, calculates the average relative to assistance 
+        % scenario (i.e. for each of 'NE', 'ET', 'EA', average 'BW':'SW')
+        % or context (vice versa). 'direction' should be 'assistance' or 
+        % 'context' depending on the mode. 
+        function avg_1d = calculate1DAvg(obj, direction)
+            diff = obj.calculateRelativeDifferences();
+            if strcmp(direction, 'context')
+                avg_1d = 1:5;
+                for i=1:5
+                    avg_1d(i) = mean(diff(1:end,i));
+                end
+            elseif strcmp(direction, 'assistance')
+                avg_1d = 1:3;
+                for i=1:3
+                    avg_1d(i) = mean(diff(i,1:end));
+                end
+            end
+        end
+                
     end
 end
         
