@@ -75,7 +75,25 @@ classdef metric
                 end
             end
         end
-                
+              
+        function cohens_d = calculateCohensD(obj)
+            % 14 effect size results for each metric. Start off with a 
+            % 5 x 3 matrix for convenience. 
+            cohens_d = zeros(3,5);
+            % over assistance levels and contexts...
+            for i=1:5
+                for j=1:3
+                    % Don't compare the baseline to itself.
+                    if ~ (i == 1 && j == 1)
+                        % Calculate pooled standard deviation.
+                        ss = 70;
+                        pool = sqrt(((ss-1)*obj.sdevs(1,1)^2 + (ss-1)*obj.sdevs(j,i)^2)/(2*ss-2));
+                        cohens_d(j,i) = (obj.values(1,1) - obj.values(j,i))/pool;
+                    end
+                end
+            end
+        end
+        
     end
 end
         
