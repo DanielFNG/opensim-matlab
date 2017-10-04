@@ -12,7 +12,7 @@ for i=1:10
     overall(1,i) = metrics{i}.calculateOverall();
     avg_by_context(i,1:5) = metrics{i}.calculate1DAvg('context');
     avg_by_assistance(i,1:3) = metrics{i}.calculate1DAvg('assistance');
-    cohens_d{i} = metrics{i}.calculateCohensD();
+    cohens_d{i} = metrics{i}.calculateCohensD_tTests();
     ThreeDBarWithErrorBars(abs(cohens_d{i}), zeros(3,5), 'Cohen''s D');
     title(metrics{i}.name)
     cohens_d_avged(1,i) = mean(abs([cohens_d{i}(1,2:5), cohens_d{i}(2,1:5), cohens_d{i}(3,1:5)]));
