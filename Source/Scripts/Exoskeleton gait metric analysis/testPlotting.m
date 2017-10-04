@@ -2,6 +2,8 @@ overall = zeros(1,10);
 avg_by_context = zeros(10,5);
 avg_by_assistance = zeros(10,3);
 cohens_d_avged = zeros(1,10);
+cohens_d_avged_assistance = zeros(1,10);
+cohens_d_avged_context = zeros(1,10);
 cohens_d{10} = {};
 for i=1:10
     diff = metrics{i}.calculateRelativeDifferences();
@@ -14,7 +16,20 @@ for i=1:10
     ThreeDBarWithErrorBars(abs(cohens_d{i}), zeros(3,5), 'Cohen''s D');
     title(metrics{i}.name)
     cohens_d_avged(1,i) = mean(abs([cohens_d{i}(1,2:5), cohens_d{i}(2,1:5), cohens_d{i}(3,1:5)]));
+    cohens_d_avged_assistance(1,i) = mean(abs(cohens_d{i}(1:3,1)));
+    cohens_d_avged_context(1,i) = mean(abs(cohens_d{i}(1,1:5)));
 end
+
+% We want to average cohen's d for each metric in 3 directions: 
+% 1) choosing assistance = 0 and averaging over context
+% 2) choosing context = BW and averaging over assistance
+% 3) averaging over all contexts 
+% BUT in each case we only consider (assistance, context) pairs for which 
+% a significant difference was observed. I'm going to be doing this
+% manually which is why this gets it's own for loop. 
+
+% There's a bit of confusion. For the time being I'm just going to get the
+% other directional averages too.
 
 % % For each metric, plot a 1D bar graph for avg over assistance.
 % for i=1:10
@@ -111,8 +126,27 @@ cd = figure;
 cd_ax = axes('Parent', cd);
 cd = bar(cohens_d_avged);
 set(cd_ax, 'XTick', [1 2 3 4 5 6 7 8 9 10], 'XTickLabel', ...
-    {'sw','sf','hr','hp','cpa','cpm','cv','cmm','cpa','mm'});
+    {'sw','sf','hr','hp','cpa','cpm','cv','cmm','ma','mm'});
 ylabel('Averaged Cohen''s D');
 xlabel('Metric');
 title('Cohen''s D averaged over all contexts for each metric');
 
+% And directionally. 
+% Plot the averaged Cohen's D value for each metric. 
+cd_as = figure;
+cd_as_ax = axes('Parent', cd_as);
+cd_as = bar(cohens_d_avged_assistance);
+set(cd_as_ax, 'XTick', [1 2 3 4 5 6 7 8 9 10], 'XTickLabel', ...
+    {'sw','sf','hr','hp','cpa','cpm','cv','cmm','ma','mm'});
+ylabel('Averaged Cohen''s D');
+xlabel('Metric');
+title('Cohen''s D for (BW, *)');
+
+cd_cn = figure;
+cd_cn_ax = axes('Parent', cd_cn);
+cd_cn = bar(cohens_d_avged_context);
+set(cd_cn_ax, 'XTick', [1 2 3 4 5 6 7 8 9 10], 'XTickLabel', ...
+    {'sw','sf','hr','hp','cpa','cpm','cv','cmm','ma','mm'});
+ylabel('Averaged Cohen''s D');
+xlabel('Metric');
+title('Cohen''s D for (*, NE)');
