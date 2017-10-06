@@ -1,16 +1,19 @@
-classdef metric
+classdef metric < handle
     
-    properties (SetAccess = private)
+    properties %(SetAccess = private)
         name
-        significant_differences_A
-        significant_differences_C
+        sample_size = 70;  % 7 subjects * 2 feet * 5 gait cycles
+        means = 'Not yet known.'
+        sdevs = 'Not yet known.'
+        sig_diffs_A = 'Not yet known.'
+        sig_diffs_C = 'Not yet known.'
+        combined_means = 'Not yet calculated.'
+        combined_sdevs = 'Not yet calculated.'
     end
         
     properties (SetAccess = private, GetAccess = private)
-        assistance_order = {'NE', 'EA', 'ET'}
+        assistance_order = {'NE', 'ET', 'EA'}
         context_order = {'BW','IW','DW','FW','SW'}
-        values = zeros(3,5)
-        sdevs = zeros(3,5)
     end
     
     methods 
@@ -21,10 +24,10 @@ classdef metric
             end
         end
         
-        function obj = inputManually(obj)
+        function inputManually(obj)
             for i=1:size(obj.assistance_order,2)
                 for j=1:size(obj.context_order,2)
-                    obj.values(i,j) = input(...
+                    obj.means(i,j) = input(...
                         ['Input value for metric: ', obj.name, ' for ', ...
                         obj.assistance_order{i}, ' and ', ...
                         obj.context_order{j}, ':\n']);
@@ -36,10 +39,10 @@ classdef metric
             end
         end
         
-        function obj = inputSignificantDifferences(obj)
+        function inputSignificantDifferences(obj)
             % This method provides a way to manually input the significant
             % differences for each metric. What results is 2 2D cell array
-            % accessed using obj.significant_differences_A or _C. 
+            % accessed using obj.sig_diffs_A or _C. 
             % The first dimension is how many differences there are in the
             % respective direction.
             % The second dimension also has 2 elements, the first of which
@@ -56,14 +59,14 @@ classdef metric
                 x_f = input('From:\n', 's');
                 if strcmp(x_f, 'end')
                     if n_x == 0
-                        obj.significant_differences_A{1,1} = 'n/a';
+                        obj.sig_diffs_A{1,1} = 'n/a';
                     end
                     break
                 end
                 n_x = n_x + 1;
                 x_t = input('To:\n', 's');
-                obj.significant_differences_A{n_x,1} = x_f;
-                obj.significant_differences_A{n_x,2} = x_t;
+                obj.sig_diffs_A{n_x,1} = x_f;
+                obj.sig_diffs_A{n_x,2} = x_t;
             end
             display('Now do the same but along context.');
             n_y = 0;
@@ -71,36 +74,81 @@ classdef metric
                 y_f = input('From:\n', 's');
                 if strcmp(y_f, 'end')
                     if n_y == 0
-                        obj.significant_differences_C{1,1} = 'n/a';
+                        obj.sig_diffs_C{1,1} = 'n/a';
                     end
                     break
                 end
                 n_y = n_y + 1;
                 y_t = input('To:\n', 's');
-                obj.significant_differences_C{n_y,1} = y_f;
-                obj.significant_differences_C{n_y,2} = y_t;
+                obj.sig_diffs_C{n_y,1} = y_f;
+                obj.sig_diffs_C{n_y,2} = y_t;
             end
         end
         
-        function printValues(obj)
-            values = obj.values;
-            display(values);
-            sdevs = obj.sdevs;
-            display(sdevs);
+        % This calculates obj.combined_means, which is a map from a label
+        % (corresponding to either an assistance level or walking context)
+        % on to the combined mean for that label.
+        %
+        % For example, obj.combined_means('NE') is the mean value of
+        % (NE,BW), (NE,IW), (NE,DW), ... etc. And likewise for the context
+        % labels. 
+        function calcCombinedMeansAndSdevs(obj)
+            n_assist = size(obj.assistance_order,2);
+            n_context = size(obj.context_order,2);
+            comb_means = [];
+            comb_sdevs = [];
+            for i=1:n_assist
+                keys{i} = obj.assistance_order{1,i};
+                comb_means = [comb_means mean(obj.means(i,1:end))];
+                comb_sdevs = [comb_sdevs obj.calcCombSdevs(...
+                    comb_means(end), {'assistance', i})];
+            end
+            for i=1:n_context
+                keys{i+n_assist} = obj.context_order{1,i};
+                comb_means = [comb_means mean(obj.means(1:end,i))];
+                comb_sdevs = [comb_sdevs obj.calcCombSdevs(...
+                    comb_means(end), {'context', i})];
+            end
+            obj.combined_means = containers.Map(keys,comb_means);
+            obj.combined_sdevs = containers.Map(keys,comb_sdevs);
+        end
+        
+        function result = calcCombSdevs(obj, overall_mean, indices)
+            if strcmp(indices{1}, 'assistance')
+                assistance_level = indices{2};
+                d = size(obj.context_order,2);
+                temp = 0;
+                for i=1:d
+                    temp = temp + metric.intermediateVariance(...
+                        obj.sample_size, ...
+                        obj.sdevs(assistance_level,i)^2, ... % v = sdev^2
+                        obj.means(assistance_level,i), overall_mean);
+                end
+            else
+                context = indices{2};
+                d = size(obj.assistance_order,2);
+                temp = 0;
+                for i=1:d
+                    temp = temp + metric.intermediateVariance(...
+                        obj.sample_size, obj.sdevs(i,context)^2, ...
+                        obj.means(i,context), overall_mean);
+                end
+            end
+            result = sqrt(temp/(d*obj.sample_size - 1));  % sdev = sqrt(V)
         end
         
         function diff = calculateRelativeDifferences(obj)
-            diff = zeros(size(obj.values));
-            baseline = obj.values(1,1); 
+            diff = zeros(size(obj.means));
+            baseline = obj.means(1,1); 
             for i=1:3
                 for j=1:5
-                    diff(i,j) = 100*(abs(obj.values(i,j) - baseline)/baseline);
+                    diff(i,j) = 100*(abs(obj.means(i,j) - baseline)/baseline);
                 end
             end
         end
         
         function overall = calculateOverall(obj)
-            diff = obj.calculateRelativeDifferences()
+            diff = obj.calculateRelativeDifferences();
             diff = reshape(diff,1,[]);
             overall = mean(diff);
         end
@@ -137,7 +185,7 @@ classdef metric
                         % Calculate pooled standard deviation.
                         ss = 70;
                         pool = sqrt(((ss-1)*obj.sdevs(1,1)^2 + (ss-1)*obj.sdevs(j,i)^2)/(2*ss-2));
-                        cohens_d(j,i) = (obj.values(1,1) - obj.values(j,i))/pool;
+                        cohens_d(j,i) = (obj.means(1,1) - obj.means(j,i))/pool;
                     end
                 end
             end
@@ -152,7 +200,7 @@ classdef metric
             % The optional argument 'direction' should evalute to 'A' if 
             % only caring about the along-assistance average, or 'C' if the
             % opposite. If not present the overall average is calculated. 
-            if isempty(obj.significant_differences_A)
+            if isempty(obj.sig_diffs_A)
                 error(['The ANOVA version of Cohen''s d calculation'...
                     ' requires knowledge of significant differences.'...
                     ' See inputSignificantDifferences method.']);
@@ -169,15 +217,15 @@ classdef metric
             end
             
             % Along assistance direction.
-            if ~strcmp(obj.significant_differences_A{1,1}, 'n/a')
+            if ~strcmp(obj.sig_diffs_A{1,1}, 'n/a')
                 ss = 350; % 70 per mean, but all contexts avgd so x5
                 contribution_A = [];
-                for i=1:size(obj.significant_differences_A,1)
+                for i=1:size(obj.sig_diffs_A,1)
                     % Combine the means.
-                    meanfrom = mean(obj.values(metric.mapLabel(...
-                        obj.significant_differences_A{i,1},1:5)));
-                    meanto = mean(obj.values(metric.mapLabel(...
-                        obj.significant_differences_A{i,2},1:5)));
+                    meanfrom = mean(obj.means(metric.mapLabel(...
+                        obj.sig_diffs_A{i,1},1:5)));
+                    meanto = mean(obj.means(metric.mapLabel(...
+                        obj.sig_diffs_A{i,2},1:5)));
                     % Combine the sdevs. 
                     sdevfrom = 0;
                     sdevto = 0;
@@ -196,10 +244,10 @@ classdef metric
             contribution_A = mean(contribution_A);
             
             % Along context direction. 
-            if ~strcmp(obj.significant_differences_C{1,1}, 'n/a')
+            if ~strcmp(obj.sig_diffs_C{1,1}, 'n/a')
                 ss = 210; % 70 per mean, but all ass avgd so x3
                 contribution_C = [];
-                for i=1:size(obj.significant_differences_C,1)
+                for i=1:size(obj.sig_diffs_C,1)
                     % Combine the means.
                     % Combine the sdevs.
                     % Calculate the pooled standard deviation.
@@ -241,6 +289,16 @@ classdef metric
             else
                 error('String not recognised.')
             end
+        end
+        
+        % Function for calculating the intermediate terms when calculating
+        % combined variance of groups. 
+        function result = intermediateVariance(...
+                samples, variance, mean, overall_mean)
+            result = ((samples - 1) * variance) ...
+                + (samples * mean^2) ...
+                - (2 * samples * mean * overall_mean) ...
+                + (samples * overall_mean^2);
         end
         
     end
