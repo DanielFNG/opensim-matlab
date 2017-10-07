@@ -49,7 +49,9 @@ classdef metric < handle
             % is the 'from' and the second the 'to', for example a
             % significant difference from NE to ET, for example. In
             % practice which is from and which is to won't matter since we
-            % will only consider absolute Cohen's d for simplicity. 
+            % will only consider absolute Cohen's d for simplicity.
+            obj.sig_diffs_A = {};
+            obj.sig_diffs_C = {};
             display(['Please input all significant differences along'... 
                 'the assistance direction. Input ''end'' to finish. You'...
                 'will be prompted using ''From:'' and ''To:''. Give'...
@@ -171,6 +173,77 @@ classdef metric < handle
                 end
             end
         end
+        
+        % Calculates the absolute value of Cohen's d averaged across 
+        % either assistance, context, or in both directions. 
+        function result = calcAbsCohensD(obj, direction)
+            % Check that the significant difference info has been input.
+            if isempty(obj.sig_diffs_A)
+                error(['The Cohen''s d calculation'...
+                    ' requires knowledge of significant differences.'...
+                    ' See inputSignificantDifferences method.']);
+            end
+            
+            % Parse command line arguments to see whether to average across
+            % a direction or do the overall average. 
+            if nargin == 1
+                direction = 0;
+            elseif nargin ~= 2
+                error('Require 1 or 2 arguments to calc anova cohens d.');
+            else
+                if ~(strcmp(direction, 'A') || strcmp(direction, 'C'))
+                    error('If given direction should be ''A'' or ''C''.');
+                end
+            end
+            
+            % Calculate Cohen's D for each significant differences, either
+            % in one or both directions. 
+            if ~(strcmp(direction, 'C'))
+                contribution_A = [];
+                if ~strcmp(obj.sig_diffs_A{1}, 'n/a')
+                    for i=1:size(obj.sig_diffs_A,1)
+                        contribution_A = ...
+                            [contribution_A abs(obj.compCohensD(...
+                            obj.sig_diffs_A{i,1}, obj.sig_diffs_A{i,2}))];
+                    end
+                end
+            end
+            if ~(strcmp(direction, 'A'))
+                contribution_C = [];
+                if ~strcmp(obj.sig_diffs_C{1}, 'n/a')
+                    for i=1:size(obj.sig_diffs_C,1)
+                        contribution_C = ...
+                            [contribution_C abs(obj.compCohensD(...
+                            obj.sig_diffs_C{i,1}, obj.sig_diffs_C{i,2}))];
+                    end
+                end
+            end
+            
+            % Choose what to return based on the provided direction.
+            if direction == 0
+                result = mean([contribution_A contribution_C]);
+            elseif strcmp(direction, 'A')
+                result = mean(contribution_A);
+            else % we already checked direction is either 'A', 'C', or set to 0
+                result = mean(contribution_C);
+            end
+        end
+        
+        % Calculates Cohen's d between the groups of data specified by 
+        % label1 and label2.
+        function result = compCohensD(obj, label1, label2)
+            if any(strcmp(label1, obj.assistance_order))
+                q = size(obj.context_order,2);
+            else
+                q = size(obj.assistance_order,2);
+            end
+            n = obj.sample_size*q;
+            mean1 = obj.combined_means(label1);
+            mean2 = obj.combined_means(label2);
+            sdev1 = obj.combined_sdevs(label1);
+            sdev2 = obj.combined_sdevs(label2);
+            result = metric.cohensD(n,mean1,sdev1,n,mean2,sdev2);
+        end
               
         function cohens_d = calculateCohensD_tTests(obj)
             % t tests comparing means to baselines
@@ -189,86 +262,8 @@ classdef metric < handle
                     end
                 end
             end
-        end
-        
-        function cohens_d = calculateCohensD_anova(obj, direction)
-            % ANOVA method 
-            % For each of both directions (assistance/context), and for
-            % each significant difference pair, calculate Cohen's D between
-            % the pair (where the 'other' direction is averaged over).
             
-            % The optional argument 'direction' should evalute to 'A' if 
-            % only caring about the along-assistance average, or 'C' if the
-            % opposite. If not present the overall average is calculated. 
-            if isempty(obj.sig_diffs_A)
-                error(['The ANOVA version of Cohen''s d calculation'...
-                    ' requires knowledge of significant differences.'...
-                    ' See inputSignificantDifferences method.']);
-            end
             
-            if nargin == 1
-                direction = 0;
-            elseif nargin ~= 2
-                error('Require 1 or 2 arguments to calc anova cohens d.');
-            else
-                if ~(strcmp(direction, 'A') || strcmp(direction, 'C'))
-                    error('If given direction should be ''A'' or ''C''.');
-                end
-            end
-            
-            % Along assistance direction.
-            if ~strcmp(obj.sig_diffs_A{1,1}, 'n/a')
-                ss = 350; % 70 per mean, but all contexts avgd so x5
-                contribution_A = [];
-                for i=1:size(obj.sig_diffs_A,1)
-                    % Combine the means.
-                    meanfrom = mean(obj.means(metric.mapLabel(...
-                        obj.sig_diffs_A{i,1},1:5)));
-                    meanto = mean(obj.means(metric.mapLabel(...
-                        obj.sig_diffs_A{i,2},1:5)));
-                    % Combine the sdevs. 
-                    sdevfrom = 0;
-                    sdevto = 0;
-                    % Calculate the pooled standard deviation.
-                    pool = sqrt(((ss-1)*sdevfrom^2 + (ss-1)*sdevto^2)/(2*ss-2));
-                    % Calculate Cohen's d for this difference.
-                    cohens_d = (meanfrom - meanto)/pool;
-                    % Add it to the array.
-                    contribution_A = [contribution_A cohens_d];
-                end
-            else
-                contribution_A = 0;
-            end
-            % Compute the total contribution along assistance, as the mean
-            % of the list from the previous loop (or 0 if no diffs).
-            contribution_A = mean(contribution_A);
-            
-            % Along context direction. 
-            if ~strcmp(obj.sig_diffs_C{1,1}, 'n/a')
-                ss = 210; % 70 per mean, but all ass avgd so x3
-                contribution_C = [];
-                for i=1:size(obj.sig_diffs_C,1)
-                    % Combine the means.
-                    % Combine the sdevs.
-                    % Calculate the pooled standard deviation.
-                    % Calculate Cohen's d for this difference.
-                    % Add it to the array.
-                end
-            else
-                contribution_C = 0;
-            end
-            % Compute the total contribution along context, as the mean 
-            % of the list from the previous loop (or 0 if no diffs).
-            contribution_C = mean(contribution_C);
-            
-            % Choose what to return based on the provided direction.
-            if direction == 0
-                cohens_d = contribution_A + contribution_C;
-            elseif strcmp(direction, 'A')
-                cohens_d = contribution_A;
-            else % we already checked direction is either 'A', 'C', or set to 0
-                cohens_d = contribution_C;
-            end
         end
         
     end
@@ -299,6 +294,13 @@ classdef metric < handle
                 + (samples * mean^2) ...
                 - (2 * samples * mean * overall_mean) ...
                 + (samples * overall_mean^2);
+        end
+        
+        % This function calculates Cohen's d for two groups of data, 
+        % given the sample size, mean and variance of each group. 
+        function result = cohensD(n1, m1, s1, n2, m2, s2)
+            pooled_sdev = sqrt(((n1-1)*s1^2 + (n2-1)*s2^2)/(n1+n2-2));
+            result = abs((m1 - m2)/pooled_sdev);
         end
         
     end
