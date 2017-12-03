@@ -47,4 +47,4 @@ Temporary Items
 .apdisk
 
 # Ignore any changes to the default RRA actuator file. 
-gait2392_RRA_Actuators.xml
+./gait2392_RRA_Actuators.xml
