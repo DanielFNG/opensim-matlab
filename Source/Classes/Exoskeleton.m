@@ -147,6 +147,11 @@ classdef Exoskeleton
             left_hip_flexion = states.getDataCorrespondingToLabel(...
                 'hip_flexion_l');
             
+            % Get the pelvis rotation in vector form.
+            p_rx = states.getDataCorrespondingToLabel('pelvis_list');
+            p_ry = states.getDataCorrespondingToLabel('pelvis_rotation');
+            p_rz = states.getDataCorrespondingToLabel('pelvis_tilt');
+            
             % And store the constant angle vs the horizontal for the left &
             % right groups. 
             group_angle = deg2rad(33.08);
@@ -156,20 +161,24 @@ classdef Exoskeleton
             
             for i=1:nTimesteps
                 Q{i} = zeros(rra.OpenSimTrial.human_dofs,1);
+                % Pelvis rotation.
+                r_3d = rotx(p_rx(i,1))*roty(p_ry(i,1))*rotz(p_rz(i,1));
+                r_6d = [r_3d, zeros(3); zeros(3), r_3d];
+                
                 % Links
-                right_force = 1/d_link*[0;0;0; ...
+                right_force = 1/d_link*r_6d*[0;0;0; ...
                     cos(right_hip_flexion(i,1));sin(right_hip_flexion(i,1));0];
                 ContactSet{i,1} = right_force;
-                left_force = 1/d_link*[0;0;0; ...
+                left_force = 1/d_link*r_6d*[0;0;0; ...
                     cos(left_hip_flexion(i,1));sin(left_hip_flexion(i,1));0];
                 ContactSet{i,2} = left_force;
                 right_jacobian = Jacobians.JacobianSet{1}.Jacobian.Values{i};
                 left_jacobian = Jacobians.JacobianSet{2}.Jacobian.Values{i};
                 % Groups
-                right_group_force = -1/d_weld*[0;0;0; ...
+                right_group_force = -1/d_weld*r_6d*[0;0;0; ...
                     sin(group_angle);cos(group_angle);0];
                 ContactSet{i,3} = right_group_force;
-                left_group_force = -1/d_weld*[0;0;0; ...
+                left_group_force = -1/d_weld*r_6d*[0;0;0; ...
                     sin(group_angle);cos(group_angle);0];
                 ContactSet{i,4} = left_group_force;
                 right_group_jacobian = ...
