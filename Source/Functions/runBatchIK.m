@@ -1,15 +1,7 @@
 function [IK_array, Input_Markers_array, Output_Markers_array] = ...
     runBatchIK(model, input_folder, results_folder)
 % Performs IK using default settings on given model and a batch of input
-% data. Uses runIK function. 
-
-% If the desired results directory exists already, get its full path. If
-% not, create it and get its full path. 
-if exist([pwd '/' results_folder], 'dir')
-    results_folder = getFullPath(results_folder);
-else
-    results_folder = createUniqueDirectory(results_folder);
-end
+% data. Uses runIK function.
 
 % Obtain the files in the input folder. 
 trc_struct = dir([input_folder '/*.trc']);
