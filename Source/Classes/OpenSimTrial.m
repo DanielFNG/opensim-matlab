@@ -50,8 +50,10 @@ classdef OpenSimTrial
                 obj.grfs = Data(obj.grfs_path);
                 obj.kinematics_path = getFullPath(kinematics);
                 obj.kinematics = Data(obj.kinematics_path);
-                new_results = createUniqueDirectory(results);
-                obj.results_directory = getFullPath(new_results);
+                if ~exist(results, 'dir')
+                    mkdir(results);
+                end
+                obj.results_directory = results;
                 [obj.default_rra, obj.default_id, obj.default_ext, ...
                     obj.gait2392_model, obj.gait2392_proportions] = ...
                     obj.loadDefaults();

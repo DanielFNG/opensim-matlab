@@ -44,6 +44,8 @@ addpath(genpath([getenv('EXOPT_HOME') filesep 'Source']));
 % Include any additional libraries. 
 addpath(genpath([getenv('EXOPT_HOME') filesep 'External' filesep ...
     'qpOASES-3.2.1' filesep 'interfaces' filesep 'matlab']));
+addpath(genpath([getenv('EXOPT_HOME') filesep 'External' filesep ...
+    'multiWaitbar']));
     
 % Originally setup was also added to the path, but this is a terrible idea
 % since this script uses the assumption of being in the setup folder!!

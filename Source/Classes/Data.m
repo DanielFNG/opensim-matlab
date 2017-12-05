@@ -553,6 +553,25 @@ classdef Data
             fclose(fileID);
         end
         
+        % Write TRC files. Header only and require ints for the first
+        % column.
+        function writeTRCToFile(obj, filename, withHeader)
+            fileID = fopen(filename,'w');
+            if obj.hasHeader && (withHeader == 1)
+                for i=1:size(obj.Header,1)
+                    fprintf(fileID,'%s\n', char(obj.Header(i)));
+                end
+            end
+            for i=1:size(obj.Values,1)
+                fprintf(fileID,'%d\t', obj.Values(i,1));
+                for j=2:size(obj.Values,2)
+                    fprintf(fileID,'%12.14f\t', obj.Values(i,j));
+                end
+                fprintf(fileID,'\n');
+            end
+            fclose(fileID);
+        end
+        
         % Overload addition. Data objects which share an identical timestep
         % array can be added together. One is essentially appended on to
         % the other, and the labels and header are updated accordingly. NOTE: 

@@ -2,12 +2,9 @@ function [Positions_array, Velocities_array, Accelerations_array] = ...
     runBatchBodyKinematicsAnalysis(model, input_folder, results_folder)
 % Runs a batch of BodyKinematics analyses on a folder containing IK data. 
 
-% If the desired results directory exists already, get its full path. If
-% not, create it and get its full path. 
-if exist([pwd '/' results_folder], 'dir')
-    results_folder = getFullPath(results_folder);
-else
-    results_folder = createUniqueDirectory(results_folder);
+% If the desired results directory does not exist, create it.
+if ~exist(results_folder, 'dir')
+    mkdir(results_folder);
 end
 
 % Obtain the files in the input folder.
