@@ -8,12 +8,9 @@ elseif nargin == 4
     load = 'normal';
 end
 
-% If the desired results directory exists already, get its full path. If
-% not, create it and get its full path. 
-if exist([pwd '/' results], 'dir')
-    results = getFullPath(results);
-else
-    results = createUniqueDirectory(results);
+% If the desired results directory does not exist, create it. 
+if ~exist(results, 'dir')
+    mkdir(results);
 end
 
 % Obtain the files in the ik and grf folders. 
