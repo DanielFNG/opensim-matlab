@@ -1,5 +1,4 @@
 function RRA_adjustment = adjustmentRRA(model,ik,grf,results,load)
-
 % Function for using RRA to adjust a model. 
 %   Uses input kinematic and GRF data to perform RRA and calculate a
 %   modified model file. 

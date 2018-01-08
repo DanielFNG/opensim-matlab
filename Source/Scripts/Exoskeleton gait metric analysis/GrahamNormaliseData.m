@@ -1,4 +1,4 @@
-function [ Normalised_data ] = normaliseData( data )
+function [ Normalised_data ] = GrahamNormaliseData( data )
 %NORMALISEDATA Summary of this function goes here
 %   Detailed explanation goes here
 

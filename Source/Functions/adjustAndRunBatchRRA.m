@@ -1,6 +1,5 @@
 function [RRA_adjustment, RRA_array] = adjustAndRunBatchRRA(...
     scaled_model,ik,grf,ik_folder,grf_folder, results, load)
-
 %Function for running the RRA algorithm in batch form, first adjusting for 
 %dynamic inconsistency. 
 %   Uses input kinematic and GRF data to perform RRA and calculate a
