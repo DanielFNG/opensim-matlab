@@ -1,5 +1,5 @@
 function result = dataLoop(...
-    root, subjects, feet, contexts, assistances, handles, savename)
+    root, subjects, feet, contexts, assistances, handles, savename, load)
 % This function gives programmatic access to the data files for the
 % submission to ROBIO 2017. This allows for efficient data processing.
 % The multiWaitbar function by Ben Tordoff, Matlab, is used to provide 
@@ -31,6 +31,13 @@ function result = dataLoop(...
 % result - a cell array containing the results from each of the executed
 %          function calls
 
+% 
+if nargin < 8
+    load = false;
+elseif nargin > 8
+    error('dataLoop does not support more than 8 arguments.');
+end
+
 % Convenience definitions.
 n_func = vectorSize(handles);
 
@@ -59,6 +66,9 @@ end
 
 try
     for subject = subjects
+        if load
+            subject_data = loadSubject(root,subject);
+        end
         multiWaitbar(labels{2}, 'Reset');  % Reset previous bar.
         for foot = feet
             multiWaitbar(labels{3}, 'Reset');
@@ -67,10 +77,16 @@ try
                 for assistance = assistances
                     multiWaitbar(labels{5}, 'Reset');
                     for func=1:n_func
-                        % Apply each function via handles. 
-                        result{func,subject,foot,context,assistance} = ...
-                            handles{func}(...
-                            root,subject,foot,context,assistance);
+                        % Apply each function via handles.
+                        if load
+                            result{func,subject,foot,context,assistance}...
+                                = handles{func}(...
+                                subject_data,foot,context,assistance);
+                        else 
+                            result{func,subject,foot,context,assistance}... 
+                                = handles{func}(...
+                                root,subject,foot,context,assistance);
+                        end
                         
                         % Update loading bar.
                         multiWaitbar(...
