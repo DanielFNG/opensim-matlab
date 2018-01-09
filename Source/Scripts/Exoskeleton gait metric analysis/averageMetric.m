@@ -13,11 +13,7 @@
 
 A = Hip_RMSD_array;
 
-
-
 %% Average over steady state gait cycles and subjects
-
-
 
  b = [];
 % % Loop over the assistance levels.
@@ -40,34 +36,3 @@ end
    
  Average_array = Average_array(2:3,:);
  Stdev_array = Stdev_array(2:3,:);    
-
-%% Print array to appropriate folder
-
-% metric = Average_array;
-
-%% Convert to table
-
-
- 
-for i = 1:2
-    for j = 1:5
-         String_Av = num2str(Average_array(i,j),'%4.2f, '); 
-         String_Stdev = num2str(Stdev_array(i,j),'%4.2f, ');
-         Table(i,j) = {['$ ' String_Av ' \pm ' String_Stdev ' $']};
-    end
-end
-
-  matrix = Table;
-  rowLabels = {'row 1', 'row 2' , 'row 3'};
-  columnLabels = {'col 1', 'col 2' , 'col 3' , 'col 4' , 'col 5'};
-  matrix2latex(matrix, 'out.tex', 'rowLabels', rowLabels, 'columnLabels', columnLabels, 'alignment', 'c', 'format', '%-6.2f', 'size', 'tiny');
-
-%% Plot values
-Metric_Label = ['Hip angle RMS (' char(176) ')'];
-
-ThreeDBarWithErrorBars(Average_array,Stdev_array,Metric_Label)
-
-
-
-
-
