@@ -6,15 +6,16 @@ function result = calculateHipPkT(subject_data, foot, context, assistance)
     ID = subject_data.ID{foot, context, assistance}.ID_array;
     result{vectorSize(ID)} = {};
     
+    switch foot
+        case 1
+            label = 'hip_flexion_r_moment';
+        case 2
+            label = 'hip_flexion_l_moment';
+    end
+    
     % Calculate hip peak to peak torque for each individual trajectory and 
     % save it.
     for i=1:vectorSize(ID)
-        switch foot
-            case 1
-                label = 'hip_flexion_r_moment';
-            case 2
-                label = 'hip_flexion_l_moment';
-        end
         torques = ID{i}.id.getDataCorrespondingToLabel(label);
         result{i} = max(torques) - min(torques);
     end

@@ -1,9 +1,0 @@
-function result = individualVariance(samples, variance, mean, overall_mean)
-
-result = ((samples - 1) * variance) ...
-    + (samples * mean^2) ...
-    - (2 * samples * mean * overall_mean) ...
-    + (samples * overall_mean^2);
-
-end
-

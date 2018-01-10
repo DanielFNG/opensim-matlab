@@ -3,14 +3,13 @@ root = 'C:\Users\Graham\SharePoint\GORDON Daniel\Exoskeleton metrics data\Data f
 % 
 % load ([root 'IK_Results.mat'])
 
+subject_leg = [0.93 0.93 0.91 0.9 0.97 0.97 0.94 0.95 0.92];
 
-% Define the subjects weight
-Subject_weight = [76.4 67.1 58.8 77.2 132 83 61.4 66.6 75.8];
-Subject_weight = Subject_weight*9.80665;
-
-% FZ1 peak = 1 or FZ2 peak = 2
-
-peak = 2;
+subject_speed = [0.95 0.95 0.94 0.94 0.98 0.98 0.96 0.97;...
+    0.95 0.95 0.94 0.94 0.98 0.98 0.96 0.97;...
+    0.95 0.95 0.94 0.94 0.98 0.98 0.96 0.97;...
+    1.14 1.14 1.13 1.13 1.18 1.18 1.15 1.16;...
+    0.76 0.76 0.75 0.75 0.78 0.78 0.77 0.78];
 
 % Loop over the nine subjects. 
 for subject=1:8
@@ -63,27 +62,34 @@ for subject=1:8
                         file = ['\EA' num2str(i)];
                     end
                     
-                    if i == 1 || i == 2 || i == 4 || i == 6 || i == 8 || i == 10
+                    if i == 2 || i == 4 || i == 6 || i == 8 || i == 10
                         
                         % Loop over the two gait cycles for the relevant
                         % contexts
                         for k = 1:5
                             
-                           GRF = Data([context_folder file num2str(k) '.mot']);
-                           
-                           PkGRFVer2_array{subject,assistance_level,j,i}{k} = ...
-                           getPkGRFVer(GRF,j,subject,Subject_weight,peak); 
+                           GRF = GRF_array{subject,assistance_level,j,i}{k};
+                        
+                           MoS_array{subject,assistance_level,j,i}{k} = ...
+                           getMoS(Positions_array{subject,assistance_level,j,i}{k},...
+                           Velocities_array{subject,assistance_level,j,i}{k},GRF,...
+                           Input_Markers_array{subject,assistance_level,1,i}{k},j,subject,subject_leg,...
+                           subject_speed(i/2,subject)); 
                         end
+                        
+                    elseif i == 7 || i == 9
 
                         % Loop over the two gait cycles for the relevant
                         % contexts
-                        for k = 1:2
-                            
-                           GRF = Data([context_folder file num2str(k) '.mot']);
-                           
-                           PkGRFVer2_array{subject,assistance_level,j,i}{k} = ...
-                           getPkGRFVer(GRF,j,subject,Subject_weight,peak); 
-                        end
+%                         for k = 1:2
+%                                                      
+%                            GRF = Data([context_folder file num2str(k) '.mot']);
+%                        
+%                            MoS_array{subject,assistance_level,j,i}{k} = ...
+%                            getMoS(Positions_array{subject,assistance_level,j,i}{k},...
+%                            Velocities_array{subject,assistance_level,j,i}{k},GRF,...
+%                            Input_Markers_array{subject,assistance_level,1,i}{k},j,subject,subject_leg);  
+%                         end
                     end
                 end
             end
