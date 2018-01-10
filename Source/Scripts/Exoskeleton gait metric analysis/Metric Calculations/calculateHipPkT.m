@@ -1,22 +1,25 @@
 function result = calculateHipPkT(subject_data, foot, context, assistance)
-% Calculates the hip peak to peak torques for a given subject and gait 
-% cycle as indexed by a {foot, context, assistance} triple.
+% Calculate the peak to peak hip torque value.
 
-    % Gain access to the hip torques as set of data objects.
-    ID = subject_data.ID{foot, context, assistance}.ID_array;
-    result{vectorSize(ID)} = {};
-    
-    switch foot
-        case 1
-            label = 'hip_flexion_r_moment';
-        case 2
-            label = 'hip_flexion_l_moment';
-    end
-    
-    % Calculate hip peak to peak torque for each individual trajectory and 
-    % save it.
-    for i=1:vectorSize(ID)
-        torques = ID{i}.id.getDataCorrespondingToLabel(label);
-        result{i} = max(torques) - min(torques);
+% Account for left/right foot.
+switch foot 
+    case 1
+        label = 'hip_flexion_r_moment';
+    case 2
+        label = 'hip_flexion_l_moment';
+end
+
+ID = subject_data.ID{foot, context, assistance}.ID_array;
+
+% Calculate peak to peak hip torque. Dividing by weight
+% for normalisation purposes.
+for i=1:vectorSize(ID)
+    hip = ID.id.getDataCorrespondingToLabel(label);
+    result{i} = (max(hip) - min(hip))/subject_data.weight;
+    if result{i} > 200
+        error('HipPkT unreasonably high.');
     end
 end
+
+end
+
