@@ -35,5 +35,4 @@ handles = {@prepareGRF, @prepareBatchIK, @prepareBatchRRA, ...
 save_dir = 'C:\Users\Daniel\Dropbox\PhD\Exoskeleton Metrics\Matlab Data Files\new_structs';
 
 % Process data. 
-dataLoop(root, subjects, feet, contexts, assistances, handles, labels, ...
-    save_dir);
+dataLoop(root, subjects, feet, contexts, assistances, handles, save_dir);

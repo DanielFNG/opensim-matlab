@@ -18,4 +18,5 @@ handles = ...;
 save_dir = uigetdir('', 'Select a periodic save destination.');
 
 % Process data.
-dataLoop(root, subjects, feet, contexts, assistances, handles, save_dir);
+dataLoop(...
+    root, subjects, feet, contexts, assistances, handles, save_dir, 1);
