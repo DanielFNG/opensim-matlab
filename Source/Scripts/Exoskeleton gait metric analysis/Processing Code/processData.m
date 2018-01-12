@@ -3,6 +3,15 @@
 % Get the root folder using a UI.
 root = uigetdir('', 'Select directory containing subject data folders.');
 
+% Subject specific data.
+subject_leg = [0.93 0.93 0.91 0.9 0.97 0.97 0.94 0.95 0.92];
+
+subject_speed = [0.95 0.95 0.94 0.94 0.98 0.98 0.96 0.97;...
+    0.95 0.95 0.94 0.94 0.98 0.98 0.96 0.97;...
+    0.95 0.95 0.94 0.94 0.98 0.98 0.96 0.97;...
+    1.14 1.14 1.13 1.13 1.18 1.18 1.15 1.16;...
+    0.76 0.76 0.75 0.75 0.78 0.78 0.77 0.78];
+
 %% Preliminaries: required steps for RRA adjustment.
 
 % Need to perform IK and adjustment RRA.
