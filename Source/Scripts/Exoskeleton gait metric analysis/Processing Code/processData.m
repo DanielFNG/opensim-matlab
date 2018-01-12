@@ -34,5 +34,11 @@ handles = {@prepareGRF, @prepareBatchIK, @prepareBatchRRA, ...
 % Choose periodic save destination.
 save_dir = 'C:\Users\Daniel\Dropbox\PhD\Exoskeleton Metrics\Matlab Data Files\new_structs';
 
-% Process data. 
-dataLoop(root, subjects, feet, contexts, assistances, handles, save_dir);
+% Process data.
+try
+    dataLoop(root, subjects, feet, contexts, assistances, handles, save_dir);
+catch ME
+    fid = fopen('C:\Users\Daniel\Dropbox\PhD\Exoskeleton Metrics\Matlab Data Files\new_structs\error_message.txt', 'a+');
+    fprintf(fid, '%s', ME.getReport('extended', 'hyperlinks', 'off'));
+    rethrow(ME)
+end

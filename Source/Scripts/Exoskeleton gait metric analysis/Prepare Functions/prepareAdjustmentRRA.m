@@ -20,7 +20,6 @@ model_path = constructModelPath(root, subject, assistance);
 output_dir = [grf_path '\RRA_Results'];
 
 % Run adjustment RRA.
-result.MassAdjustment = adjustmentRRA(model_path, first_ik, first_grf, ...
-    output_dir);
+no_result = adjustmentRRA(model_path, first_ik, first_grf, output_dir);
 
 end
