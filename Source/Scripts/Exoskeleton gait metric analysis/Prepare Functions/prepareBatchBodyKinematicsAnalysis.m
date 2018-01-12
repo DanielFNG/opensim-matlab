@@ -1,5 +1,5 @@
 function result = prepareBatchBodyKinematicsAnalysis(...
-    root, subject, foot, context, assistance, output_dir)
+    root, subject, foot, context, assistance, result)
 % This function obtains the necessary paths to run a batch of
 % BodyKinematics analyses. It assumes a filestructure used for the ROBIO
 % 2017 submission. It is also assumed that RRA adjustment and RRA have been 
@@ -12,15 +12,12 @@ data_path = constructDataPath(...
     root, subject, foot, context, assistance);
 kinematics_folder = [data_path '\RRA_Results'];
 model_path = constructAdjustedModelPath(root, subject, assistance);
-
-if nargin == 5
-    output_dir = [data_path '\BodyKinematics_Results'];
-elseif nargin ~= 6
-    error(['Incorrect number of arguments to '...
-        'prepareBatchBodyKinematicsAnalysis.']);
-end
+output_dir = [data_path '\BodyKinematics_Results'];
 
 % Run BodyKinematics analysis batch.
-[result.positions, result.velocities, result.accelerations] = ...
+[result.BodyKinematics.positions, result.BodyKinematics.velocities, ...
+    result.BodyKinematics.accelerations] = ...
     runBatchBodyKinematicsAnalysis(...
     model_path, kinematics_folder, output_dir);
+
+end

@@ -1,5 +1,5 @@
 function result = prepareAdjustmentRRA(...
-    root, subject, foot, context, assistance, output_dir)
+    root, subject, foot, context, assistance, result)
 % This function obtains the necessary paths to run an adjustment RRA.
 % It assumes a filestructure used for the ROBIO 2017 submission. For
 % adjustment RRA, we just take the first grf/ik file corresponding to the
@@ -17,15 +17,10 @@ ik_path = [grf_path '\IK_Results'];
 ik_files = dir([ik_path '\*.mot']);
 first_ik = [ik_path '\' ik_files(1).name];
 model_path = constructModelPath(root, subject, assistance);
-
-if nargin == 5
-    output_dir = [grf_path '\RRA_Results'];
-elseif nargin ~= 6
-    error('Incorrect number of arguments to prepareAdjustmentRRA.');
-end
+output_dir = [grf_path '\RRA_Results'];
 
 % Run adjustment RRA.
-result = adjustmentRRA(model_path, first_ik, first_grf, ...
+result.MassAdjustment = adjustmentRRA(model_path, first_ik, first_grf, ...
     output_dir);
 
 end

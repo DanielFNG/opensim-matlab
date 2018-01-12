@@ -1,5 +1,5 @@
 function result = prepareGRF(...
-    root, subject, foot, context, assistance, ~)
+    root, subject, foot, context, assistance, result)
 % This function obtains the necessary paths to read in GRF files and store
 % them as data objects.
 %
@@ -14,12 +14,14 @@ grf_path = constructDataPath(...
 grf_struct = dir([grf_path filesep '*.mot']);
 
 % Create a cell array of the appropriate size.
-result{vectorSize(grf_struct)} = {};
+temp{vectorSize(grf_struct)} = {};
 
 % Read in each grf file as a Data object. 
 for i=1:vectorSize(grf_struct)
-	result{i} = Data([grf_path filesep grf_struct(i,1).name]);
+	temp{i} = Data([grf_path filesep grf_struct(i,1).name]);
 end
+
+result.GRF = temp;
 
 end
 

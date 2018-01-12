@@ -1,4 +1,4 @@
-function result = dataLoop(...
+function dataLoop(...
     root, subjects, feet, contexts, assistances, handles, savename, load)
 % This function gives programmatic access to the data files for the
 % submission to ROBIO 2017. This allows for efficient data processing.
@@ -41,71 +41,65 @@ end
 % Convenience definitions.
 n_func = vectorSize(handles);
 
-% Create a cell array of the appropriate size to hold the results. First
-% index is the function, then subject, foot, context, assistance_level.
-% Choosing max rather than len to make it clearer if we have gaps (e.g.
-% missing subject 5). This doesn't help when missing end points but that
-% should be more obvious...
-result{n_func, max(subjects), max(feet), max(contexts), ...
-    max(assistances)} = {};
-
 % Print starting message.
 fprintf('Beginning data processing.\n');
 
 % Initialise loading bar.
 id = 'MATLAB:nargchk:deprecated';   
 warning('off', id);  % Supress multiWaitbar warning.
-labels = {'Subject', 'Foot', 'Context', 'Assistance', 'Function'};
+load_labels = {'Subject', 'Foot', 'Context', 'Assistance', 'Function'};
 increments = [1/vectorSize(subjects), 1/vectorSize(feet), ...
     1/vectorSize(contexts), 1/vectorSize(assistances), ...
     1/vectorSize(handles)];
 colours = {'b', 'r', 'g', 'm', 'k'};
-for i=1:vectorSize(labels)
-    multiWaitbar( labels{i}, 0, 'Color', colours{i}); 
+for i=1:vectorSize(load_labels)
+    multiWaitbar( load_labels{i}, 0, 'Color', colours{i}); 
 end
 
 try
     for subject = subjects
         if load
-            subject_data = loadSubject(root,subject);
+            result = loadSubject(root,subject);
+        else
+            result = initialiseSubjectData(subject);
         end
-        multiWaitbar(labels{2}, 'Reset');  % Reset previous bar.
+        multiWaitbar(load_labels{2}, 'Reset');  % Reset previous bar.
         for foot = feet
-            multiWaitbar(labels{3}, 'Reset');
+            multiWaitbar(load_labels{3}, 'Reset');
             for context = contexts
-                multiWaitbar(labels{4}, 'Reset');
+                multiWaitbar(load_labels{4}, 'Reset');
                 for assistance = assistances
-                    multiWaitbar(labels{5}, 'Reset');
+                    multiWaitbar(load_labels{5}, 'Reset');
                     for func=1:n_func
                         % Apply each function via handles.
                         if load
                             result{func,subject,foot,context,assistance}...
                                 = handles{func}(...
-                                subject_data,foot,context,assistance);
-                        else 
-                            result{func,subject,foot,context,assistance}... 
-                                = handles{func}(...
-                                root,subject,foot,context,assistance);
+                                result,foot,context,assistance);
+                        else
+                            result = handles{func}(root,subject,foot,...
+                                context,assistance,result);
                         end
                         
                         % Update loading bar.
                         multiWaitbar(...
-                            labels{5}, 'Increment', increments(5));
+                            load_labels{5}, 'Increment', increments(5));
                     end
                     multiWaitbar(...
-                        labels{4}, 'Increment', increments(4));
+                        load_labels{4}, 'Increment', increments(4));
                 end
                 multiWaitbar(...
-                    labels{3}, 'Increment', increments(3));
+                    load_labels{3}, 'Increment', increments(3));
             end
-            multiWaitbar(labels{2}, 'Increment', increments(2));
+            multiWaitbar(load_labels{2}, 'Increment', increments(2));
         end
         % Optionally save and clear periodically.
         if nargin == 7
-            save([savename '\subject' num2str(subject) '.mat'], 'result');
-            result(:,subject,:,:,:) = {[]};
+            temp.(['subject' num2str(subject)]) = result;
+            save([savename '\subject' num2str(subject) '.mat'], '-struct', 'temp');
+            clear('result', 'temp');
         end
-        multiWaitbar(labels{1}, 'Increment', increments(1));
+        multiWaitbar(load_labels{1}, 'Increment', increments(1));
     end
     % Print successful message & close multiWaitbar.
     fprintf('Data processing complete.\n\n');

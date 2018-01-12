@@ -262,8 +262,50 @@ classdef metric < handle
                     end
                 end
             end
+        end
+        
+        function plot3DBar(obj)
+            b = figure;
+            b.Units = 'centimeters';
+            set(b, 'Position', [2 2 25 15]);
+            ax = axes('Parent', b);
+            b = bar3(obj.means);
             
+            colormap('parula');
+            colorbar('peer',ax,'Position',[0.890396659707724 ...
+                0.198050314465409 0.031513569937367 0.666729559748428]);
             
+            for k=1:length(b)
+                b(k).CData = b(k).ZData;
+                b(k).FaceColor = 'interp';
+            end
+            
+            hold on;
+            for row=1:size(obj.means,1)
+                for col=1:size(obj.means,2)
+                    z = obj.means(row,col):obj.sdevs(row,col)/50:obj.means(row,col)+obj.sdevs(row,col);
+                    x(1:length(z)) = row;
+                    y(1:length(z)) = col;
+                    if rows >= cols
+                        plot3(x, y, z, 'r-');
+                    else
+                        plot3(y, x, z, 'r-', 'linewidth', 1)
+                    end
+                    clear x;
+                    clear y;
+                    clear z;
+                end
+            end
+            plotSigDiff(obj);
+            hold off
+            
+            xlabel(obj.x_variable, 'FontWeight', 'bold');
+            zlabel(obj.name, 'FontWeight', 'bold');
+            ylabel(obj.y_variable, 'FontWeight', 'bold');
+            set(ax, 'FontSize', 20, 'FontWeight', 'bold', 'XTick', ...
+                [1 2 3 4 5], 'XTickLabel', obj.x_labels, 'YTick', ...
+                [1 2 3], 'YTickLabel', obj.y_labels);
+                    
         end
         
     end
