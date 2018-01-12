@@ -28,8 +28,8 @@ contexts = 2:2:10;  % Only steady-state contexts for now.
 assistances = 1:3;
 
 % Choose functions to execute. 
-handles = {@prepareBatchIK, @prepareBatchRRA, @prepareBatchID, ...
-    @prepareBatchBodyKinematicsAnalysis};
+handles = {@prepareGRF, @prepareBatchIK, @prepareBatchRRA, ...
+    @prepareBatchID, @prepareBatchBodyKinematicsAnalysis};
 
 % Choose periodic save destination.
 save_dir = 'C:\Users\Daniel\Dropbox\PhD\Exoskeleton Metrics\Matlab Data Files\new_structs';
