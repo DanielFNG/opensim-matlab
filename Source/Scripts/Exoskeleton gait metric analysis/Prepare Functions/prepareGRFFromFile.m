@@ -1,4 +1,4 @@
-function result = prepareGRF(...
+function result = prepareGRFFromFile(...
     root, subject, foot, context, assistance, result)
 % This function obtains the necessary paths to read in GRF files and store
 % them as data objects.
@@ -21,7 +21,7 @@ for i=1:vectorSize(grf_struct)
 	temp{i} = Data([grf_path filesep grf_struct(i,1).name]);
 end
 
-result.GRF = temp;
+result.GRF{foot, context, assistance} = temp;
 
 end
 

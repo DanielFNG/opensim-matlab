@@ -16,6 +16,7 @@ model_path = constructAdjustedModelPath(root, subject, assistance);
 output_dir = [grf_path '\RRA_Results'];
 
 % Run RRA batch.
-result.RRA = runBatchRRA(model_path, ik_path, grf_path, output_dir);
+result.RRA{foot, context, assistance} = ...
+    runBatchRRA(model_path, ik_path, grf_path, output_dir);
 
 end

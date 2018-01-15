@@ -6,7 +6,7 @@ function fullPath = getFullPath( path )
 %
 %   For the time being also assumes that we are in the C drive...
 
-    if (path(1) == 'C') && (path(2) == ':')
+    if path(2) == ':'
         fullPath = path;
     else
         [pathstr, name, ext] = fileparts(path);

@@ -15,6 +15,7 @@ model_path = constructAdjustedModelPath(root, subject, assistance);
 output_dir = [grf_data_path '\ID_Results'];
 
 % Run ID batch.
-result.ID = runBatchID(model_path, kinematics_data_path, ...
-    grf_data_path, output_dir);
+result.ID{foot, context, assistance} = ...
+    runBatchID(...
+    model_path, kinematics_data_path, grf_data_path, output_dir);
 end
