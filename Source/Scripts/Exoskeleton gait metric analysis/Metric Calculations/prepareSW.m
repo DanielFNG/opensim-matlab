@@ -41,5 +41,5 @@ function result = prepareSW(foot, context, assistance, result)
     end
     
     % Store results properly.
-    result.Metrics.SW.Values{foot, context, assistance} = temp;
+    result.MetricsData.SW{foot, context, assistance} = temp;
 end

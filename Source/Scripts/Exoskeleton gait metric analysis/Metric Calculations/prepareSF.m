@@ -15,6 +15,6 @@ function result = prepareSF(foot, context, assistance, result)
     end
     
     % Store result.
-    result.Metrics.SF.Values{foot, context, assistance} = temp;
+    result.MetricsData.SF{foot, context, assistance} = temp;
 
 end

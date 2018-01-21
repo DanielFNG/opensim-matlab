@@ -14,7 +14,7 @@ function result = prepareCoMD(foot, context, assistance, result)
     end
     
     % Store results properly.
-    result.Metrics.CoMD_Y.Values{foot, context, assistance} = temp_y;
-    result.Metrics.CoMD_Z.Values{foot, context, assistance} = temp_z;
+    result.MetricsData.CoMD_Y{foot, context, assistance} = temp_y;
+    result.MetricsData.CoMD_Z{foot, context, assistance} = temp_z;
     
 end

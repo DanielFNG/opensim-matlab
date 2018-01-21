@@ -18,9 +18,15 @@ classdef metric < handle
     
     methods 
         
-        function obj = metric(name)
+        function obj = metric(name, means, sdevs)
             if nargin > 0
                 obj.name = name;
+                if nargin == 3
+                    obj.means = means;
+                    obj.sdevs = sdevs;
+                elseif nargin ~= 1
+                    error('Must have 1 or 3 args.');
+                end
             end
         end
         
@@ -264,47 +270,43 @@ classdef metric < handle
             end
         end
         
-        function plot3DBar(obj)
+        function plotRelative3DBar(obj)
+            
+            % Compute relative differences from the baseline. 
+            diff = obj.calculateRelativeDifferences;
+            
+            % Set dimensions.
             b = figure;
             b.Units = 'centimeters';
             set(b, 'Position', [2 2 25 15]);
             ax = axes('Parent', b);
-            b = bar3(obj.means);
             
+            % Create a bar plot.
+            b = bar3(diff);
+            
+            % Create the color bar.
             colormap('parula');
             colorbar('peer',ax,'Position',[0.890396659707724 ...
                 0.198050314465409 0.031513569937367 0.666729559748428]);
             
+            % Change the colours of the bars accordingly. 
             for k=1:length(b)
                 b(k).CData = b(k).ZData;
                 b(k).FaceColor = 'interp';
             end
             
+            % Add the significant difference lines. 
             hold on;
-            for row=1:size(obj.means,1)
-                for col=1:size(obj.means,2)
-                    z = obj.means(row,col):obj.sdevs(row,col)/50:obj.means(row,col)+obj.sdevs(row,col);
-                    x(1:length(z)) = row;
-                    y(1:length(z)) = col;
-                    if rows >= cols
-                        plot3(x, y, z, 'r-');
-                    else
-                        plot3(y, x, z, 'r-', 'linewidth', 1)
-                    end
-                    clear x;
-                    clear y;
-                    clear z;
-                end
-            end
-            plotSigDiff(obj);
+            %plotSigDiff(obj);
             hold off
             
-            xlabel(obj.x_variable, 'FontWeight', 'bold');
+            % Handle labels etc.
+            xlabel('Context', 'FontWeight', 'bold');
             zlabel(obj.name, 'FontWeight', 'bold');
-            ylabel(obj.y_variable, 'FontWeight', 'bold');
+            ylabel('Assistance Level', 'FontWeight', 'bold');
             set(ax, 'FontSize', 20, 'FontWeight', 'bold', 'XTick', ...
-                [1 2 3 4 5], 'XTickLabel', obj.x_labels, 'YTick', ...
-                [1 2 3], 'YTickLabel', obj.y_labels);
+                [1 2 3 4 5], 'XTickLabel', obj.context_order, 'YTick', ...
+                [1 2 3], 'YTickLabel', obj.assistance_order);
                     
         end
         

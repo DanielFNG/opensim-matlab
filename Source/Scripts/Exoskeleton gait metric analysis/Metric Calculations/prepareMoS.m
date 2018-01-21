@@ -42,8 +42,8 @@ for i=1:vectorSize(grfs)
 end
 
 % Store results properly.
-result.Metrics.MoSAP.Values{foot, context, assistance} = temp_ap;
-result.Metrics.MoSML.Values{foot, context, assistance} = temp_ml;
+result.MetricsData.MoSAP{foot, context, assistance} = temp_ap;
+result.MetricsData.MoSML{foot, context, assistance} = temp_ml;
 
 end
     

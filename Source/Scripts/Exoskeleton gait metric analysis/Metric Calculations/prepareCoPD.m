@@ -17,6 +17,6 @@ for i=1:vectorSize(grfs)
     temp_z{i} = calculateCoPD(grfs{i}, f_label, z_label);
 end
 
-result.Metrics.CoPAP.Values{foot, context, assistance} = temp_x;
-result.Metrics.CoPML.Values{foot, context, assistance} = temp_z;
+result.MetricsData.CoPAP{foot, context, assistance} = temp_x;
+result.MetricsData.CoPML{foot, context, assistance} = temp_z;
 

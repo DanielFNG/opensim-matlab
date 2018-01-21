@@ -23,7 +23,7 @@ for i=1:vectorSize(ID)
     end
 end
 
-result.Metrics.HipPkT.Values{foot, context, assistance} = temp;
+result.MetricsData.HipPkT{foot, context, assistance} = temp;
 
 end
 

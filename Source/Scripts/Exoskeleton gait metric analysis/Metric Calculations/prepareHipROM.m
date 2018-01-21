@@ -21,6 +21,6 @@ for i=1:vectorSize(IK)
     temp{i} = calculateHipROM(IK{i}, label);
 end
 
-result.Metrics.HipROM.Values{foot, context, assistance} = temp;
+result.MetricsData.HipROM{foot, context, assistance} = temp;
 
 end
