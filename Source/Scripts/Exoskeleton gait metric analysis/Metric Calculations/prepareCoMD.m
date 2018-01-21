@@ -1,7 +1,7 @@
 function result = prepareCoMD(foot, context, assistance, result)
 
     % Gain access to the position trajectories of the bodies. 
-    BK = result.BodyKinematics{foot, context, assistance}.positions;
+    BK = result.BodyKinematics.positions{foot, context, assistance};
     
     % Create cell arrays to hold temporary results.
     temp_y{vectorSize(BK)} = {};
@@ -14,7 +14,7 @@ function result = prepareCoMD(foot, context, assistance, result)
     end
     
     % Store results properly.
-    result.Metrics.CoMD_Y{foot, context, assistance} = temp_y;
-    result.Metrics.CoMD_Y{foot, context, assistance} = temp_z;
+    result.Metrics.CoMD_Y.Values{foot, context, assistance} = temp_y;
+    result.Metrics.CoMD_Z.Values{foot, context, assistance} = temp_z;
     
 end

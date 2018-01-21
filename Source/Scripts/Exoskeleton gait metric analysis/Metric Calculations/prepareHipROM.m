@@ -11,7 +11,7 @@ switch foot
 end
 
 % Gain access to the hip trajectories as set of data objects.
-IK = subject_data.IK.IK_array{foot, context, assistance};
+IK = result.IK.IK_array{foot, context, assistance};
 
 % Create temp cell array.
 temp{vectorSize(IK)} = {};
@@ -21,6 +21,6 @@ for i=1:vectorSize(IK)
     temp{i} = calculateHipROM(IK{i}, label);
 end
 
-result.Metrics.HipROM = temp;
+result.Metrics.HipROM.Values{foot, context, assistance} = temp;
 
 end

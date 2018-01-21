@@ -1,5 +1,6 @@
-function indices = isolateStancePhase(grf, foot)
-    indices = find(grf.getDataCorrespondingToLabel(...
-        ['    ground_force' num2str(foot) '_vy']) > 10);
+function indices = isolateStancePhase(grf, label)
+% Given grf data and a label pointing to to the correct vy force column for
+% the foot in question, isolates the stance phase. 
+    indices = find(grf.getDataCorrespondingToLabel(label) > 10);
 end
 

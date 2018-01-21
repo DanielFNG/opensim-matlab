@@ -1,4 +1,4 @@
-function result = calculateSW(subject_data, foot, context, assistance)
+function result = prepareSW(foot, context, assistance, result)
 % Calculates the step width for a given subject and gait cycle as indexed 
 % by a {foot, context, assistance} triple.
 
@@ -15,10 +15,9 @@ function result = calculateSW(subject_data, foot, context, assistance)
 
     % Gain access to the input marker trajectories for both feet.
     these_markers = ...
-        subject_data.IK{foot, context, assistance}.Input_Markers_array;
-    other_markers = ...
-        subject_data.IK{mod(foot,2) + 1, context, assistance}. ...
-        Input_Markers_array;
+        result.IK.Input_Markers_array{foot, context, assistance};
+    other_markers = result.IK.Input_Markers_array{...
+        mod(foot,2) + 1, context, assistance};
     
     % Determine leading foot and set parameters accordingly. 
     if these_markers{1}.getStartTime() < other_markers{1}.getStartTime()
@@ -30,7 +29,7 @@ function result = calculateSW(subject_data, foot, context, assistance)
     end
     
     % Create cell array for results. 
-    result{n_results} = {};
+    temp{n_results} = {};
         
     % Calculate step widths. 
     for i=1:n_results
@@ -38,6 +37,9 @@ function result = calculateSW(subject_data, foot, context, assistance)
             these_markers{i}.getDataCorrespondingToLabel(this_label);
         second_heel = other_markers{i+offset}. ...
             getDataCorrespondingToLabel(other_label);
-        result{i} = abs(second_heel(1) - first_heel(1));
+        temp{i} = abs(second_heel(1) - first_heel(1));
     end
+    
+    % Store results properly.
+    result.Metrics.SW.Values{foot, context, assistance} = temp;
 end

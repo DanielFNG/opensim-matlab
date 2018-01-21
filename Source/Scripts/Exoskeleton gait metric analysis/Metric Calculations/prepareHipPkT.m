@@ -9,7 +9,7 @@ switch foot
         label = 'hip_flexion_l_moment';
 end
 
-ID = subject_data.ID{foot, context, assistance};
+ID = result.ID{foot, context, assistance};
 
 % Create temp cell array.
 temp{vectorSize(ID)} = {};
@@ -18,12 +18,12 @@ temp{vectorSize(ID)} = {};
 % for normalisation purposes.
 for i=1:vectorSize(ID)
     temp{i} = calculateHipPkT(ID{i}, result.Properties.Weight, label);
-    if result{i} > 200
+    if temp{i} > 200
         error('HipPkT unreasonably high.');
     end
 end
 
-result.Metrics.HipPkT = temp;
+result.Metrics.HipPkT.Values{foot, context, assistance} = temp;
 
 end
 

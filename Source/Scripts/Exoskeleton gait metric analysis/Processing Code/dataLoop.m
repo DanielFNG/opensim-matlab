@@ -73,9 +73,8 @@ try
                     for func=1:n_func
                         % Apply each function via handles.
                         if load
-                            result{func,subject,foot,context,assistance}...
-                                = handles{func}(...
-                                result,foot,context,assistance);
+                            result = handles{func}(...
+                                foot,context,assistance,result);
                         else
                             result = handles{func}(root,subject,foot,...
                                 context,assistance,result);
@@ -93,12 +92,11 @@ try
             end
             multiWaitbar(load_labels{2}, 'Increment', increments(2));
         end
-        % Optionally save and clear periodically.
-        if nargin == 7
-            temp.(['subject' num2str(subject)]) = result;
-            save([savename '\subject' num2str(subject) '.mat'], '-struct', 'temp');
-            clear('result', 'temp');
-        end
+        % Save and clear periodically.
+        temp.(['subject' num2str(subject)]) = result;
+        save([savename '\subject' num2str(subject) '.mat'], '-struct', 'temp');
+        clear('result', 'temp');
+        
         multiWaitbar(load_labels{1}, 'Increment', increments(1));
     end
     % Print successful message & close multiWaitbar.

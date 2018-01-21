@@ -1,11 +1,11 @@
-function result = calculateCoPD(foot, grfs, label)
+function result = calculateCoPD(grfs, f_label, label)
 % Calculate difference in CoP given grfs and the correct label and foot.
 
 % Get CoP trajectory.
-cop_traj = grfs.getDataCorrespondingToLabel(label);
+cop = grfs.getDataCorrespondingToLabel(label);
 
 % Find min and max in stance phase only. 
-stance = isolateStancePhase(grfs, foot);
+stance = isolateStancePhase(grfs, f_label);
 max_pk = max(cop(stance));
 min_pk = min(cop(stance));
 

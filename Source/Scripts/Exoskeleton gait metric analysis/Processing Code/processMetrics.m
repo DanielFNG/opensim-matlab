@@ -1,7 +1,8 @@
 %% Obtain data directory. 
 
 % Get the root folder using a UI.
-root = uigetdir('', 'Select directory containing subject data files.');
+%root = uigetdir('', 'Select directory containing subject data files.');
+root = 'F:\updated_structs';
 
 %% Calculate metrics
 
@@ -12,10 +13,12 @@ contexts = 2:2:10;  % Only steady-state contexts for now.
 assistances = 1:3;
 
 % Choose functions to execute.
-handles = ...;
+handles = {@prepareCoMD, @prepareCoPD, @prepareHipPkT, @prepareHipROM, ...
+    @prepareMoS, @prepareSF, @prepareSW};
 
 % Choose periodic save destination.
-save_dir = uigetdir('', 'Select a periodic save destination.');
+%save_dir = uigetdir('', 'Select a periodic save destination.');
+save_dir = 'F:\structs_with_metrics';
 
 % Process data.
 dataLoop(...
