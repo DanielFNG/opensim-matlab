@@ -331,7 +331,7 @@ classdef metric < handle
             
             % Add the significant difference lines. 
             hold on;
-            %plotSigDiff(obj);
+            obj.plotSignificantDifferences(diff);
             hold off
             
             % Handle labels etc.
@@ -342,6 +342,32 @@ classdef metric < handle
                 [1 2 3 4 5], 'XTickLabel', obj.context_order, 'YTick', ...
                 [1 2 3], 'YTickLabel', obj.assistance_order);
                     
+        end
+        
+        function plotSignificantDifferences(obj, vals)
+            j = 0.1;
+            for i=1:size(obj.col_diffs,1)
+                if obj.col_diffs(i,3) > 0 || obj.col_diffs(i,5) < 0
+                    mx = max(max(vals)) + j*max(max(vals));
+                    j = j + 0.1;
+                    x = [obj.col_diffs(i,1); obj.col_diffs(i,2)];
+                    y = zeros(2);
+                    z = ones(1,2)*mx;
+                    plot3(x,y,z,'-k*','linewidth',1);
+                end
+            end
+            
+            j = 0.1;
+            for i=1:size(obj.row_diffs,1)
+                if obj.row_diffs(i,3) > 0 || obj.row_diffs(i,5) < 0
+                    mx = max(max(vals)) + j*max(max(vals));
+                    j = j + 0.1;
+                    x = ones(1,2)*5.4;
+                    y = [obj.row_diffs(i,1); obj.row_diffs(i,2)];
+                    z = ones(1,2)*mx;
+                    plot3(x,y,z,'-k*','linewidth',1);
+                end
+            end  
         end
         
     end
