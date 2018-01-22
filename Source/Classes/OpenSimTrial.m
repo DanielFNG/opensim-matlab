@@ -30,7 +30,8 @@ classdef OpenSimTrial
     end
     
     properties (GetAccess = private, SetAccess = private)
-        default_rra 
+        default_rra
+        default_cmc
         default_id
         default_ext
         gait2392_model
@@ -52,9 +53,9 @@ classdef OpenSimTrial
                 obj.kinematics = Data(obj.kinematics_path);
                 new_results = createUniqueDirectory(results);
                 obj.results_directory = getFullPath(new_results);
-                [obj.default_rra, obj.default_id, obj.default_ext, ...
-                    obj.gait2392_model, obj.gait2392_proportions] = ...
-                    obj.loadDefaults();
+                [obj.default_rra, obj.default_cmc, obj.default_id, ...
+                    obj.default_ext, obj.gait2392_model, ...
+                    obj.gait2392_proportions] = obj.loadDefaults();
                 obj.load = load; 
                 obj.load_path = [obj.default_ext load '.xml'];
                 % Import OpenSim Model class to calculate model dofs.  
@@ -97,6 +98,11 @@ classdef OpenSimTrial
                 Tool.loadModel([obj.default_rra 'settings.xml']);
                 Tool.updateModelForces(...
                     Tool.getModel(), [obj.default_rra 'settings.xml']);
+            elseif isa(Tool, 'org.opensim.modeling.CMCTool')
+                Tool.setModelFilename(obj.model_path);
+                Tool.loadModel([obj.default_cmc 'settings.xml']);
+                Tool.updateModelForces(...
+                    Tool.getModel(), [obj.default_cmc 'settings.xml']);
             elseif isa(Tool, 'org.opensim.modeling.InverseDynamicsTool')
                 Tool.setModelFileName(obj.model_path);
             else
@@ -110,7 +116,8 @@ classdef OpenSimTrial
             Tool.setResultsDir([obj.results_directory '/' dir]);
             
             % Slightly different behaviour for RRA vs ID. 
-            if isa(Tool, 'org.opensim.modeling.RRATool')
+            if isa(Tool, 'org.opensim.modeling.RRATool') || ...
+                    isa(Tool, 'org.opensim.modeling.CMCTool')
                 Tool.setInitialTime(initialTime);
                 Tool.setFinalTime(finalTime);
                 Tool.setDesiredKinematicsFileName(obj.kinematics_path);
@@ -174,7 +181,8 @@ classdef OpenSimTrial
                 % a getModel method.
                 import org.opensim.modeling.Model
                 Tool.setExternalLoadsFileName(getFullPath('temp.xml'));
-            elseif isa(Tool, 'org.opensim.modeling.RRATool')
+            elseif isa(Tool, 'org.opensim.modeling.RRATool') || ...
+                    isa(Tool, 'org.opensim.modeling.CMCTool')
                 Tool.createExternalLoads('temp.xml', Tool.getModel());
                 delete('temp.xml');
             else
@@ -245,7 +253,7 @@ classdef OpenSimTrial
                     '_time=' num2str(initialTime) '-' num2str(finalTime)];
                 rraTool = obj.setupRRA(...
                             dir, initialTime, finalTime);
-                rraTool.run();
+                rraTool.run()
                 
                 % Process resulting RRA data. 
                 RRA = RRAResults(obj, [obj.results_directory '/' dir '/RRA']);
@@ -304,6 +312,44 @@ classdef OpenSimTrial
             obj.setupExternalLoads(idTool);
         end
         
+        function cmc = setupCMC(obj, dir, startTime, endTime)
+            % Import OpenSim CMCTool class.
+            import org.opensim.modeling.CMCTool
+            
+            % Load default CMCTool.
+            cmc = CMCTool([obj.default_cmc 'settings.xml']);
+            
+            % Perform setup.
+            obj.loadModelAndActuators(cmc);
+            obj.setInputsAndOutputs(cmc, startTime, endTime, dir);
+            obj.setupExternalLoads(cmc);
+        end
+        
+        function runCMC(obj, startTime, endTime)
+            
+            % If we just want to do it for the entire file.
+            if nargin == 1
+                startTime = obj.kinematics.Timesteps(1,1);
+                endTime = obj.kinematics.Timesteps(end,1);
+                
+            % If only a start time is given.
+            elseif nargin == 2
+                endTime = obj.kinematics.Timesteps(end,1);
+                
+            % If we have both a start time and an end time.
+            elseif nargin ~= 3
+                error('Incorrect number of arguments to runCMC.');
+            end
+            
+            dir = ['CMC_' 'load=' obj.load ...
+                '_time=' num2str(startTime) '-' num2str(endTime)];
+            
+            cmc = obj.setupCMC(dir, startTime, endTime);
+            
+            cmc.run();
+            
+        end
+        
         % Run the ID algorithm. 
         function ID = runID(obj, startTime, endTime)
             
@@ -344,9 +390,10 @@ classdef OpenSimTrial
     methods(Static)
         
         % Load the filenames for default RRA, ID settings etc. 
-        function [rra, id, ext, model, prop] = loadDefaults()
+        function [rra, cmc, id, ext, model, prop] = loadDefaults()
             rra = [getenv('EXOPT_HOME') '/Defaults/RRA/'];
             id = [getenv('EXOPT_HOME') '/Defaults/ID/'];
+            cmc = [getenv('EXOPT_HOME') '/Defaults/CMC/'];
             ext = [getenv('EXOPT_HOME') '/Defaults/ExternalLoads/'];
             model = [getenv('EXOPT_HOME') '/Defaults/Model/gait2392.osim'];
             prop = [getenv('EXOPT_HOME') ...
