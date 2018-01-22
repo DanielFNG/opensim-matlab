@@ -275,7 +275,7 @@ classdef OpenSimTrial
                     dir, initialTime, finalTime, body, output);
                 log = [obj.results_directory '/' 'RRA_output.log'];
                 diary(log);
-                rraTool.run();
+                rraTool.run()
                 diary off;
                     
                 % Perform mass adjustment. 

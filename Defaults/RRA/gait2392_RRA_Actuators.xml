@@ -199,7 +199,7 @@
 				    for control values-->
             <max_control> infinity </max_control>
             <body>pelvis</body>
-            <point> -0.065383	0	0	</point>
+            <point> -0.064428	0	0	</point>
             <point_is_global> false </point_is_global>
             <direction>       1.00000000      -0.00000000      -0.00000000 </direction>
             <force_is_global> true </force_is_global>
@@ -212,7 +212,7 @@
 				    for control values-->
             <max_control> infinity </max_control>
             <body> pelvis </body>
-            <point> -0.065383	0	0	</point>
+            <point> -0.064428	0	0	</point>
             <point_is_global> false </point_is_global>
             <direction>      -0.00000000       1.00000000      -0.00000000 </direction>
             <force_is_global> true </force_is_global>
@@ -225,7 +225,7 @@
 				    for control values-->
             <max_control> infinity </max_control>
             <body> pelvis </body>
-            <point> -0.065383	0	0	</point>
+            <point> -0.064428	0	0	</point>
             <point_is_global> false </point_is_global>
             <direction>      -0.00000000      -0.00000000       1.00000000 </direction>
             <force_is_global> true </force_is_global>
