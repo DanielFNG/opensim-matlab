@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <OpenSimDocument Version="20302">
-	<CMCTool name="subject01_walk1">
+	<CMCTool name="CMC">
 	<!--Name of the .osim file used to construct a model.-->
 	<model_file> gait2392_APO.osim </model_file>
 		<!--Replace the model's force set with sets specified in

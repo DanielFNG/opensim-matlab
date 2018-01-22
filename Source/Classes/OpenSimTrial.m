@@ -325,7 +325,7 @@ classdef OpenSimTrial
             obj.setupExternalLoads(cmc);
         end
         
-        function runCMC(obj, startTime, endTime)
+        function CMC = runCMC(obj, startTime, endTime)
             
             % If we just want to do it for the entire file.
             if nargin == 1
@@ -347,6 +347,9 @@ classdef OpenSimTrial
             cmc = obj.setupCMC(dir, startTime, endTime);
             
             cmc.run();
+            
+            % Process resulting CMC data. 
+            CMC = CMCResults(obj, [obj.results_directory '/' dir '/CMC']);
             
         end
         
