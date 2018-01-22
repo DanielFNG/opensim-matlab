@@ -5,6 +5,8 @@ classdef metric < handle
         sample_size = 70;  % 7 subjects * 2 feet * 5 gait cycles
         means = 'Not yet known.'
         sdevs = 'Not yet known.'
+        row_diffs
+        col_diffs
         sig_diffs_A = 'Not yet known.'
         sig_diffs_C = 'Not yet known.'
         combined_means = 'Not yet calculated.'
@@ -18,16 +20,48 @@ classdef metric < handle
     
     methods 
         
-        function obj = metric(name, means, sdevs)
+        function obj = metric(name, means, sdevs, sample_size, ...
+                col_diffs, row_diffs)
             if nargin > 0
                 obj.name = name;
-                if nargin == 3
+                if nargin == 6
                     obj.means = means;
                     obj.sdevs = sdevs;
+                    obj.sample_size = sample_size;
+                    obj.row_diffs = row_diffs;
+                    obj.col_diffs = col_diffs;
+                    obj = obj.identifySignificantDifferences();
                 elseif nargin ~= 1
                     error('Must have 1 or 3 args.');
                 end
             end
+        end
+        
+        function obj = identifySignificantDifferences(obj)
+            obj.sig_diffs_A = {};
+            obj.sig_diffs_C = {};
+            
+            num = 1;
+            for i=1:size(obj.col_diffs,1)
+                if obj.col_diffs(i,3) > 0 || obj.col_diffs(i,5) < 0
+                    obj.sig_diffs_C{num,1} = ...
+                        obj.context_order{obj.col_diffs(i,1)};
+                    obj.sig_diffs_C{num,2} = ...
+                        obj.context_order{obj.col_diffs(i,2)};
+                    num = num + 1;
+                end
+            end
+            
+            num = 1;
+            for i=1:size(obj.row_diffs,1)
+                if obj.row_diffs(i,3) > 0 || obj.row_diffs(i,5) < 0
+                    obj.sig_diffs_A{num,1} = ...
+                        obj.assistance_order{obj.row_diffs(i,1)};
+                    obj.sig_diffs_A{num,2} = ...
+                        obj.assistance_order{obj.row_diffs(i,2)};
+                    num = num + 1;
+                end
+            end         
         end
         
         function inputManually(obj)
