@@ -4,9 +4,9 @@ function result = prepareBatchCMC(...
 % Get appropriate paths.
 grf_path = constructDataPath(...
     root, subject, foot, context, assistance);
-kinematics_data_path = [grf_data_path '\RRA_Results'];
+kinematics_data_path = [grf_path '\RRA_Results'];
 model_path = constructAdjustedModelPath(root, subject, assistance);
-output_dir = [grf_data_path '\CMC_Results'];
+output_dir = [grf_path '\CMC_Results'];
 
 % Run CMC batch.
 result.CMC{foot, context, assistance} = ...

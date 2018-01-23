@@ -72,9 +72,9 @@ try
                     multiWaitbar(load_labels{5}, 'Reset');
                     for func=1:n_func
                         % Apply each function via handles.
-                        if load
+                        if load 
                             result = handles{func}(...
-                                foot,context,assistance,result);
+                                foot, context, assistance, result);
                         else
                             result = handles{func}(root,subject,foot,...
                                 context,assistance,result);
