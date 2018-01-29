@@ -103,6 +103,7 @@ classdef OpenSimTrial
             elseif isa(Tool, 'org.opensim.modeling.CMCTool')
                 Tool.setModelFilename(obj.model_path);
                 Tool.loadModel([obj.default_cmc 'settings.xml']);
+                Tool.addAnalysisSetToModel();
                 Tool.updateModelForces(...
                     Tool.getModel(), [obj.default_cmc 'settings.xml']);
             elseif isa(Tool, 'org.opensim.modeling.InverseDynamicsTool')
@@ -350,8 +351,10 @@ classdef OpenSimTrial
             
             cmc.run();
             
-            % Process resulting CMC data. 
-            CMC = CMCResults(obj, [obj.results_directory '/' dir '/CMC']);
+            % Process resulting CMC data if necessary.
+            if nargout == 1
+                CMC = CMCResults(obj, [obj.results_directory '/' dir '/CMC']);
+            end
             
         end
         
