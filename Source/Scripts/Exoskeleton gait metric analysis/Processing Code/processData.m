@@ -28,15 +28,15 @@ contexts = 2:2:10;  % Only steady-state contexts for now.
 assistances = 1:3;
 subjects = 1;
 feet = 1;
-contexts = 2;
-assistances = 1;
+contexts = 6;
+assistances = 3;
 
 % Choose functions to execute. 
 handles = {@prepareGRFFromFile, @prepareBatchIK, @prepareBatchRRA, ...
     @prepareBatchID, @prepareBatchBodyKinematicsAnalysis};
 
 % Choose periodic save destination.
-save_dir = 'F:\Dropbox\PhD\Exoskeleton Metrics\Matlab Data Files\new_structs';
+save_dir = 'C:\Users\danie\Documents\GitHub\exopt\Source\Scripts\Exoskeleton gait metric analysis\Processing Code';
 
 % Process data.
 try

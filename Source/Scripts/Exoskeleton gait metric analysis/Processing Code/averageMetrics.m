@@ -1,10 +1,10 @@
 % This script performs the averaging process for the metrics, resulting in
 % a mean and standard deviation for each (context, assistance) pair. 
 
-root = 'F:\structs_with_metrics';
-save_dir = 'F:\structs_with_metrics';
+root = 'F:\structs_with_metrics_cmc';
+save_dir = 'F:\structs_with_metrics_cmc';
 
-for subject=1
+for subject=[1:4,6:8]
     data = loadSubject(root, subject);
     metric_labels = fieldnames(data.MetricsData);
     for n_metric=1:vectorSize(metric_labels)
@@ -16,10 +16,8 @@ for subject=1
             inner_stds = [];
             inner_observations = [];
             for assistance=1:3
-                values = [cell2mat(data.MetricsData. ...
-                    (metric_labels{n_metric}){1,context,assistance}), ...
-                    cell2mat(data.MetricsData.(metric_labels{n_metric}) ...
-                    {2,context,assistance})];
+                values = cell2mat(data.MetricsData. ...
+                    (metric_labels{n_metric}){1,context,assistance});
                 inner_observations = [inner_observations; ...
                     transpose(values)];
                 inner_means = [inner_means; mean(values)];
