@@ -61,7 +61,7 @@ try
         if load
             result = loadSubject(root,subject);
         else
-            result = initialiseSubjectData(subject);
+            result = initialiseSubjectData(root,subject);
         end
         multiWaitbar(load_labels{2}, 'Reset');  % Reset previous bar.
         for foot = feet

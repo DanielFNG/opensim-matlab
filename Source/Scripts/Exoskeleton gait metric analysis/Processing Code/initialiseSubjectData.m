@@ -1,5 +1,6 @@
-function result = initialiseSubjectData(subject)
+function result = initialiseSubjectData(root, subject)
 
+torques_path = [root filesep 'APO Torques'];
 weights = [76.4 67.1 58.8 77.2 132 83 61.4 66.6 75.8];
 leg_lengths = [0.93 0.93 0.91 0.9 0.97 0.97 0.94 0.95 0.92];
 
@@ -20,6 +21,6 @@ result.Name = ['subject' num2str(subject)];
 result.Properties.LegLength = leg_lengths(subject);
 result.Properties.WalkingSpeed = walking_speeds(1:end,subject);
 result.Properties.Weight = weights(subject);
-result.APO = computeAPOTorques(subject);
+result.APO = computeAPOTorques(torques_path, subject);
 end
 
