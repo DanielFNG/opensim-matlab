@@ -1,7 +1,7 @@
 function result = readAPOData(filename)
 % Read and plot the saved variables in the RT Labview routine 
 
-    Fid     = fopen('S1_EA.bin', 'r', 's'); % read the file name of your saved dataset.
+    Fid     = fopen(filename, 'r', 's'); % read the file name of your saved dataset.
     DataSet = fread(Fid, [9 inf], 'double');                      % read the 9 variables
     fclose(Fid);                                                  % close the file
 

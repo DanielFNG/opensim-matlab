@@ -1,12 +1,13 @@
-%% Compute APO torques. 
+function APO = computeAPOTorques(subject)
 
-n_timeskips = 5;
-lookahead_window = 600;
+    n_timeskips = 5;
+    lookahead_window = 700;
+    n_cycles = 2;
+    vector_size = 1000;
 
-for subject=[1:4,6:8]
     result  = readAPOData(['S' num2str(subject) '_EA.bin']);
     
-    %% Segment the data according to timeskips.
+    % Segment the data according to timeskips.
     timediffs = result.Time(2:end) - result.Time(1:end-1);
     segs = zeros(1,n_timeskips);
     for i=1:n_timeskips
@@ -15,14 +16,30 @@ for subject=[1:4,6:8]
         timediffs(maxloc) = 1; % Set this to 1 so it will no longer be a maximum.
     end
     
-    %% Use autocorrelation to detect the first 3 cycles for each context.
-    for i=1:5
-        x = result.H_RightActualTorque(segs(1,i):segs(1,i)+lookahead_window);
-        ac = xcorr(x, x);
+    % Sort the segs array.
+    segs = sort(segs);
+    
+    % Detect cycles and form average.
+    names = fieldnames(result);
+    for i=1:n_timeskips
+        y = result.H_RightJointAngle(segs(1,i):segs(1,i)+lookahead_window);
+        ac = xcorr(y, y);
         [~, locs] = findpeaks(ac);
+        for j=1:length(names)-1
+            x = result.(names{j})(segs(1,i):segs(1,i)+lookahead_window);
+            cycles = cell(1,n_cycles);
+            for k=1:n_cycles
+                cycles{k} = ...
+                    stretchVector(x(locs(k+1):locs(k+2)), vector_size);
+            end
+            cycle = [];
+            for k=1:n_cycles
+                cycle = [cycle cycles{k}];
+            end
+            result.(['Avg' names{j}]).(['Context' num2str(i*2)]) = cycle;
+        end
     end
     
-    
-    %% Save in a single struct. 
-    APO.(['subject' num2str(subject)]) = result;
+    APO = result;
+
 end
