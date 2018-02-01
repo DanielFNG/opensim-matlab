@@ -26,7 +26,7 @@ temp{vectorSize(grf_struct)} = {};
 for i=1:vectorSize(grf_struct)
     % Load in the right hip flexion joint angle trajectory. 
     ik = Data([ik_path filesep ik_struct(i,1).name]);
-    if subject == 8 && i == 4
+    if subject == 8 && context == 8 && i == 4
         right_hip = ik.getDataCorrespondingToLabel('hip_flexion_r');
         right_hip = right_hip(1:round(length(right_hip)/2));
     else

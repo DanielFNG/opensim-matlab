@@ -25,6 +25,11 @@ cmc{vectorSize(all_folders)} = {};
 for i=1:vectorSize(all_folders)
     % Identify the CMC folder.
     folder = getSubfolders([cmc_path all_folders(i,1).name]);
+    if vectorSize(folder) ~= 1
+        fprintf('Subject %i, foot %i, context %i, assistance $i.', ...
+            subject, foot, context, assistance);
+        error('Multiple CMC folders detected.')
+    end
     
     % Construct the OpenSimTrial.
     Trial = OpenSimTrial(model_path, ...

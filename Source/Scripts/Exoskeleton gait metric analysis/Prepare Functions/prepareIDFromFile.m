@@ -24,6 +24,11 @@ id{vectorSize(folders)} = {};
 for i=1:vectorSize(folders)
     % Identify the ID folder.
     folder = getSubfolders([id_path folders(i,1).name]);
+    if vectorSize(folder) ~= 1
+        fprintf('Subject %i, foot %i, context %i, assistance $i.', ...
+            subject, foot, context, assistance);
+        error('Multiple ID folders detected.')
+    end
 
     % Load.
     id{i} = Data(...

@@ -26,17 +26,17 @@ subjects = [1:4, 6:8];  % Ignore missing data from subject 5.
 feet = 1:2;
 contexts = 2:2:10;  % Only steady-state contexts for now.
 assistances = 1:3;
-subjects = 1;
 feet = 1;
-contexts = 6;
+contexts = 2:2:10;
 assistances = 3;
 
 % Choose functions to execute. 
-handles = {@prepareGRFFromFile, @prepareBatchIK, @prepareBatchRRA, ...
-    @prepareBatchID, @prepareBatchBodyKinematicsAnalysis};
+%handles = {@prepareGRFFromFile, @prepareBatchIK, @prepareBatchRRA, ...
+%    @prepareBatchID, @prepareBatchBodyKinematicsAnalysis};
+handles = {@prepareBatchID};
 
 % Choose periodic save destination.
-save_dir = 'C:\Users\danie\Documents\GitHub\exopt\Source\Scripts\Exoskeleton gait metric analysis\Processing Code';
+save_dir = 'D:\with_apo_torques';
 
 % Process data.
 try

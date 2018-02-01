@@ -14,8 +14,15 @@ kinematics_data_path = [grf_data_path '\RRA_Results'];
 model_path = constructAdjustedModelPath(root, subject, assistance);
 output_dir = [grf_data_path '\ID_Results'];
 
+% Set load.
+if assistance == 3
+    load = 'apo_torques';
+else
+    load = 'normal';
+end
+
 % Run ID batch.
 result.ID{foot, context, assistance} = ...
     runBatchID(...
-    model_path, kinematics_data_path, grf_data_path, output_dir);
+    model_path, kinematics_data_path, grf_data_path, output_dir, load);
 end
