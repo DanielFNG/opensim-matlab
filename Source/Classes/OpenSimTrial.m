@@ -258,8 +258,11 @@ classdef OpenSimTrial
                             dir, initialTime, finalTime);
                 rraTool.run()
                 
-                % Process resulting RRA data. 
-                RRA = RRAResults(obj, [obj.results_directory '/' dir '/RRA']);
+                % Process resulting RRA data, only saving the result if 
+                % necessary.
+                if nargout == 1
+                    RRA = RRAResults(obj, [obj.results_directory '/' dir '/RRA']);
+                end
                 
             % Mass adjustment. 
             elseif (nargin == 3 && isa(initialTime, 'char')) || nargin == 4 || nargin == 5
@@ -353,7 +356,8 @@ classdef OpenSimTrial
             
             % Process resulting CMC data if necessary.
             if nargout == 1
-                CMC = CMCResults(obj, [obj.results_directory '/' dir '/CMC']);
+                CMC = CMCResults(obj, ...
+                    [obj.results_directory '/' dir '/CMC']);
             end
             
         end
@@ -390,8 +394,10 @@ classdef OpenSimTrial
             % it afterwards. 
             delete('temp.xml');
             
-            % Create an IDResult object to store ID result. 
-            ID = IDResult(obj, [obj.results_directory '/' dir '/']);
+            % If required, create an IDResult object to store ID result. 
+            if nargout == 1
+                ID = IDResult(obj, [obj.results_directory '/' dir '/']);
+            end
         end
     end
     

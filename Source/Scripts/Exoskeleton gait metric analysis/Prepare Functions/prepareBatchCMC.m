@@ -1,5 +1,4 @@
-function result = prepareBatchCMC(...
-    root, subject, foot, context, assistance, result)
+function prepareBatchCMC(root, subject, foot, context, assistance)
 
 % Get appropriate paths.
 grf_path = constructDataPath(...
@@ -16,5 +15,4 @@ else
 end
 
 % Run CMC batch.
-result.CMC{foot, context, assistance} = ...
-    runBatchCMC(model_path, kinematics_data_path, grf_path, output_dir, load);
+runBatchCMC(model_path, kinematics_data_path, grf_path, output_dir, load);

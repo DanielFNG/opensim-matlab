@@ -22,12 +22,17 @@ grf_struct = dir([grf_folder '/*.mot']);
 CMC_array{vectorSize(rra_struct)} = {};
 
 % Iterate over the files doing CMC and storing the results.
-for i=1:vectorSize(rra_struct)
+%for i=1:vectorSize(rra_struct)
+for i=112
     Trial = OpenSimTrial(model, ...
         [rra_folder filesep rra_struct(i,1).name], load, ...
         [grf_folder filesep grf_struct(i,1).name], [results filesep ...
         num2str(i)]);
-    CMC_array{i} = Trial.runCMC();
+    if nargout == 1
+        CMC_array{i} = Trial.runCMC();
+    else
+        Trial.runCMC();
+    end
 end
 
 end

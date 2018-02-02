@@ -1,5 +1,4 @@
-function result = deleteCMCData(...
-    root, subject, foot, context, assistance, result)
+function prepareDeleteCMCData(root, subject, foot, context, assistance)
 
 % Get appropriate path.
 grf_path = constructDataPath(...

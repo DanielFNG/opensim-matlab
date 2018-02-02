@@ -6,7 +6,7 @@ feet = 1;
 contexts = 2:2:10;
 assistances = 3;
 
-handles = {@deleteOldForceData};
+handles = {@prepareDeleteOldForceData};
 
 save_dir = 'D:\deleted_cmc_data';
 

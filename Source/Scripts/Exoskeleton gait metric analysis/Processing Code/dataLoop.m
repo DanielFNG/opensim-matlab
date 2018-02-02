@@ -32,8 +32,17 @@ function dataLoop(...
 %          function calls
 
 % 
-if nargin < 8
+if nargin < 6
+    error('dataLoop requires at least 6 arguments.');
+elseif nargin == 6
+    save = false;
     load = false;
+elseif nargin == 7
+    save = true;
+    load = false;
+elseif nargin == 8
+    save = true;
+    load = true;
 elseif nargin > 8
     error('dataLoop does not support more than 8 arguments.');
 end
@@ -60,8 +69,8 @@ try
     for subject = subjects
         if load
             result = loadSubject(root,subject);
-        else
-            result = initialiseSubjectData(root,subject);
+        elseif save
+            result = initialiseSubjectData(subject);
         end
         multiWaitbar(load_labels{2}, 'Reset');  % Reset previous bar.
         for foot = feet
@@ -75,9 +84,12 @@ try
                         if load 
                             result = handles{func}(...
                                 foot, context, assistance, result);
-                        else
+                        elseif save
                             result = handles{func}(root,subject,foot,...
                                 context,assistance,result);
+                        else
+                            handles{func}(root,subject,foot,context,...
+                                assistance);
                         end
                         
                         % Update loading bar.
@@ -92,10 +104,12 @@ try
             end
             multiWaitbar(load_labels{2}, 'Increment', increments(2));
         end
-        % Save and clear periodically.
-        temp.(['subject' num2str(subject)]) = result;
-        save([savename '\subject' num2str(subject) '.mat'], '-struct', 'temp');
-        clear('result', 'temp');
+        if save
+            % Save and clear periodically.
+            temp.(['subject' num2str(subject)]) = result;
+            save([savename '\subject' num2str(subject) '.mat'], '-struct', 'temp');
+            clear('result', 'temp');
+        end
         
         multiWaitbar(load_labels{1}, 'Increment', increments(1));
     end

@@ -31,9 +31,14 @@ tool.setResultsDir(results);
 
 tool.run();
 
-Positions = Data([results '\Analysis_BodyKinematics_pos_global.sto']);
-Velocities = Data([results '\Analysis_BodyKinematics_vel_global.sto']);
-Accelerations = Data([results '\Analysis_BodyKinematics_acc_global.sto']);
+if nargout == 3
+    Positions = ...
+        Data([results '\Analysis_BodyKinematics_pos_global.sto']);
+    Velocities = ...
+        Data([results '\Analysis_BodyKinematics_vel_global.sto']);
+    Accelerations = ...
+        Data([results '\Analysis_BodyKinematics_acc_global.sto']);
+end
 
 end
 

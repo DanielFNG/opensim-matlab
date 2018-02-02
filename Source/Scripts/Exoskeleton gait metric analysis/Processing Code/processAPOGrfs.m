@@ -10,7 +10,7 @@ feet = 1;
 contexts = 2:2:10;
 assistances = 3;
 
-handles = {@createAPOGRFs};
+handles = {@prepareAPOGRFs};
 
 save_dir = 'D:\apo_grfs';
 

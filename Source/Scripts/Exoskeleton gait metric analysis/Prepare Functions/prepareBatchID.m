@@ -1,5 +1,5 @@
-function result = prepareBatchID(...
-    root, subject, foot, context, assistance, result)
+function prepareBatchID(...
+    root, subject, foot, context, assistance)
 % This function obtains the necessary paths to run a batch of ID analyses.
 % It assumes a filestructure used for the ROBIO 2017 submission. It is 
 % also assumed that ID is done on RRA files, so the RRA adjusted model
@@ -22,7 +22,6 @@ else
 end
 
 % Run ID batch.
-result.ID{foot, context, assistance} = ...
-    runBatchID(...
+runBatchID(...
     model_path, kinematics_data_path, grf_data_path, output_dir, load);
 end

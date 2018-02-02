@@ -48,11 +48,18 @@ RRA_array{size(ik_struct,1)} = {};
 for i=1:size(ik_struct,1)
     Trial = OpenSimTrial(model, ...
         [ik_folder '/' ik_struct(i,1).name], load, ...
-        [grf_folder '/' grf_struct(i,1).name], [results '/' num2str(i)]); 
-    RRA_array{i} = Trial.runRRA();
+        [grf_folder '/' grf_struct(i,1).name], [results '/' num2str(i)]);
+    if nargout == 1
+        RRA_array{i} = Trial.runRRA();
+    else
+        Trial.runRRA();
+    end
     % For convenience when later doing ID etc, copy the kinematics file in
     % to one folder.
-    copyfile(RRA_array{i}.positions_path,[results '/' 'RRA_q_' num2str(i) '.sto']);
+    rra_folder = getSubfolders([results filesep num2str(i)]);
+    positions = [results filesep num2str(i) filesep ...
+        rra_folder(1).name filesep 'RRA_Kinematics_q.sto'];
+    copyfile(positions,[results '/' 'RRA_q_' num2str(i) '.sto']);
 end
 
 end

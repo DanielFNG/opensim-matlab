@@ -31,12 +31,17 @@ end
 % Create a cell array to hold the ID results. 
 ID_array{size(ik_struct,1)} = {};
 
-% Iterate over the files doing ID and storing the results each time.
+% Iterate over the files doing ID and storing the results each time if 
+% required.
 for i=1:size(ik_struct,1)
     Trial = OpenSimTrial(model, ...
         [ik_folder '/' ik_struct(i,1).name], load, ...
-        [grf_folder '/' grf_struct(i,1).name], [results '/' num2str(i)]); 
-    ID_array{i} = Trial.runID();
+        [grf_folder '/' grf_struct(i,1).name], [results '/' num2str(i)]);
+    if nargout == 1
+        ID_array{i} = Trial.runID();
+    else
+        Trial.runID();
+    end
 end
 
 end

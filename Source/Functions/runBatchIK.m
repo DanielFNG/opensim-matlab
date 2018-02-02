@@ -14,9 +14,14 @@ Input_Markers_array{size(trc_struct,1)} = {};
 % Iterate over the input files doing IK on each one and storing the results
 % appropriately. 
 for i=1:size(trc_struct,1)
-    [IK_array{i}, Input_Markers_array{i}, Output_Markers_array{i}] = ...
+    if nargout == 3
+        [IK_array{i}, Input_Markers_array{i}, Output_Markers_array{i}] = ...
+            runIK(model, [input_folder filesep trc_struct(i,1).name], ...
+            results_folder, num2str(i));
+    else
         runIK(model, [input_folder filesep trc_struct(i,1).name], ...
-        results_folder, num2str(i));
+            results_folder, num2str(i));
+    end
 end
 
 end

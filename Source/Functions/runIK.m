@@ -6,10 +6,7 @@ function [IK, InputMarkers, OutputMarkers] = runIK(model, input, results, append
 %   Input data should be a trc file.
 %
 %   Based on the OpenSim BatchIK example available under the Apache
-%   licence. 
-
-% Interpret the input trc file.
-InputMarkers = Data(input);
+%   licence.
 
 % Import the OpenSim modelling tools.
 import org.opensim.modeling.*
@@ -43,14 +40,17 @@ tool.setOutputMotionFileName(output);
 % Run IK.
 tool.run();
 
-% Interpret the results as a Data object. 
-IK = Data(output);
+% Copy the input marker data to the results folder.
+copyfile(input, ...
+    [results '\' append 'MarkerData\' 'raw_marker_locations.trc']);
 
-% Also interpret the marker trajectories as a Data object.
-OutputMarkers = Data([results '\' append 'MarkerData\' 'ik_model_marker_locations.sto']);
-
-% Store the input file in the same as the output for posterity.
-InputMarkers.writeToFile([results '\' append 'MarkerData\' 'raw_marker_locations.trc'],1,0);
+% Interpret the results as Data objects if required.
+if nargout == 1
+    IK = Data(output);
+    OutputMarkers = Data([results '\' append 'MarkerData' filesep ...
+        'ik_model_marker_locations.sto']);
+    InputMarkers = Data(input);
+end
 
 end
 

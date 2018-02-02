@@ -33,8 +33,12 @@ end
 save_dir = [results '/' 'adjustment'];
 trial = OpenSimTrial(model,ik,load,grf,save_dir);
 
-% Run RRA with adjustment on this trial.
-RRA_adjustment = trial.runRRA('torso','model_adjusted');
+% Run RRA with adjustment on this trial. Save result if necessary.
+if nargout == 1
+    RRA_adjustment = trial.runRRA('torso','model_adjusted');
+else
+    trial.runRRA('torso','model_adjusted');
+end
 
 end
 

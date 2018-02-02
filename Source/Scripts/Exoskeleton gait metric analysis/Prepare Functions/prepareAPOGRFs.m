@@ -1,5 +1,4 @@
-function result = createAPOGRFs(...
-    root, subject, foot, context, assistance, result)
+function prepareAPOGRFs(root, subject, foot, context, assistance)
 % This function obtained the necessary paths to read in GRF files and APO
 % torques and create GRF files modified to include the APO actuation. 
 %
@@ -20,9 +19,6 @@ ik_path = [grf_path filesep 'IK_Results'];
 ik_struct = dir([ik_path filesep '*.mot']);
 grf_struct = dir([grf_path filesep '*.mot']);
 
-% Create a cell array of the appropriate size.
-temp{vectorSize(grf_struct)} = {};
-
 for i=1:vectorSize(grf_struct)
     % Load in the right hip flexion joint angle trajectory. 
     ik = Data([ik_path filesep ik_struct(i,1).name]);
@@ -34,12 +30,13 @@ for i=1:vectorSize(grf_struct)
     end
    
     % Create a scaled copy of the APO joint torques and right hip angle
-    % which are twice the length of the hip vector. 
-    apo_right_hip = stretchVector(result.APO.AvgH_RightJointAngle. ...
+    % which are twice the length of the hip vector.
+    APO = computeAPOTorques([root filesep 'APO Torques'], subject);
+    apo_right_hip = stretchVector(APO.AvgH_RightJointAngle. ...
         (['Context' num2str(context)]), 2*vectorSize(right_hip));
-    apo_right_torque = stretchVector(result.APO.AvgH_RightActualTorque. ...
+    apo_right_torque = stretchVector(APO.AvgH_RightActualTorque. ...
         (['Context' num2str(context)]), 2*vectorSize(right_hip));
-    apo_left_torque = stretchVector(result.APO.AvgH_LeftActualTorque. ...
+    apo_left_torque = stretchVector(APO.AvgH_LeftActualTorque. ...
         (['Context' num2str(context)]), 2*vectorSize(right_hip));
     % Use cross correlation to align the right hip human joint angle to the
     % apo right joint angle.
