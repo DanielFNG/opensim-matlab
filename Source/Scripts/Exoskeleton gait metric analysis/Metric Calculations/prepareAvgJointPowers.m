@@ -1,6 +1,8 @@
-function result = prepareAvgGroupPowers(foot, context, assistance, result)
+function result = prepareAvgJointPowers(foot, context, assistance, result)
 
-    % Create structs for the joints of interest. 
+    %% Create structs for the joints of interest.
+    
+    % Hip adduction.
     Joints.hip_adduction_r.uniarticular = {'glut_med2_r', ...
         'glut_min2_r'};
     Joints.hip_adduction_r.biarticular.muscles{1} = 'glut_max1_r';
@@ -38,6 +40,7 @@ function result = prepareAvgGroupPowers(foot, context, assistance, result)
     Joints.hip_adduction_r.biarticular.muscles{17} = 'semiten_r';
     Joints.hip_adduction_r.biarticular.joints{17} = {'hip_flexion_r', 'knee_angle_r'};
     
+    % Hip flexion.
     Joints.hip_flexion_r.uniarticular = {'glut_max2_r', 'glut_max3_r'};
     Joints.hip_flexion_r.biarticular.muscles{1} = 'add_brev_r';
     Joints.hip_flexion_r.biarticular.joints{1} = {'hip_adduction_r'};
@@ -80,6 +83,7 @@ function result = prepareAvgGroupPowers(foot, context, assistance, result)
     Joints.hip_flexion_r.biarticular.muscles{20} = 'semiten_r';
     Joints.hip_flexion_r.biarticular.joints{20} = {'hip_adduction_r', 'knee_angle_r'};
     
+    % Knee. 
     Joints.knee_angle_r.uniarticular = {'bifemsh_r', 'vas_int_r', 'vas_lat_r', 'vas_med_r'};
     Joints.knee_angle_r.biarticular.muscles{1} = 'bifemlh_r';
     Joints.knee_angle_r.biarticular.joints{1} = {'hip_adduction_r, hip_flexion_r'};
@@ -98,6 +102,7 @@ function result = prepareAvgGroupPowers(foot, context, assistance, result)
     Joints.knee_angle_r.biarticular.muscles{8} = 'rect_fem_r';
     Joints.knee_angle_r.biarticular.joints{8} = {'hip_flexion_r'};
     
+    % Ankle. 
     Joints.ankle_angle_r.uniarticular = {};
     Joints.ankle_angle_r.biarticular.muscles{1} = 'flex_dig_r';
     Joints.ankle_angle_r.biarticular.joints{1} = {'subtalar_angle_r', 'mtp_angle_r'};
@@ -124,6 +129,30 @@ function result = prepareAvgGroupPowers(foot, context, assistance, result)
     Joints.ankle_angle_r.biarticular.muscles{12} = 'per_tert_r';
     Joints.ankle_angle_r.biarticular.joints{12} = {'subtalar_angle_r'};
     
+    % Mirror to the left handside.
+    joint_names = fieldnames(Joints);
+    n_joints = length(joint_names);
+    for i=1:n_joints
+        left_joint = [joint_names{i}(1:end-1) 'l'];
+        n_uniarticular = length(Joints.(joint_names(i)).uniarticular);
+        Joints.(left_joint).uniarticular = cell(1, n_uniarticular);
+        for j=1:n_uniarticular
+            Joints.(left_joint).uniarticular{j} = [Joints.(joint_names(i)).uniarticular{j}(1:end-1) 'l'];
+        end
+        n_biarticular = length(Joints.(joint_names(i)).biarticular.muscles);
+        Joints.(left_joint).biarticular.muscles = cell(1, n_biarticular);
+        Joints.(left_joint).biarticular.joints = cell(1, n_biarticular);
+        for j=1:n_biarticular
+            Joints.(left_joint).biarticular.muscles{j} = [Joints.(joint_names(i)).biarticular.muscles{j}(1:end-1) 'l'];
+            n_other_joints = length(Joints.(joint_names(i)).biarticular.joints{j});
+            Joints.(left_joint).biarticular.joints{j} = cell(1, n_other_joints);
+            for k=1:n_other_joints
+                Joints.(left_joint).biarticular.joints{j}{k} = [Joints.(joint_names(i)).biarticular.joints{j}{k}(1:end-1) 'l'];
+            end
+        end
+    end
+    
+    % Back. 
     Joints.lumbar_extension.uniarticular = {};
     Joints.ankle_angle_r.biarticular.muscles{1} = 'ercspn_l';
     Joints.ankle_angle_r.biarticular.joints{1} = {'lumbar_bending', 'lumbar_rotation'};
@@ -137,64 +166,8 @@ function result = prepareAvgGroupPowers(foot, context, assistance, result)
     Joints.ankle_angle_r.biarticular.joints{5} = {'lumbar_bending', 'lumbar_rotation'};
     Joints.ankle_angle_r.biarticular.muscles{6} = 'intobl_r';
     Joints.ankle_angle_r.biarticular.joints{6} = {'lumbar_bending', 'lumbar_rotation'};
-
-
-
-
-    % Define appropriate labels for each lower body muscle group. 
-    MuscleGroups.hip_abd = strsplit(['glut_max1_r glut_med1_r ' ...
-        'glut_med2_r glut_med3_r glut_min1_r glut_min2_r glut_min3_r ' ...
-        'peri_r sar_r tfl_r']);
-    MuscleGroups.hip_flex = strsplit(['add_brev_r add_long_r ' ...
-        'glut_med1_r glut_min1_r grac_r iliacus_r pect_r psoas_r ' ...
-        'rect_fem_r sar_r tfl_r']);
-    MuscleGroups.hip_inrot = strsplit(['glut_med1_r glut_min1_r ' ...
-        'iliacus_r psoas_r tfl_r']);
-    MuscleGroups.hip_exrot = strsplit(['gem_r glut_med3_r glut_min3_r ' ...
-        'peri_r quad_fem_r']);
-    MuscleGroups.hip_ext = strsplit(['add_long_r add_mag1_r add_mag2_r' ...
-        ' add_mag3_r bifemlh_r glut_max1_r glut_max2_r glut_max3_r ' ...
-        'glut_med3_r glut_min3_r semimem_r semiten_r']);
-    MuscleGroups.hip_add = strsplit(['add_brev_r add_long_r add_mag1_r' ...
-        ' add_mag2_r add_mag3_r bifemlh_r grac_r pect_r semimem_r ' ...
-        'semiten_r']);
-    MuscleGroups.knee_bend = strsplit(['bifemlh_r bifemsh_r grac_r ' ...
-        'lat_gas_r med_gas_r sar_r semimem_r semiten_r']);
-    MuscleGroups.knee_ext = strsplit(['rect_fem_r vas_int_r vas_lat_r ' ...
-        'vas_med_r']);
-    MuscleGroups.ankle_pf = strsplit(['flex_dig_r flex_hal_r lat_gas_r' ...
-        ' med_gas_r per_brev_r per_long_r soleus_r tib_post_r']);
-    MuscleGroups.inverter = strsplit(['ext_hal_r flex_dig_r flex_hal_r' ...
-        ' tib_ant_r tib_post_r']);
-    MuscleGroups.ankle_df = strsplit(['ext_dig_r ext_hal_r per_tert_r ' ...
-        'tib_ant_r']);
-    MuscleGroups.everter = strsplit(['ext_dig_r per_brev_r per_long_r ' ...
-        'per_tert_r']);
-
-    muscle_group_names = fieldnames(MuscleGroups);
-    n_groups = length(muscle_group_names);
-
-    % If necessary replace the 'r' suffix with 'l' if we are in the left
-    % foot case. 
-    if foot == 2
-        for i=1:n_groups
-            for j=1:length(MuscleGroups.(muscle_group_names{i}))
-                MuscleGroups.(muscle_group_names{i}){j} = [MuscleGroups.(muscle_group_names{i}){j}(1:end-1) 'l'];
-            end
-        end
-    end
-
-    % Define appropriate labels for the back muscles.
-    MuscleGroups.back_ext = strsplit('ercspn_l ercspn_r');
-    MuscleGroups.back_rlb = strsplit('ercspn_r extobl_r intobl_r');
-    MuscleGroups.back_introt = strsplit('ercspn_r extobl_l intobl_r');
-    MuscleGroups.back_llb = strsplit('ercspn_l extobl_l intobl_l');
-    MuscleGroups.back_extrot = strsplit('ercspn_l extobl_r intobl_l');
-    MuscleGroups.back_flex = strsplit('extobl_l extobl_r intobl_l intobl_r');
     
-    % Redefine these after adding back muscles in. 
-    muscle_group_names = fieldnames(MuscleGroups);
-    n_groups = length(muscle_group_names);
+    %% Pass off to calculateAvgGroupPowers. 
 
     % Gain access to the appropriate data.
     cmc = result.CMC{foot, context, assistance};
@@ -203,17 +176,21 @@ function result = prepareAvgGroupPowers(foot, context, assistance, result)
     % Create cell array to hold temporary results, and a temporary variable
     % to store the total average metabolic power.
     n_cmcs = vectorSize(cmc);
-    temp{n_groups, n_cmcs} = {};
+    temp{n_joints, n_cmcs} = {};
+    
+    % Redefine after adding left joints and back joint.
+    joint_names = fieldnames(Joints);
+    n_joints = length(joint_names);
 
-    for i=1:n_groups
+    for i=1:n_joints
         % Calculate the metrics and store the results. 
         for j=1:n_cmcs
-            temp{i,j} = calculateAvgGroupPowers(cmc{j}, ...
-                MuscleGroups.(muscle_group_names{i}), weight);
+            temp{i,j} = calculateAvgJointPowers(cmc{j}, ...
+                Joints.(joint_names{i}), weight);
         end
 
         % Store results properly and clear temp variable. 
-        result.MetricsData.(muscle_group_names{i}){ ...
+        result.MetricsData.(joint_names{i}){ ...
             foot, context, assistance} = temp(i,:);
     end
     
