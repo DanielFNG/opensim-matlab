@@ -1,5 +1,5 @@
-function dataLoop(...
-    root, subjects, feet, contexts, assistances, handles, savename, load)
+function dataLoop(root, subjects, feet, contexts, assistances, handles, ...
+    savename, load_dir)
 % This function gives programmatic access to the data files for the
 % submission to ROBIO 2017. This allows for efficient data processing.
 % The multiWaitbar function by Ben Tordoff, Matlab, is used to provide 
@@ -35,14 +35,14 @@ function dataLoop(...
 if nargin < 6
     error('dataLoop requires at least 6 arguments.');
 elseif nargin == 6
-    save = false;
-    load = false;
+    make_save = false;
+    load_data = false;
 elseif nargin == 7
-    save = true;
-    load = false;
+    make_save = true;
+    load_data = false;
 elseif nargin == 8
-    save = true;
-    load = true;
+    make_save = true;
+    load_data = true;
 elseif nargin > 8
     error('dataLoop does not support more than 8 arguments.');
 end
@@ -67,9 +67,9 @@ end
 
 try
     for subject = subjects
-        if load
-            result = loadSubject(root,subject);
-        elseif save
+        if load_data
+            result = loadSubject(load_dir, subject);
+        elseif make_save
             result = initialiseSubjectData(subject);
         end
         multiWaitbar(load_labels{2}, 'Reset');  % Reset previous bar.
@@ -80,16 +80,21 @@ try
                 for assistance = assistances
                     multiWaitbar(load_labels{5}, 'Reset');
                     for func=1:n_func
-                        % Apply each function via handles.
-                        if load 
-                            result = handles{func}(...
-                                foot, context, assistance, result);
-                        elseif save
-                            result = handles{func}(root,subject,foot,...
-                                context,assistance,result);
-                        else
-                            handles{func}(root,subject,foot,context,...
-                                assistance);
+                        try
+                            % Apply each function via handles.
+                            if make_save 
+                                result = handles{func}(root,subject,foot,...
+                                    context,assistance,result);
+                            else
+                                handles{func}(root,subject,foot,context,...
+                                    assistance);
+                            end
+                        catch ME
+                            fprintf(['Error appears for subject %i foot'...
+                                ' %i context %i assistance %i function' ...
+                                ' %i.\n'], ...
+                                subject, foot, context, assistance, func);
+                            rethrow(ME)
                         end
                         
                         % Update loading bar.
@@ -104,10 +109,16 @@ try
             end
             multiWaitbar(load_labels{2}, 'Increment', increments(2));
         end
-        if save
+        if make_save
             % Save and clear periodically.
             temp.(['subject' num2str(subject)]) = result;
+            warning('About to attempt save.');
             save([savename '\subject' num2str(subject) '.mat'], '-struct', 'temp');
+            [~, warnid] = lastwarn;
+            if strcmp(warnid, 'MATLAB:save:sizeTooBigForMATFile')
+                fprintf('Couldn''t save normally. Trying -v7.3 with no compression.');
+                save([savename '\subject' num2str(subject) '.mat'], '-struct', 'temp', '-v7.3', '-nocompression');
+            end
             clear('result', 'temp');
         end
         

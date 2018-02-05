@@ -1,4 +1,4 @@
-function result = prepareMoS(foot, context, assistance, result)
+function result = prepareMoS(~, ~, foot, context, assistance, result)
 
 % Define appropriate labels. 
 switch foot

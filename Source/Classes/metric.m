@@ -179,6 +179,16 @@ classdef metric < handle
             result = sqrt(temp/(d*obj.sample_size - 1));  % sdev = sqrt(V)
         end
         
+        function diff = calculateSignedRelativeDifferences(obj)
+            diff = zeros(size(obj.means));
+            baseline = obj.means(1,1);
+            for i=1:3
+                for j=1:5
+                    diff(i,j) = 100*(obj.means(i,j) - baseline)/baseline;
+                end
+            end
+        end
+        
         function diff = calculateRelativeDifferences(obj)
             diff = zeros(size(obj.means));
             baseline = obj.means(1,1); 
@@ -304,10 +314,14 @@ classdef metric < handle
             end
         end
         
-        function plotRelative3DBar(obj)
+        function plotRelative3DBar(obj, mode)
             
             % Compute relative differences from the baseline. 
-            diff = obj.calculateRelativeDifferences;
+            if strcmp(mode, 'signed')
+                diff = obj.calculateSignedRelativeDifferences;
+            else
+                diff = obj.calculateRelativeDifferences; 
+            end
             
             % Set dimensions.
             b = figure;

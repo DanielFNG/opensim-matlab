@@ -1,4 +1,4 @@
-function result = prepareSW(foot, context, assistance, result)
+function result = prepareSW(~, ~, foot, context, assistance, result)
 % Calculates the step width for a given subject and gait cycle as indexed 
 % by a {foot, context, assistance} triple.
 

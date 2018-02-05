@@ -1,4 +1,4 @@
-function result = prepareCoPD(foot, context, assistance, result)
+function result = prepareCoPD(~, ~, foot, context, assistance, result)
 
 % Define labels based on foot.
 f_label = ['    ground_force' num2str(foot) '_vy'];

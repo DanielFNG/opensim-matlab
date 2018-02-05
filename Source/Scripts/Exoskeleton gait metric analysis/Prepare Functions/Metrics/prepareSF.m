@@ -1,4 +1,4 @@
-function result = prepareSF(foot, context, assistance, result)
+function result = prepareSF(~, ~, foot, context, assistance, result)
 
     % Determine labelling based on foot.
     label = ['    ground_force' num2str(foot) '_vy'];

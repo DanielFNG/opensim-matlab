@@ -7,7 +7,7 @@ function result = calculateAvgUniMusclePower(CMC, muscle, weight)
 
 power = CMC.metabolics.getDataCorrespondingToLabel(...
     ['metabolics_' muscle]);
-time = CMC.powers.Timesteps;
+time = CMC.metabolics.Timesteps;
 result = trapz(time, power)/(weight*(time(end)-time(1)));
 
 end

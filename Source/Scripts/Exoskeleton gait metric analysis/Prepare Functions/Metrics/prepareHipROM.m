@@ -1,4 +1,4 @@
-function result = prepareHipROM(foot, context, assistance, result)
+function result = prepareHipROM(~, ~, foot, context, assistance, result)
 % Calculates the hip range of motion for a given subject and gait cycle 
 % as indexed by a {foot, context, assistance} triple.
 

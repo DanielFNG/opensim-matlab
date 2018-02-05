@@ -12,15 +12,15 @@ power = CMC.metabolics.getDataCorrespondingToLabel(...
     ['metabolics_' muscle]);
 
 % Get the instantaneous primary moment arm over the cycle.
-primary_moment_arm = ...
-    CMC.MomentArms.(primary_joint).getDataCorrespondingToLabel(muscle);
+primary_moment_arm = abs(...
+    CMC.MomentArms.(primary_joint).getDataCorrespondingToLabel(muscle));
 
 % Sum the instantaneous secondary moment arms over the cycle. 
 temp = zeros(size(primary_moment_arm));
 for i=1:length(secondary_joints)
     temp = temp + ...
-        CMC.MomentArms.(secondary_joints{i}). ...
-        getDataCorrespondingToLabel(muscle);
+        abs(CMC.MomentArms.(secondary_joints{i}). ...
+        getDataCorrespondingToLabel(muscle));
 end
 secondary_moment_arm_sum = temp;
 
@@ -32,7 +32,7 @@ contribution = ...
 adjusted_power = contribution.*power;
 
 % Integrate and divide by weight and cycle length. 
-time = CMC.powers.Timesteps;
+time = CMC.metabolics.Timesteps;
 result = trapz(time, adjusted_power)/(weight*(time(end)-time(1)));
 
 end

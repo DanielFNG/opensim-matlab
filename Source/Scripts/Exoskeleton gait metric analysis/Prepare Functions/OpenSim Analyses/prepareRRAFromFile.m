@@ -34,8 +34,6 @@ for i=1:vectorSize(folders)
     % Identify the RRA folder.
     folder = getSubfolders([rra_path folders(i,1).name]);
     if vectorSize(folder) ~= 1
-        fprintf('Subject %i, foot %i, context %i, assistance $i.', ...
-            subject, foot, context, assistance);
         error('Multiple RRA folders detected.')
     end
     

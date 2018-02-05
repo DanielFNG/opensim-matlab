@@ -356,8 +356,8 @@ classdef OpenSimTrial
             
             % Process resulting CMC data if necessary.
             if nargout == 1
-                CMC = CMCResults(obj, ...
-                    [obj.results_directory '/' dir '/CMC']);
+                CMC = CMCResults(...
+                    [obj.results_directory '/' dir '/CMC'], obj);
             end
             
         end

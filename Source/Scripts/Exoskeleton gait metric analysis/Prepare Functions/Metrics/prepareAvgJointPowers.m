@@ -1,5 +1,5 @@
-function result = prepareAvgJointPowers(foot, context, assistance, result)
-
+function result = prepareAvgJointPowers(...
+    ~, ~, foot, context, assistance, result)
     %% Create structs for the joints of interest.
     
     % Hip adduction.
@@ -115,10 +115,10 @@ function result = prepareAvgJointPowers(foot, context, assistance, result)
         {'bifemsh_r', 'vas_int_r', 'vas_lat_r', 'vas_med_r'};
     Joints.knee_angle_r.biarticular.muscles{1} = 'bifemlh_r';
     Joints.knee_angle_r.biarticular.joints{1} = ...
-        {'hip_adduction_r, hip_flexion_r'};
+        {'hip_adduction_r', 'hip_flexion_r'};
     Joints.knee_angle_r.biarticular.muscles{2} = 'grac_r';
     Joints.knee_angle_r.biarticular.joints{2} = ...
-        {'hip_adduction_r, hip_flexion_r'};
+        {'hip_adduction_r', 'hip_flexion_r'};
     Joints.knee_angle_r.biarticular.muscles{3} = 'lat_gas_r';
     Joints.knee_angle_r.biarticular.joints{3} = ...
         {'ankle_angle_r', 'subtalar_angle_r'};
@@ -181,27 +181,27 @@ function result = prepareAvgJointPowers(foot, context, assistance, result)
     n_joints = length(joint_names);
     for i=1:n_joints
         left_joint = [joint_names{i}(1:end-1) 'l'];
-        n_uniarticular = length(Joints.(joint_names(i)).uniarticular);
+        n_uniarticular = length(Joints.(joint_names{i}).uniarticular);
         Joints.(left_joint).uniarticular = cell(1, n_uniarticular);
         for j=1:n_uniarticular
             Joints.(left_joint).uniarticular{j} = ...
-                [Joints.(joint_names(i)).uniarticular{j}(1:end-1) 'l'];
+                [Joints.(joint_names{i}).uniarticular{j}(1:end-1) 'l'];
         end
         n_biarticular = ...
-            length(Joints.(joint_names(i)).biarticular.muscles);
+            length(Joints.(joint_names{i}).biarticular.muscles);
         Joints.(left_joint).biarticular.muscles = cell(1, n_biarticular);
         Joints.(left_joint).biarticular.joints = cell(1, n_biarticular);
         for j=1:n_biarticular
             Joints.(left_joint).biarticular.muscles{j} = ...
-                [Joints.(joint_names(i)).biarticular. ...
+                [Joints.(joint_names{i}).biarticular. ...
                 muscles{j}(1:end-1) 'l'];
             n_other_joints = ...
-                length(Joints.(joint_names(i)).biarticular.joints{j});
+                length(Joints.(joint_names{i}).biarticular.joints{j});
             Joints.(left_joint).biarticular.joints{j} = ...
                 cell(1, n_other_joints);
             for k=1:n_other_joints
                 Joints.(left_joint).biarticular.joints{j}{k} = ...
-                    [Joints.(joint_names(i)).biarticular. ...
+                    [Joints.(joint_names{i}).biarticular. ...
                     joints{j}{k}(1:end-1) 'l'];
             end
         end
@@ -209,23 +209,23 @@ function result = prepareAvgJointPowers(foot, context, assistance, result)
     
     % Back. 
     Joints.lumbar_extension.uniarticular = {};
-    Joints.ankle_angle_r.biarticular.muscles{1} = 'ercspn_l';
-    Joints.ankle_angle_r.biarticular.joints{1} = ...
+    Joints.lumbar_extension.biarticular.muscles{1} = 'ercspn_l';
+    Joints.lumbar_extension.biarticular.joints{1} = ...
         {'lumbar_bending', 'lumbar_rotation'};
-    Joints.ankle_angle_r.biarticular.muscles{2} = 'ercspn_r';
-    Joints.ankle_angle_r.biarticular.joints{2} = ...
+    Joints.lumbar_extension.biarticular.muscles{2} = 'ercspn_r';
+    Joints.lumbar_extension.biarticular.joints{2} = ...
         {'lumbar_bending', 'lumbar_rotation'};
-    Joints.ankle_angle_r.biarticular.muscles{3} = 'extobl_l';
-    Joints.ankle_angle_r.biarticular.joints{3} = ...
+    Joints.lumbar_extension.biarticular.muscles{3} = 'extobl_l';
+    Joints.lumbar_extension.biarticular.joints{3} = ...
         {'lumbar_bending', 'lumbar_rotation'};
-    Joints.ankle_angle_r.biarticular.muscles{4} = 'extobl_r';
-    Joints.ankle_angle_r.biarticular.joints{4} = ...
+    Joints.lumbar_extension.biarticular.muscles{4} = 'extobl_r';
+    Joints.lumbar_extension.biarticular.joints{4} = ...
         {'lumbar_bending', 'lumbar_rotation'};
-    Joints.ankle_angle_r.biarticular.muscles{5} = 'intobl_l';
-    Joints.ankle_angle_r.biarticular.joints{5} = ...
+    Joints.lumbar_extension.biarticular.muscles{5} = 'intobl_l';
+    Joints.lumbar_extension.biarticular.joints{5} = ...
         {'lumbar_bending', 'lumbar_rotation'};
-    Joints.ankle_angle_r.biarticular.muscles{6} = 'intobl_r';
-    Joints.ankle_angle_r.biarticular.joints{6} = ...
+    Joints.lumbar_extension.biarticular.muscles{6} = 'intobl_r';
+    Joints.lumbar_extension.biarticular.joints{6} = ...
         {'lumbar_bending', 'lumbar_rotation'};
     
     %% Pass off to calculateAvgGroupPowers. 
@@ -246,7 +246,7 @@ function result = prepareAvgJointPowers(foot, context, assistance, result)
     for i=1:n_joints
         % Calculate the metrics and store the results. 
         for j=1:n_cmcs
-            temp{i,j} = calculateAvgJointPowers(cmc{j}, joint_names{i}, ...
+            temp{i,j} = calculateAvgJointPower(cmc{j}, joint_names{i}, ...
                 Joints.(joint_names{i}), weight);
         end
 
@@ -254,6 +254,9 @@ function result = prepareAvgJointPowers(foot, context, assistance, result)
         result.MetricsData.AvgJointPowers.(joint_names{i}){ ...
             foot, context, assistance} = temp(i,:);
     end
+    
+    % Clear temp variable. 
+    clear('temp');
 
 end
 

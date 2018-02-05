@@ -1,4 +1,4 @@
-function reportCMCNumbers(root, subject, foot, context, assistance)
+function prepareCMCFileNumbers(root, subject, foot, context, assistance)
 
 % Get appropriate path.
 grf_path = constructDataPath(...

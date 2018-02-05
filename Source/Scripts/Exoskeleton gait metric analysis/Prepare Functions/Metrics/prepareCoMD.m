@@ -1,4 +1,4 @@
-function result = prepareCoMD(foot, context, assistance, result)
+function result = prepareCoMD(~, ~, foot, context, assistance, result)
 
     % Gain access to the position trajectories of the bodies. 
     BK = result.BodyKinematics.positions{foot, context, assistance};

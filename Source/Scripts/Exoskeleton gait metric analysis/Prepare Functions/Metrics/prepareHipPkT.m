@@ -1,4 +1,4 @@
-function result = prepareHipPkT(foot, context, assistance, result)
+function result = prepareHipPkT(~, ~, foot, context, assistance, result)
 % Calculate the peak to peak hip torque value.
 
 % Account for left/right foot.
