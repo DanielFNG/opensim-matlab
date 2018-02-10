@@ -15,17 +15,26 @@ classdef CMCResults
         
         % Construct CMCResults from directory files are located and the
         % OpenSimTrial.
-        function obj = CMCResults(directory, OpenSimTrial)
+        function obj = CMCResults(directory, OpenSimTrial, ~)
             if nargin > 0
-                if nargin == 2
-                    obj.OpenSimTrial = OpenSimTrial;
-                end
+                
                 directory = getFullPath(directory);
                 obj.metabolics = Data([directory '_MetabolicsReporter_probes.sto']);
                 obj.activations = Data([directory '_controls.sto']);
                 obj.start = obj.metabolics.Timesteps(1);
                 obj.final = obj.metabolics.Timesteps(end);
-                obj = obj.getMomentArms(directory);
+                if nargin == 3
+                    obj.OpenSimTrial = OpenSimTrial;
+                elseif nargin == 2
+                    if ~isa(OpenSimTrial, 'float')
+                        obj.OpenSimTrial = OpenSimTrial;
+                        obj.getMomentArms(directory);
+                    end
+                elseif nargin == 1
+                    obj = obj.getMomentArms(directory);
+                else
+                    error('weird input arguments');
+                end
             end
         end
         
