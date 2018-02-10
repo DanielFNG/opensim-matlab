@@ -7,6 +7,7 @@ classdef CMCResults
         start
         final
         metabolics
+        activations
         MomentArms
     end
     
@@ -21,6 +22,7 @@ classdef CMCResults
                 end
                 directory = getFullPath(directory);
                 obj.metabolics = Data([directory '_MetabolicsReporter_probes.sto']);
+                obj.activations = Data([directory '_controls.sto']);
                 obj.start = obj.metabolics.Timesteps(1);
                 obj.final = obj.metabolics.Timesteps(end);
                 obj = obj.getMomentArms(directory);

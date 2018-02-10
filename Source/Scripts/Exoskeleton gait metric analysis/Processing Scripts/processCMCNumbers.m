@@ -5,12 +5,12 @@ root = 'F:\Dropbox\PhD\Exoskeleton Metrics';
 
 %% Run CMCs first to just generate the files. .
 subjects = [1:4,6:8];
-feet = 1:2;
+feet = 1;
 contexts = 2:2:10;
 assistances = 1:3;
 
 % Choose functions to execute.
-handles = {@reportRRAFolderNumbers};
+handles = {@prepareCMCFileNumbers};
 
 % Process data, loading in existing structs. 
 dataLoop(root, subjects, feet, contexts, assistances, handles);
