@@ -41,7 +41,6 @@ classdef RRAResults
                     obj.AdjustedModel = model;
                 end
                 obj.OpenSimTrial = OpenSimTrial;
-                directory = getFullPath(directory);
                 obj.forces_path = ...
                     [directory '_Actuation_force.sto'];
                 obj.accelerations_path = ...

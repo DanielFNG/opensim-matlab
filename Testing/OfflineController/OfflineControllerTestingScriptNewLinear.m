@@ -1,10 +1,12 @@
 % Choose a results directory.
 dir = 'new_linear';
+current_dir = pwd;
+dir = [current_dir filesep dir];
 
 % Set up input data a.k.a the OpenSimTrial. 
 startTime = 1.0;
 endTime = 2.2; % low end time just for testing
-loadType = 'normal'; % Normal external loads e.g. just grfs.
+loadType = 'normal_osimformat'; % Normal external loads e.g. just grfs.
 trial = OpenSimTrial('APO.osim', 'ik0.mot', loadType, 'grf0.mot', dir); 
 
 % Load the Exoskeleton information and specify a force model. 

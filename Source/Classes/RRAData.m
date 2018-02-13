@@ -13,7 +13,7 @@ classdef RRAData < Data
         function obj = RRAData(input)
             obj@Data();
             if isa(input,'char')
-                input = Data(getFullPath(input));
+                input = Data(input);
             end
             obj.Values = input.Values; 
             obj.Labels = input.Labels;
