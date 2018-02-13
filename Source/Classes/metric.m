@@ -14,6 +14,7 @@ classdef metric < handle
     end
         
     properties (SetAccess = private, GetAccess = private)
+        p_value = 0.05
         assistance_order = {'NE', 'ET', 'EA'}
         context_order = {'BW','IW','DW','FW','SW'}
     end
@@ -43,7 +44,7 @@ classdef metric < handle
             
             num = 1;
             for i=1:size(obj.col_diffs,1)
-                if obj.col_diffs(i,3) > 0 || obj.col_diffs(i,5) < 0
+                if obj.col_diffs(i,6) < obj.p_value
                     obj.sig_diffs_C{num,1} = ...
                         obj.context_order{obj.col_diffs(i,1)};
                     obj.sig_diffs_C{num,2} = ...
@@ -54,7 +55,7 @@ classdef metric < handle
             
             num = 1;
             for i=1:size(obj.row_diffs,1)
-                if obj.row_diffs(i,3) > 0 || obj.row_diffs(i,5) < 0
+                if obj.row_diffs(i,6) < obj.p_value 
                     obj.sig_diffs_A{num,1} = ...
                         obj.assistance_order{obj.row_diffs(i,1)};
                     obj.sig_diffs_A{num,2} = ...
@@ -314,13 +315,17 @@ classdef metric < handle
             end
         end
         
-        function plotRelative3DBar(obj, mode)
+        function plot3DBar(obj, mode)
             
             % Compute relative differences from the baseline. 
-            if strcmp(mode, 'signed')
+            if strcmp(mode, 'absolute')
+                diff = obj.means;
+            elseif strcmp(mode, 'relative_signed')
                 diff = obj.calculateSignedRelativeDifferences;
-            else
+            elseif strcmp(mode, 'relative')
                 diff = obj.calculateRelativeDifferences; 
+            else
+                error('Mode for plot3DBar not recognised.');
             end
             
             % Set dimensions.
