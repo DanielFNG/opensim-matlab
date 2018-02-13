@@ -6,6 +6,7 @@ classdef CMCResults
         OpenSimTrial = 'N/A'
         start
         final
+        forces
         powers
         metabolics
         activations
@@ -20,6 +21,7 @@ classdef CMCResults
             if nargin > 0
                 
                 directory = getFullPath(directory);
+                obj.forces = Data([directory '_Actuation_force.sto']);
                 obj.powers = Data([directory '_Actuation_power.sto']);
                 obj.metabolics = Data([directory '_MetabolicsReporter_probes.sto']);
                 obj.activations = Data([directory '_controls.sto']);
