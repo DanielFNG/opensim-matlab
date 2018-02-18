@@ -225,6 +225,59 @@ classdef metric < handle
             end
         end
         
+        % Calculates the value of Cohen's d averaged across 
+        % either assistance, context, or in both directions. 
+        function result = calcCohensD(obj, direction)
+            
+            % Parse command line arguments to see whether to average across
+            % a direction or do the overall average. 
+            if nargin == 1
+                direction = 0;
+            elseif nargin ~= 2
+                error('Require 1 or 2 arguments to calc anova cohens d.');
+            else
+                if ~(strcmp(direction, 'A') || strcmp(direction, 'C'))
+                    error('If given direction should be ''A'' or ''C''.');
+                end
+            end
+            
+            % Calculate Cohen's D for each significant differences, either
+            % in one or both directions. 
+            if ~(strcmp(direction, 'C'))
+                if isempty(obj.sig_diffs_A)
+                    contribution_A = 0;
+                else
+                    contribution_A = [];
+                    if ~isempty(obj.sig_diffs_A{1})
+                        for i=1:size(obj.sig_diffs_A,1)
+                            contribution_A = ...
+                                [contribution_A obj.compCohensD(...
+                                obj.sig_diffs_A{i,1}, obj.sig_diffs_A{i,2})];
+                        end
+                    end
+                end
+            end
+            if ~(strcmp(direction, 'A'))
+                contribution_C = [];
+                if ~isempty(obj.sig_diffs_C{1})
+                    for i=1:size(obj.sig_diffs_C,1)
+                        contribution_C = ...
+                            [contribution_C obj.compCohensD(...
+                            obj.sig_diffs_C{i,1}, obj.sig_diffs_C{i,2})];
+                    end
+                end
+            end
+            
+            % Choose what to return based on the provided direction.
+            if direction == 0
+                result = mean([contribution_A contribution_C]);
+            elseif strcmp(direction, 'A')
+                result = mean(contribution_A);
+            else % we already checked direction is either 'A', 'C', or set to 0
+                result = mean(contribution_C);
+            end
+        end
+        
         % Calculates the absolute value of Cohen's d averaged across 
         % either assistance, context, or in both directions. 
         function result = calcAbsCohensD(obj, direction)
@@ -354,12 +407,24 @@ classdef metric < handle
             hold off
             
             % Handle labels etc.
-            xlabel('Context', 'FontWeight', 'bold');
-            zlabel(obj.name, 'FontWeight', 'bold');
+            xlabel('Walking context', 'FontWeight', 'bold');
+            zlabel('% difference from baseline', 'FontWeight', 'bold');
             ylabel('Assistance Level', 'FontWeight', 'bold');
             set(ax, 'FontSize', 20, 'FontWeight', 'bold', 'XTick', ...
                 [1 2 3 4 5], 'XTickLabel', obj.context_order, 'YTick', ...
                 [1 2 3], 'YTickLabel', obj.assistance_order);
+            words = strsplit(obj.name(1:end-2), '_');
+            if length(words) > 1
+                for i=1:length(words)
+                    if strcmp(words{i}(end), '1')
+                        words{i} = [words{i}(1:end-1) '.'];
+                    else
+                        words{i} = [words{i} '.'];
+                    end
+                end
+            end
+            new_name = strjoin(words);
+            title([upper(new_name(1)) new_name(2:end)])
                     
         end
         
@@ -368,11 +433,11 @@ classdef metric < handle
             for i=1:size(obj.col_diffs,1)
                 if obj.col_diffs(i,3) > 0 || obj.col_diffs(i,5) < 0
                     mx = max(max(vals)) + j*max(max(vals));
-                    j = j + 0.1;
+                    j = j + 0.2;
                     x = [obj.col_diffs(i,1); obj.col_diffs(i,2)];
                     y = zeros(2);
                     z = ones(1,2)*mx;
-                    plot3(x,y,z,'-k*','linewidth',1);
+                    plot3(x,y,z,'-k.','linewidth',1);
                 end
             end
             
@@ -380,11 +445,11 @@ classdef metric < handle
             for i=1:size(obj.row_diffs,1)
                 if obj.row_diffs(i,3) > 0 || obj.row_diffs(i,5) < 0
                     mx = max(max(vals)) + j*max(max(vals));
-                    j = j + 0.1;
+                    j = j + 0.2;
                     x = ones(1,2)*5.4;
                     y = [obj.row_diffs(i,1); obj.row_diffs(i,2)];
                     z = ones(1,2)*mx;
-                    plot3(x,y,z,'-k*','linewidth',1);
+                    plot3(x,y,z,'-k.','linewidth',1);
                 end
             end  
         end

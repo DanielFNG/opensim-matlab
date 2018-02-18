@@ -1,5 +1,5 @@
 % The directory where the subject data is stored (as Matlab data).
-load_dir = 'D:\one_subject_pipeline_metabolic_by_context';
+load_dir = 'F:\one_subject_pipeline_metabolic_by_context';
 
 % The parameters we want to look at data for. 
 subjects = [1:4,6:8];
@@ -22,7 +22,59 @@ metric_names = fieldnames(MetricsData.( ...
 
 for context = contexts
     context_identifier = ['Context' num2str(context)];
-    for nmetric = 1:length(metric_names)
+    for nmetric = 1:(length(metric_names)-6)/2
+        observations = [];
+        means = [];
+        stds = [];
+        for assistance = assistances
+            values = [];
+            for subject = subjects
+                for foot = feet
+                    if strcmp(metric_names{nmetric}(1:end-2), 'glut_med1') || ...
+                            strcmp(metric_names{nmetric}(1:end-2), 'glut_min1') || ...
+                            strcmp(metric_names{nmetric}(1:end-2), 'add_mag1') || ...
+                            strcmp(metric_names{nmetric}(1:end-2), 'glut_max1')
+                        for i=1:3
+                            data = MetricsData.(['Subject' num2str(subject)]).MusclePowers. ...
+                                ([metric_names{nmetric}(1:end-3) num2str(i) '_r']){foot, context, assistance};
+                            for instance = 1:length(data)
+                                values = [values; data{instance}];
+                            end
+                            data = MetricsData.(['Subject' num2str(subject)]).MusclePowers. ...
+                                ([metric_names{nmetric}(1:end-3) num2str(i) '_l']){foot, context, assistance};
+                            for instance = 1:length(data)
+                                values = [values; data{instance}];
+                            end
+                        end
+                    elseif ~(strcmp(metric_names{nmetric}(end-2), '2') || strcmp(metric_names{nmetric}(end-2), '3')) 
+                        data = MetricsData.(['Subject' num2str(subject)]).MusclePowers. ...
+                            (metric_names{nmetric}){foot, context, assistance};
+                        for instance = 1:length(data)
+                            values = [values; data{instance}];
+                        end
+                        data = MetricsData.(['Subject' num2str(subject)]).MusclePowers. ...
+                            ([metric_names{nmetric}(1:end-1) 'l']){foot, context, assistance};
+                        for instance = 1:length(data)
+                            values = [values; data{instance}];
+                        end
+                    end
+                end
+            end
+            means = [means, mean(values)];
+            stds = [stds, std(values)];
+            observations = [observations, values];
+        end
+        if ~isempty(observations)
+            [~,~,stats] = anova1(observations, [], 'off');
+            diffs = multcompare(stats, 'Display', 'off');
+
+            % Create the metric.
+            Metrics.(metric_names{nmetric}(1:end-2)).(context_identifier).means = means;
+            Metrics.(metric_names{nmetric}(1:end-2)).(context_identifier).stds = stds;
+            Metrics.(metric_names{nmetric}(1:end-2)).(context_identifier).diffs = diffs;
+        end
+    end
+    for nmetric = (length(metric_names)-5):2:(length(metric_names)-1)
         observations = [];
         means = [];
         stds = [];
@@ -35,19 +87,24 @@ for context = contexts
                     for instance = 1:length(data)
                         values = [values; data{instance}];
                     end
+                    data = MetricsData.(['Subject' num2str(subject)]).MusclePowers. ...
+                        ([metric_names{nmetric}(1:end-1) 'l']){foot, context, assistance};
+                    for instance = 1:length(data)
+                        values = [values; data{instance}];
+                    end
                 end
             end
             means = [means, mean(values)];
             stds = [stds, std(values)];
             observations = [observations, values];
         end
-        [~,~,stats] = anova1(observations, 'off');
+        [~,~,stats] = anova1(observations, [], 'off');
         diffs = multcompare(stats, 'Display', 'off');
         
         % Create the metric.
-        Metrics.(metric_names{nmetric}).(context_identifier).means = means;
-        Metrics.(metric_names{nmetric}).(context_identifier).stds = stds;
-        Metrics.(metric_names{nmetric}).(context_identifier).diffs = diffs;
+        Metrics.(metric_names{nmetric}(1:end-2)).(context_identifier).means = means;
+        Metrics.(metric_names{nmetric}(1:end-2)).(context_identifier).stds = stds;
+        Metrics.(metric_names{nmetric}(1:end-2)).(context_identifier).diffs = diffs;
     end
 end
 
