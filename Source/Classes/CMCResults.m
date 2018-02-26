@@ -23,7 +23,8 @@ classdef CMCResults
                 directory = getFullPath(directory);
                 obj.forces = Data([directory '_Actuation_force.sto']);
                 obj.powers = Data([directory '_Actuation_power.sto']);
-                obj.metabolics = Data([directory '_MetabolicsReporter_probes.sto']);
+                obj.metabolics = ...
+					Data([directory '_MetabolicsReporter_probes.sto']);
                 obj.activations = Data([directory '_controls.sto']);
                 obj.start = obj.metabolics.Timesteps(1);
                 obj.final = obj.metabolics.Timesteps(end);

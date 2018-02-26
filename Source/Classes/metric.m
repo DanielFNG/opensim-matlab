@@ -16,7 +16,7 @@ classdef metric < handle
     properties (SetAccess = private, GetAccess = private)
         p_value = 0.05
         assistance_order = {'NE', 'ET', 'EA'}
-        context_order = {'BW','IW','DW','FW','SW'}
+        context_order = {'BW','UW','DW','FW','SW'}
     end
     
     methods 
@@ -405,6 +405,8 @@ classdef metric < handle
             hold on;
             obj.plotSignificantDifferences(diff);
             hold off
+            
+            obj.context_order{2} = 'UW';
             
             % Handle labels etc.
             xlabel('Walking context', 'FontWeight', 'bold');
