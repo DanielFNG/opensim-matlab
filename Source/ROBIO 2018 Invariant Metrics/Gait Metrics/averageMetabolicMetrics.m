@@ -17,8 +17,6 @@ for subject = subjects
     clear('result');
 end
 
-
-
 metric_names = fieldnames(MetricsData.( ...
     ['Subject' num2str(subjects(1))]).MusclePowers);
 for nmetric = 1:(length(metric_names)-6)/2

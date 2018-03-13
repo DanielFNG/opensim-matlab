@@ -19,11 +19,11 @@ assistances = 1:3;
 % dataLoop(...
 %     root, subjects, feet, contexts, assistances, handles, save_dir);
 
-%% Calculate spatial metrics. 
+%% Calculate spatial metrics.
 
-% Handles. 
+% Handles.
 handles = {@prepareAvgJointPowers, @prepareAvgMusclePowers};
 
 % Process data. Note how we now load from the save dir.
-dataLoop(...
-    root, subjects, feet, contexts, assistances, handles, save_dir, save_dir);
+dataLoop(root, subjects, feet, contexts, assistances, handles, ...
+    save_dir, save_dir);
