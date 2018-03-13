@@ -29,6 +29,13 @@ if isempty(which('startup.m'))
     fprintf(fileID, '%s', ['setenv(''EXOPT_HOME'', ''' pwd ''');']);
 else
     fileID = fopen(which('startup.m'), 'a');
+    if fileID == -1
+        display(['Attempted to open existing startup.m file in ' ...
+            'matlabroot, but access was denied. Please rerun this ' ...
+            'script after running Matlab as an administrator.']);
+        cd('Setup');
+        return
+    end
     fprintf(fileID, '\n%s', ['setenv(''EXOPT_HOME'', ''' pwd ''');']);
 	flag = -1;
 end
