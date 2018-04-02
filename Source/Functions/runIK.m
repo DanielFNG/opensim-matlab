@@ -45,7 +45,7 @@ copyfile(input, ...
     [results '\' append 'MarkerData\' 'raw_marker_locations.trc']);
 
 % Interpret the results as Data objects if required.
-if nargout == 1
+if nargout ~= 0
     IK = Data(output);
     OutputMarkers = Data([results '\' append 'MarkerData' filesep ...
         'ik_model_marker_locations.sto']);
