@@ -32,6 +32,18 @@ else
     fprintf(fileID, '\n%s', ['setenv(''EXOPT_HOME'', ''' pwd ''');']);
 	flag = -1;
 end
+
+% Fix and save the location of the OpenSim err.log and out.log files. 
+fprintf(fileID, '\n%s', 'current_dir = pwd;');
+fprintf(fileID, '\n%s', 'cd(getenv(''EXOPT_HOME''));');
+fprintf(fileID, '\n%s', 'cd(''Logs'');');
+fprintf(fileID, '\n%s', 'import org.opensim.modeling.Model');
+fprintf(fileID, '\n%s', 'test = Model();');
+fprintf(...
+    fileID, '\n%s', 'setenv(''EXOPT_OUT'', [pwd filesep ''out.log'']);');
+fprintf(fileID, '\n%s', 'cd(current_dir)');
+
+% Close the startup file.
 fclose(fileID);
 
 % Set the environment variable for the current session (necessary so users
