@@ -46,10 +46,6 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-# Ignore logs 
-*.tlog
-*.log
-
 # Ignore Matlab autosaves. 
 *.asv
 
