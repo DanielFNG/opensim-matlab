@@ -9,12 +9,6 @@ function path = constructDataPath(root, subject, foot, context, assistance)
         side = 'left';
     end
     
-    if mod(context, 2) == 1 
-        state = 'Non-StSt';
-    else
-        state = 'StSt';
-    end
-    
     if assistance == 1
         level = 'NE';
     elseif assistance == 2
@@ -24,6 +18,6 @@ function path = constructDataPath(root, subject, foot, context, assistance)
     end
     
     path = [root '\S' num2str(subject) '\dynamicElaborations\' side ...
-        state '\' level num2str(context)];
+        filesep level num2str(context)];
     
 end

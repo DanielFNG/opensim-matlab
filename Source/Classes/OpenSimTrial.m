@@ -229,7 +229,7 @@ classdef OpenSimTrial
         % 2 arguments: no adjustment.
         % 3 arguments: adjustment, from given time to end of IK file.
         % 4 arguments: adjustment, between given times. 
-        function RRA = runRRA(...
+        function [RRA, adjusted_path] = runRRA(...
                 obj, initialTime, finalTime, body, output)
             % Setup RRATool. Supports anywhere from 1 to 5 arguments. 
             % 1 - no adjustment, full file
@@ -287,18 +287,17 @@ classdef OpenSimTrial
                     '_withAdjustment'];
                 rraTool = obj.setupRRA(...
                     dir, initialTime, finalTime, body, output);
-                log = [obj.results_directory '/' 'RRA_output.log'];
-                diary(log);
                 rraTool.run()
-                diary off;
                     
                 % Perform mass adjustment. 
-                obj.performMassAdjustments([obj.results_directory '/' dir '/' output], getFullPath(log));
+                obj.performMassAdjustments([obj.results_directory '/' dir '/' output], getenv('EXOPT_OUT'));
+                
+                % Adjusted model path.
+                adjusted_path = getFullPath([obj.results_directory filesep dir filesep output '_mass_changed.osim']);
                 
                 % Process resulting RRA data. 
                 RRA = RRAResults(obj, [obj.results_directory '/' dir '/RRA'], ...
-                    getFullPath([obj.results_directory '/' dir '/' output ...
-                    '_mass_changed.osim']));
+                    adjusted_path);
             else
                 error('Incorrect number of arguments to runRRA');
             end

@@ -20,6 +20,11 @@ model_path = constructModelPath(root, subject, assistance);
 output_dir = [grf_path '\RRA_Results'];
 
 % Run adjustment RRA.
-adjustmentRRA(model_path, first_ik, first_grf, output_dir);
+[~, path] = adjustmentRRA(model_path, first_ik, first_grf, output_dir);
+
+% Copy adjusted model file in to appropriate location.
+[~, model_name, ~] = fileparts(model_path);
+[~, new_model_name, ext] = fileparts(path);
+copyfile(path, [root filesep 'S' num2str(subject) filesep 'Scaling' filesep model_name '_' new_model_name ext]);
 
 end

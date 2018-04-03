@@ -1,4 +1,4 @@
-function RRA_adjustment = adjustmentRRA(model,ik,grf,results,load)
+function [RRA_adjustment, path] = adjustmentRRA(model,ik,grf,results,load)
 % Function for using RRA to adjust a model. 
 %   Uses input kinematic and GRF data to perform RRA and calculate a
 %   modified model file. 
@@ -33,12 +33,8 @@ end
 save_dir = [results '/' 'adjustment'];
 trial = OpenSimTrial(model,ik,load,grf,save_dir);
 
-% Run RRA with adjustment on this trial. Save result if necessary.
-if nargout == 1
-    RRA_adjustment = trial.runRRA('torso','model_adjusted');
-else
-    trial.runRRA('torso','model_adjusted');
-end
+% Run RRA with adjustment on this trial.
+[RRA_adjustment, path] = trial.runRRA('torso','model_adjusted');
 
 end
 
