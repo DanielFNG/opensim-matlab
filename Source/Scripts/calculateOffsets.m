@@ -7,8 +7,12 @@ for subject = subjects
     static = Data(['Static' num2str(subject) '.trc']);
     APO_x = static.getDataCorrespondingToLabel('V_SacralX') + x_offset;
     APO_y = static.getDataCorrespondingToLabel('V_SacralY') + y_offset;
-    offset_R_x = abs(APO_x - static.getDataCorrespondingToLabel('RHJCX'));
-    offset_R_y = abs(APO_y - static.getDataCorrespondingToLabel('RHJCY'));
-    offset_L_x = abs(APO_x - static.getDataCorrespondingToLabel('LHJCX'));
-    offset_L_y = abs(APO_y - static.getDataCorrespondingToLabel('LHJCY'));
+    offsets.(['s' num2str(subject)]).offset_R_x = ...
+        mean(APO_x - static.getDataCorrespondingToLabel('RHJCX'));
+    offsets.(['s' num2str(subject)]).offset_R_y = ...
+        mean(APO_y - static.getDataCorrespondingToLabel('RHJCY'));
+    offsets.(['s' num2str(subject)]).offset_L_x = ...
+        mean(APO_x - static.getDataCorrespondingToLabel('LHJCX'));
+    offsets.(['s' num2str(subject)]).offset_L_y = ...
+        mean(APO_y - static.getDataCorrespondingToLabel('LHJCY'));
 end
