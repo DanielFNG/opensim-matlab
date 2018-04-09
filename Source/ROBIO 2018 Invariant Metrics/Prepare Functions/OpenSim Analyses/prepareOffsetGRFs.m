@@ -4,11 +4,14 @@ if assistance ~= 3
     error('Do NOT replace the grf files for non-assistance cases.');
 end
 
+% Calculate offsets for all subjects (this needs fixed).
+offsets = calculateOffsets();
+
 % For now hard code the offsets for S7 and APO length.
-offsets.R_x = 0.088089830104000;
-offsets.R_y = 0.020913669636000;
-offsets.L_x = 0.108146523996000;
-offsets.L_y = 0.021298258020000;
+offsets.R_x = offsets.(['s' num2str(subject)]).R_x;
+offsets.R_y = offsets.(['s' num2str(subject)]).R_y;
+offsets.L_x = offsets.(['s' num2str(subject)]).L_x;
+offsets.L_y = offsets.(['s' num2str(subject)]).L_y;
 length_apo = 0.23;
 
 % Get appropriate path.
