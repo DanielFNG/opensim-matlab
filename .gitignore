@@ -54,4 +54,3 @@ Temporary Items
 
 # Don't sync the startup.m file.
 *startup.m
-*.log
