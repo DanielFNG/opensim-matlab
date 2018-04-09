@@ -1,20 +1,45 @@
 function [human_length, special_angle] = ...
-    calculateHumanLengthSpecialAngle(x, y, hip_angle, length)
+    calculateHumanLengthSpecialAngle(x, y, hip_angles, length)
 
-hip_angle = abs(hip_angle);
+% Create arrays of the right size. 
+human_length = zeros(size(hip_angles));
+special_angle = zeros(size(hip_angles));
 
-if hip_angle < 0.0001
-    special_angle = asin(x/length);
-else
-    special_angle = ...
-        asin(((y + x*cot(hip_angle)).*sin(pi - hip_angle))/length);
-end
+a = asin(x/sqrt(x^2 + (length - y)^2));
+c = pi/2 - hip_angles;
+d = asin(y/sqrt(x^2 + y^2));
+e = asin((sqrt(x^2 + y^2)*sin(c + d))/length);
 
-if hip_angle == 0
-    human_length = sqrt(length^2 - x^2);
-else
-    human_length = ...
-        (x + length*cos(special_angle + pi - hip_angle))./sin(hip_angle);
-end
+% If hip_angle == a.
+condition = hip_angles == a;
+special_angle(condition) = hip_angles(condition);
+human_length(condition) = sqrt(x^2 + (length - y)^2);
 
+% If hip_angle == 0.
+condition = hip_angles == 0;
+special_angle(condition) = asin(x/length);
+human_length(condition) = sqrt(length^2 - x^2) - y;
+
+% If hip angles are positive but less than a. 
+condition = (0 < hip_angles) & (hip_angles < a);
+special_angle(condition) = asin(x*sin(c(condition))/length);
+human_length(condition) = length*sin(pi - e(condition) - c(condition) ...
+    - d)./sin(c(condition) + d);
+
+% If hip_angle > a or hip_angles are negative.
+condition = (hip_angles > a);
+b = asin(((y + x*cot(hip_angles)).*sin(pi - hip_angles))/length);
+special_angle(condition) = b(condition);
+human_length(condition) = (x + length*cos(b(condition) + pi/2 - ...
+    hip_angles(condition)))./sin(hip_angles(condition));
+
+% If hip_angle < 0.
+condition = (hip_angles < 0);
+hip_angles = abs(hip_angles);
+human_length(condition) = sqrt((x*sin(hip_angles(condition)) + ...
+    y*cos(hip_angles(condition))).^2 + length^2 - x^2 - y^2) - ...
+    x*sin(hip_angles(condition)) - y*cos(hip_angles(condition));
+special_angle(condition) = pi/2 - hip_angles(condition) - ...
+    asin((human_length(condition).*cos(hip_angles(condition) + y))/length);
+    
 end

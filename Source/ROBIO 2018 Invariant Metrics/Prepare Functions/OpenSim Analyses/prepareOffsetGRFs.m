@@ -1,0 +1,71 @@
+function prepareOffsetGRFs(root, subject, foot, context, assistance)
+
+if assistance ~= 3
+    error('Do NOT replace the grf files for non-assistance cases.');
+end
+
+% For now hard code the offsets for S7 and APO length.
+offsets.R_x = 0.088089830104000;
+offsets.R_y = 0.020913669636000;
+offsets.L_x = 0.108146523996000;
+offsets.L_y = 0.021298258020000;
+length_apo = 0.23;
+
+% Get appropriate path.
+grf_path = constructDataPath(...
+    root, subject, foot, context, assistance);
+ik_path = [grf_path filesep 'RRA_Results'];
+
+% Identify the grf files.
+ik_struct = dir([ik_path filesep '*.sto']);
+grf_struct = dir([grf_path filesep '*.mot']);
+
+for i=1:length(grf_struct)
+    % Load in the RRA hip joint angles and the GRFs. 
+    kinematics = Data([ik_path filesep ik_struct(i,1).name]);
+    forces = Data([grf_path filesep grf_struct(i,1).name]);
+    
+    % Get what we need.
+    right_apo_torque = forces.getDataCorrespondingToLabel('apo_torque_z');
+    left_apo_torque = forces.getDataCorrespondingToLabel('1_apo_torque_z');
+    right_hip_angle = ...
+        deg2rad(kinematics.getDataCorrespondingToLabel('hip_flexion_r'));
+    left_hip_angle = ...
+        deg2rad(kinematics.getDataCorrespondingToLabel('hip_flexion_l'));
+    
+    % Since the RRA is at 1000Hz and the GRFs are at 600Hz, the RRA data 
+    % will always have more frames. Stretch the APO torques to be on the 
+    % same number of frames.
+    right_apo_torque = stretchVector(right_apo_torque, kinematics.Frames);
+    left_apo_torque = stretchVector(left_apo_torque, kinematics.Frames);
+    
+    % Perform the calculations.
+    [right_human_length, right_special_angle] = ...
+        calculateHumanLengthSpecialAngle(...
+        offsets.R_x, offsets.R_y, right_hip_angle, length_apo);
+    [left_human_length, left_special_angle] = ...
+        calculateHumanLengthSpecialAngle(...
+        offsets.L_x, offsets.L_y, left_hip_angle, length_apo);
+    [right_torque, ~] = calculateModifiedTorque(...
+        right_apo_torque, right_special_angle, length_apo, right_human_length);
+    [left_torque, ~] = calculateModifiedTorque(...
+        left_apo_torque, left_special_angle, length_apo, left_human_length);
+    
+    % Rescale the torques to the correct number of frames.
+    right_torque = stretchVector(right_torque, forces.Frames);
+    left_torque = stretchVector(left_torque, forces.Frames);
+    
+    % Reassign the values.
+    forces.Values(1:end, 28) = right_torque;
+    forces.Values(1:end, 37) = left_torque;
+    forces.Values(1:end, 46) = -right_torque;
+    forces.Values(1:end, 55) = -left_torque;
+    
+    % Rewrite these grfs. 
+    forces.writeToFile([grf_path filesep grf_struct(i,1).name], 1, 1);
+end
+
+end
+    
+    
+    
