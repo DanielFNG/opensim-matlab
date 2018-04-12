@@ -26,7 +26,7 @@ special_angle(condition) = asin(x*sin(c(condition))/length);
 human_length(condition) = length*sin(pi - e(condition) - c(condition) ...
     - d)./sin(c(condition) + d);
 
-% If hip_angle > a or hip_angles are negative.
+% If hip_angle > a.
 condition = (hip_angles > a);
 b = asin(((y + x*cot(hip_angles)).*sin(pi - hip_angles))/length);
 special_angle(condition) = b(condition);
@@ -39,7 +39,7 @@ hip_angles = abs(hip_angles);
 human_length(condition) = sqrt((x*sin(hip_angles(condition)) + ...
     y*cos(hip_angles(condition))).^2 + length^2 - x^2 - y^2) - ...
     x*sin(hip_angles(condition)) - y*cos(hip_angles(condition));
-special_angle(condition) = pi/2 - hip_angles(condition) - ...
-    asin((human_length(condition).*cos(hip_angles(condition) + y))/length);
+special_angle(condition) = -(pi/2 - hip_angles(condition) - ...
+    asin((human_length(condition).*cos(hip_angles(condition) + y))/length));
     
 end

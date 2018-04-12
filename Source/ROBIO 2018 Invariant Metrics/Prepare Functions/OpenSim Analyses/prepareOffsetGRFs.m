@@ -49,20 +49,24 @@ for i=1:length(grf_struct)
     [left_human_length, left_special_angle] = ...
         calculateHumanLengthSpecialAngle(...
         offsets.L_x, offsets.L_y, left_hip_angle, length_apo);
-    [right_torque, ~] = calculateModifiedTorque(...
+    [right_torque, right_axial_force] = calculateModifiedTorque(...
         right_apo_torque, right_special_angle, length_apo, right_human_length);
-    [left_torque, ~] = calculateModifiedTorque(...
+    [left_torque, left_axial_force] = calculateModifiedTorque(...
         left_apo_torque, left_special_angle, length_apo, left_human_length);
     
     % Rescale the torques to the correct number of frames.
+    right_apo_torque = stretchVector(right_apo_torque, forces.Frames);
+    left_apo_torque = stretchVector(left_apo_torque, forces.Frames);
     right_torque = stretchVector(right_torque, forces.Frames);
     left_torque = stretchVector(left_torque, forces.Frames);
     
     % Reassign the values.
+    forces.Values(1:end, 24) = -right_human_length;
     forces.Values(1:end, 28) = right_torque;
+    forces.Values(1:end, 33) = -left_human_length;
     forces.Values(1:end, 37) = left_torque;
-    forces.Values(1:end, 46) = -right_torque;
-    forces.Values(1:end, 55) = -left_torque;
+    forces.Values(1:end, 46) = -right_apo_torque; % Still apply the full 
+    forces.Values(1:end, 55) = -left_apo_torque; % torque to the APO. 
     
     % Rewrite these grfs. 
     forces.writeToFile([grf_path filesep grf_struct(i,1).name], 1, 1);
