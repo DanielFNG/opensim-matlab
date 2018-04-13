@@ -1,24 +1,24 @@
 % A script to process CMC, done separately since originally CMC was not
 % part of the analysis chain.
-root = 'F:\Dropbox\PhD\Exoskeleton Metrics';
+root = 'F:\Dropbox\PhD\Exoskeleton Metrics Offsets Axial';
 
 %% Run CMCs first to just generate the files. .
-subjects = 7;
+subjects = [1:4, 6:8];
 feet = 1;
 contexts = 2:2:10;
 assistances = 3;
 
-% % Choose functions to execute.
-% handles = {@prepareBatchCMC};
-% 
-% % Process data, loading in existing structs. 
-% dataLoop(root, subjects, feet, contexts, assistances, handles);
+% Choose functions to execute.
+handles = {@prepareBatchCMC};
+
+% Process data, loading in existing structs. 
+dataLoop(root, subjects, feet, contexts, assistances, handles);
 
 % Choose functions to execute.
 handles = {@prepareCMCFromFile};
 
 % Choose periodic save destination.
-save_dir = 'F:\offsets_cmc\no_offsets';
+save_dir = 'F:\Dropbox\PhD\Exoskeleton Metrics Offsets Axial\Results';
 
 % Process data.
 dataLoop(root, subjects, feet, contexts, assistances, handles, save_dir);

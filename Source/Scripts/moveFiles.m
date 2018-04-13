@@ -1,10 +1,10 @@
 startloc = 'F:\Dropbox\PhD\Exoskeleton Metrics';
-endloc = 'F:\Dropbox\PhD\Exoskeleton Metrics Offsets';
+endloc = 'F:\Dropbox\PhD\Exoskeleton Metrics Offsets Axial';
 
 scale_folder = 'Scaling';
 data_folder = 'dynamicElaborations\right';
 
-subjects = [1:4, 6, 8];
+subjects = [1:4, 6, 7, 8];
 contexts = 2:2:10;
 
 for subject = subjects

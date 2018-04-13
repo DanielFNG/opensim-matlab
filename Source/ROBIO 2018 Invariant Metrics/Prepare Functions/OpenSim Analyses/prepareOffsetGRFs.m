@@ -57,12 +57,18 @@ for i=1:length(grf_struct)
     % Rescale the torques to the correct number of frames.
     right_apo_torque = stretchVector(right_apo_torque, forces.Frames);
     left_apo_torque = stretchVector(left_apo_torque, forces.Frames);
+    right_axial_force = stretchVector(right_axial_force, forces.Frames);
+    left_axial_force = stretchVector(left_axial_force, forces.Frames);
     right_torque = stretchVector(right_torque, forces.Frames);
     left_torque = stretchVector(left_torque, forces.Frames);
+    right_human_length = stretchVector(right_human_length, forces.Frames);
+    left_human_length = stretchVector(left_human_length, forces.Frames);
     
     % Reassign the values.
+    forces.Values(1:end, 20) = right_axial_force;
     forces.Values(1:end, 24) = -right_human_length;
     forces.Values(1:end, 28) = right_torque;
+    forces.Values(1:end, 29) = left_axial_force;
     forces.Values(1:end, 33) = -left_human_length;
     forces.Values(1:end, 37) = left_torque;
     forces.Values(1:end, 46) = -right_apo_torque; % Still apply the full 
