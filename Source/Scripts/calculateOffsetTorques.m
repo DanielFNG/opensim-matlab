@@ -9,7 +9,7 @@ length_apo = 0.23;
 
 % Run the offsets script to calculate the offsets. Isolate the offsets for
 % subject 7 (for now).
-calculateOffsets;
+offsets = calculateOffsets;
 offsets = offsets.s7;
 
 % Load in the original forces file and access the original APO torques.

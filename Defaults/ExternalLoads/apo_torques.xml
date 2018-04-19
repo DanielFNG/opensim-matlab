@@ -47,9 +47,9 @@
 				<!--Name of the body the force is applied to.-->
 				<applied_to_body> femur_r </applied_to_body>
 				<!--Name of the body the force is expressed in (default is ground).-->
-				<force_expressed_in_body> ground </force_expressed_in_body>
+				<force_expressed_in_body> femur_r </force_expressed_in_body>
 				<!--Name of the body the point is expressed in (default is ground).-->
-				<point_expressed_in_body> ground </point_expressed_in_body>
+				<point_expressed_in_body> femur_r </point_expressed_in_body>
 				<!--Identifier (string) to locate the force to be applied in the data
 				    source.-->
 				<force_identifier> apo_force_v </force_identifier>
@@ -67,9 +67,9 @@
 				<!--Name of the body the force is applied to.-->
 				<applied_to_body> femur_l </applied_to_body>
 				<!--Name of the body the force is expressed in (default is ground).-->
-				<force_expressed_in_body> ground </force_expressed_in_body>
+				<force_expressed_in_body> femur_l </force_expressed_in_body>
 				<!--Name of the body the point is expressed in (default is ground).-->
-				<point_expressed_in_body> ground </point_expressed_in_body>
+				<point_expressed_in_body> femur_l </point_expressed_in_body>
 				<!--Identifier (string) to locate the force to be applied in the data
 				    source.-->
 				<force_identifier> 1_apo_force_v </force_identifier>
