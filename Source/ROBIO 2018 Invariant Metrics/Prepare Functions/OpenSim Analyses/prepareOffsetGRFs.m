@@ -65,10 +65,10 @@ for i=1:length(grf_struct)
     left_human_length = stretchVector(left_human_length, forces.Frames);
     
     % Reassign the values.
-    forces.Values(1:end, 20) = right_axial_force;
+    forces.Values(1:end, 21) = right_axial_force;
     forces.Values(1:end, 24) = -right_human_length;
     forces.Values(1:end, 28) = right_torque;
-    forces.Values(1:end, 29) = left_axial_force;
+    forces.Values(1:end, 30) = left_axial_force;
     forces.Values(1:end, 33) = -left_human_length;
     forces.Values(1:end, 37) = left_torque;
     forces.Values(1:end, 46) = -right_apo_torque; % Still apply the full 

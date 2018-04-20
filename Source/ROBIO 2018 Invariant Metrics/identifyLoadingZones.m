@@ -16,6 +16,8 @@ interior_crossing_point = find(points, 1, 'first') - 1;
 points = (indices > pk1) & (indices < pk2) & ...
     (sign(torque) == -sign(torque(pk2)));
 exterior_crossing_point = find(points, 1, 'last');
+points = (indices > pk2) & (sign(torque) == sign(torque(pk2)));
+final_crossing_point = find(points, 1, 'last');
 
 % % Find the start of the second loading zone as the longest slice of one 
 % % consistent gradient direction + remaining points until second peak. 
@@ -42,7 +44,7 @@ exterior_crossing_point = find(points, 1, 'last');
 l1 = 1:pk1;
 u1 = pk1 + 1:interior_crossing_point;
 l2 = exterior_crossing_point:pk2;
-u2 = pk2 + 1:length(torque);
+u2 = pk2 + 1:final_crossing_point;
 
 if interior_crossing_point + 1 ~= exterior_crossing_point
     lo = interior_crossing_point + 1:exterior_crossing_point - 1;

@@ -45,17 +45,17 @@ for i=1:length(grf_struct)
     left_multiplier = left_torque./original_left_torque;
     
     % Identify the left and right APO forces.
-    right_force = forces.Values(1:end, 20);
-    left_force = forces.Values(1:end, 29);
+    right_force = forces.Values(1:end, 21);
+    left_force = forces.Values(1:end, 30);
     
     % Calculate the changes left and right APO forces.
     right_force = right_force.*right_multiplier;
     left_force = left_force.*left_multiplier;
     
     % Reassign the APO force file values.
-    forces.Values(1:end, 20) = right_force;
+    forces.Values(1:end, 21) = right_force;
     forces.Values(1:end, 28) = right_torque;
-    forces.Values(1:end, 29) = left_force;
+    forces.Values(1:end, 30) = left_force;
     forces.Values(1:end, 37) = left_torque;
     
     % Rewrite the grfs. 
