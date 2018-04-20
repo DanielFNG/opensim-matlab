@@ -1,5 +1,6 @@
 % The directory where the subject data is stored (as Matlab data).
-load_dir = 'F:\one_subject_pipeline_metabolic_by_context';
+load_dir_1 = 'D:\metrics_results';
+load_dir_2 = 'D:\Dropbox\PhD\Exoskeleton Metrics Offsets Axial\Results';
 
 % The parameters we want to look at data for. 
 subjects = [1:4,6:8];
@@ -7,13 +8,22 @@ contexts = 2:2:10;
 assistances = 1:3;
 feet = 1;
 
-save_dir = [load_dir filesep 'allsubjectsmetricsbycontext.mat'];
+save_dir = [load_dir_1 filesep 'allsubjectsmetricsbycontext.mat'];
 
 % Load the subjects and store the metric information for each subject only.
 for subject = subjects
-    result = loadSubject(load_dir, subject);
-    MetricsData.(['Subject' num2str(subject)]) = result.MetricsData;
+    result = loadSubject(load_dir_1, subject);
+    result_2 = loadSubject(load_dir_2, subject);
+    temp_names = fieldnames(result.MetricsData.MusclePowers);
+    for i=1:length(temp_names)
+        for j=2:2:10
+            MetricsData.(['Subject' num2str(subject)]).MusclePowers.(temp_names{i}){1, j, 1} = result.MetricsData.MusclePowers.(temp_names{i}){1, j, 1};
+            MetricsData.(['Subject' num2str(subject)]).MusclePowers.(temp_names{i}){1, j, 2} = result.MetricsData.MusclePowers.(temp_names{i}){1, j, 2};
+            MetricsData.(['Subject' num2str(subject)]).MusclePowers.(temp_names{i}){1, j, 3} = result_2.MetricsData.MusclePowers.(temp_names{i}){1, j, 3};
+        end
+    end
     clear('result');
+    clear('result2');
 end
 
 % Identify the metrics we want to look at.
