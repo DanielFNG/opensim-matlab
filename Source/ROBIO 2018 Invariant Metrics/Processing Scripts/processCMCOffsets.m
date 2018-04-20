@@ -3,7 +3,7 @@
 root = 'F:\Dropbox\PhD\Exoskeleton Metrics Offsets Axial';
 
 %% Run CMCs first to just generate the files. .
-subjects = [1:4, 6:8];
+subjects = 2;
 feet = 1;
 contexts = 2:2:10;
 assistances = 3;
