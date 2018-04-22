@@ -14,6 +14,8 @@ classdef metric < handle
         p_value = 0.05
         row_labels
         col_labels
+        row_descriptor = 'row'
+        col_descriptor = 'column'
     end
         
     properties (SetAccess = private, GetAccess = private)
@@ -26,7 +28,7 @@ classdef metric < handle
     methods 
         
         function obj = metric(name, means, sdevs, sample_size, ...
-                col_diffs, row_diffs, row_labels, col_labels, baseline)
+                col_diffs, row_diffs, row_descriptor, col_descriptor, row_labels, col_labels, baseline)
             if nargin > 0
                 obj.name = name;
                 if nargin >= 6
@@ -40,9 +42,11 @@ classdef metric < handle
                     obj = obj.identifySignificantDifferences();
                     obj = obj.calcCombinedMeansAndSdevs();
                     if nargin >= 8
+                        obj.row_descriptor = row_descriptor;
+                        obj.col_descriptor = col_descriptor;
                         obj.row_labels = row_labels;
                         obj.col_labels = col_labels;
-                        if nargin == 9
+                        if nargin == 11
                             obj.base_row = baseline(1);
                             obj.base_col = baseline(2);
                         end
@@ -157,12 +161,12 @@ classdef metric < handle
         % 'context' depending on the mode. 
         function avg_1d = calculate1DAvg(obj, direction)
             diff = obj.calculateRelativeDifferences('unsigned');
-            if strcmp(direction, 'context')
+            if strcmp(direction, obj.col_descriptor)
                 avg_1d = 1:obj.n_cols;
                 for i=1:obj.n_cols
                     avg_1d(i) = mean(diff(1:end,i));
                 end
-            elseif strcmp(direction, 'assistance')
+            elseif strcmp(direction, obj.row_descriptor)
                 avg_1d = 1:obj.n_rows;
                 for i=1:obj.n_rows
                     avg_1d(i) = mean(diff(i,1:end));
@@ -181,14 +185,14 @@ classdef metric < handle
             elseif nargin ~= 2
                 error('Require 1 or 2 arguments to calc anova cohens d.');
             else
-                if ~(strcmp(direction, 'A') || strcmp(direction, 'C'))
-                    error('If given direction should be ''A'' or ''C''.');
+                if ~(strcmp(direction, obj.row_descriptor) || strcmp(direction, obj.col_descriptor))
+                    error('If given direction should match either the column or row descriptor.');
                 end
             end
             
             % Calculate Cohen's D for each significant differences, either
             % in one or both directions. 
-            if ~(strcmp(direction, 'C'))
+            if ~(strcmp(direction, obj.col_descriptor))
                 if isempty(obj.sig_diffs_A)
                     contribution_A = 0;
                 else
@@ -202,7 +206,7 @@ classdef metric < handle
                     end
                 end
             end
-            if ~(strcmp(direction, 'A'))
+            if ~(strcmp(direction, obj.row_descriptor))
                 contribution_C = [];
                 if ~isempty(obj.sig_diffs_C{1})
                     for i=1:size(obj.sig_diffs_C,1)
