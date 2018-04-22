@@ -2,15 +2,17 @@ classdef metric < handle
     
     properties %(SetAccess = private)
         name
-        sample_size = 70;  % 7 subjects * 2 feet * 5 gait cycles
-        means = 'Not yet known.'
-        sdevs = 'Not yet known.'
+        sample_size 
+        means  
+        sdevs 
         row_diffs
         col_diffs
-        sig_diffs_A = 'Not yet known.'
-        sig_diffs_C = 'Not yet known.'
-        combined_means = 'Not yet calculated.'
-        combined_sdevs = 'Not yet calculated.'
+        n_rows
+        n_columns
+        row_sig_diffs
+        col_sig_diffs
+        combined_means
+        combined_sdevs
     end
         
     properties (SetAccess = private, GetAccess = private)
@@ -30,102 +32,40 @@ classdef metric < handle
                     obj.sdevs = sdevs;
                     obj.sample_size = sample_size;
                     obj.row_diffs = row_diffs;
+                    obj.n_rows = size(row_diffs, 1);
                     obj.col_diffs = col_diffs;
+                    obj.n_columns = size(col_diffs, 1);
                     obj = obj.identifySignificantDifferences();
-                elseif nargin ~= 1
-                    error('Must have 1 or 3 args.');
+                    obj = obj.calcCombinedMeansAndSdevs();
+                else
+                    error('A non-empty metric requires six arguments.');
                 end
             end
         end
         
+        % I think the mapping thing that I've gone with here was a result of
+        % initially inputting the significant differences manually. Really, I
+        % think this should be replaced with a matrix of 1's or 0's where an
+        % element being equal to 1 denotes that there is a significant 
+        % difference between the row and column corresponding to that element.
         function obj = identifySignificantDifferences(obj)
-            obj.sig_diffs_A = {};
-            obj.sig_diffs_C = {};
             
-            num = 1;
+            obj.row_sig_diffs = zeros(obj.n_rows);
+            obj.col_sig_diffs = zeros(obj.n_cols);
+            
             for i=1:size(obj.col_diffs,1)
                 if obj.col_diffs(i,6) < obj.p_value
-                    obj.sig_diffs_C{num,1} = ...
-                        obj.context_order{obj.col_diffs(i,1)};
-                    obj.sig_diffs_C{num,2} = ...
-                        obj.context_order{obj.col_diffs(i,2)};
-                    num = num + 1;
+                    obj.col_sig_diffs(obj.col_diffs(i, 1), obj.col_diffs(i, 2)) = 1;
+                    obj.col_sig_diffs(obj.col_diffs(i, 2), obj.col_diffs(i, 1)) = 1;
                 end
             end
             
-            num = 1;
             for i=1:size(obj.row_diffs,1)
                 if obj.row_diffs(i,6) < obj.p_value 
-                    obj.sig_diffs_A{num,1} = ...
-                        obj.assistance_order{obj.row_diffs(i,1)};
-                    obj.sig_diffs_A{num,2} = ...
-                        obj.assistance_order{obj.row_diffs(i,2)};
-                    num = num + 1;
+                    obj.row_sig_diffs(obj.row_diffs(i, 1), obj.row_diffs(i, 2)) = 1;
+                    obj.row_sig_diffs(obj.row_diffs(i, 2), obj.row_diffs(i, 1)) = 1;
                 end
             end         
-        end
-        
-        function inputManually(obj)
-            for i=1:size(obj.assistance_order,2)
-                for j=1:size(obj.context_order,2)
-                    obj.means(i,j) = input(...
-                        ['Input value for metric: ', obj.name, ' for ', ...
-                        obj.assistance_order{i}, ' and ', ...
-                        obj.context_order{j}, ':\n']);
-                    obj.sdevs(i,j) = input(...
-                        ['Input sdev for metric: ', obj.name, ' for ', ...
-                        obj.assistance_order{i}, ' and ', ...
-                        obj.context_order{j}, ':\n']);
-                end
-            end
-        end
-        
-        function inputSignificantDifferences(obj)
-            % This method provides a way to manually input the significant
-            % differences for each metric. What results is 2 2D cell array
-            % accessed using obj.sig_diffs_A or _C. 
-            % The first dimension is how many differences there are in the
-            % respective direction.
-            % The second dimension also has 2 elements, the first of which
-            % is the 'from' and the second the 'to', for example a
-            % significant difference from NE to ET, for example. In
-            % practice which is from and which is to won't matter since we
-            % will only consider absolute Cohen's d for simplicity.
-            obj.sig_diffs_A = {};
-            obj.sig_diffs_C = {};
-            display(['Please input all significant differences along'... 
-                'the assistance direction. Input ''end'' to finish. You'...
-                'will be prompted using ''From:'' and ''To:''. Give'...
-                'the correct acronym in each case.']);
-            n_x = 0;
-            while true 
-                x_f = input('From:\n', 's');
-                if strcmp(x_f, 'end')
-                    if n_x == 0
-                        obj.sig_diffs_A{1,1} = 'n/a';
-                    end
-                    break
-                end
-                n_x = n_x + 1;
-                x_t = input('To:\n', 's');
-                obj.sig_diffs_A{n_x,1} = x_f;
-                obj.sig_diffs_A{n_x,2} = x_t;
-            end
-            display('Now do the same but along context.');
-            n_y = 0;
-            while true
-                y_f = input('From:\n', 's');
-                if strcmp(y_f, 'end')
-                    if n_y == 0
-                        obj.sig_diffs_C{1,1} = 'n/a';
-                    end
-                    break
-                end
-                n_y = n_y + 1;
-                y_t = input('To:\n', 's');
-                obj.sig_diffs_C{n_y,1} = y_f;
-                obj.sig_diffs_C{n_y,2} = y_t;
-            end
         end
         
         % This calculates obj.combined_means, which is a map from a label
@@ -360,7 +300,7 @@ classdef metric < handle
                     % Don't compare the baseline to itself.
                     if ~ (i == 1 && j == 1)
                         % Calculate pooled standard deviation.
-                        ss = 70;
+                        ss = obj.sample_size;
                         pool = sqrt(((ss-1)*obj.sdevs(1,1)^2 + (ss-1)*obj.sdevs(j,i)^2)/(2*ss-2));
                         cohens_d(j,i) = (obj.means(1,1) - obj.means(j,i))/pool;
                     end
