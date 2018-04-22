@@ -15,7 +15,7 @@ classdef metric < handle
         
     properties (SetAccess = private, GetAccess = private)
         p_value = 0.05
-        assistance_order = {'NE', 'ET', 'EA'}
+        assistance_order = {'NE', 'ET', 'EA-I', 'EA-C'}
         context_order = {'BW','UW','DW','FW','SW'}
     end
     
@@ -183,8 +183,8 @@ classdef metric < handle
         function diff = calculateSignedRelativeDifferences(obj)
             diff = zeros(size(obj.means));
             baseline = obj.means(1,1);
-            for i=1:3
-                for j=1:5
+            for i=1:length(obj.assistance_order)
+                for j=1:length(obj.context_order)
                     diff(i,j) = 100*(obj.means(i,j) - baseline)/baseline;
                 end
             end
@@ -193,8 +193,8 @@ classdef metric < handle
         function diff = calculateRelativeDifferences(obj)
             diff = zeros(size(obj.means));
             baseline = obj.means(1,1); 
-            for i=1:3
-                for j=1:5
+            for i=1:length(obj.assistance_order)
+                for j=1:length(obj.context_order)
                     diff(i,j) = 100*(abs(obj.means(i,j) - baseline)/baseline);
                 end
             end
@@ -213,13 +213,13 @@ classdef metric < handle
         function avg_1d = calculate1DAvg(obj, direction)
             diff = obj.calculateRelativeDifferences();
             if strcmp(direction, 'context')
-                avg_1d = 1:5;
-                for i=1:5
+                avg_1d = 1:length(context_order);
+                for i=1:length(context_order)
                     avg_1d(i) = mean(diff(1:end,i));
                 end
             elseif strcmp(direction, 'assistance')
-                avg_1d = 1:3;
-                for i=1:3
+                avg_1d = 1:length(obj.assistance_order);
+                for i=1:length(obj.assistance_order)
                     avg_1d(i) = mean(diff(i,1:end));
                 end
             end
@@ -282,11 +282,11 @@ classdef metric < handle
         % either assistance, context, or in both directions. 
         function result = calcAbsCohensD(obj, direction)
             % Check that the significant difference info has been input.
-            if isempty(obj.sig_diffs_A)
-                error(['The Cohen''s d calculation'...
-                    ' requires knowledge of significant differences.'...
-                    ' See inputSignificantDifferences method.']);
-            end
+%             if isempty(obj.sig_diffs_A)
+%                 error(['The Cohen''s d calculation'...
+%                     ' requires knowledge of significant differences.'...
+%                     ' See inputSignificantDifferences method.']);
+%             end
             
             % Parse command line arguments to see whether to average across
             % a direction or do the overall average. 
@@ -353,10 +353,10 @@ classdef metric < handle
             % t tests comparing means to baselines
             % 14 effect size results for each metric. Start off with a 
             % 5 x 3 matrix for convenience. 
-            cohens_d = zeros(3,5);
+            cohens_d = zeros(length(obj.assistance_order),length(obj.context_order));
             % over assistance levels and contexts...
-            for i=1:5
-                for j=1:3
+            for i=1:length(obj.context_order)
+                for j=1:length(obj.assistance_order)
                     % Don't compare the baseline to itself.
                     if ~ (i == 1 && j == 1)
                         % Calculate pooled standard deviation.
@@ -413,8 +413,8 @@ classdef metric < handle
             zlabel('% difference from baseline', 'FontWeight', 'bold');
             ylabel('Assistance Level', 'FontWeight', 'bold');
             set(ax, 'FontSize', 20, 'FontWeight', 'bold', 'XTick', ...
-                [1 2 3 4 5], 'XTickLabel', obj.context_order, 'YTick', ...
-                [1 2 3], 'YTickLabel', obj.assistance_order);
+                1:length(obj.context_order), 'XTickLabel', obj.context_order, 'YTick', ...
+                1:length(obj.assistance_order), 'YTickLabel', obj.assistance_order);
             words = strsplit(obj.name(1:end-2), '_');
             if length(words) > 1
                 for i=1:length(words)
@@ -427,13 +427,15 @@ classdef metric < handle
             end
             new_name = strjoin(words);
             title([upper(new_name(1)) new_name(2:end)])
+            
+            ylim([0 5]);
                     
         end
         
         function plotSignificantDifferences(obj, vals)
             j = 0.1;
             for i=1:size(obj.col_diffs,1)
-                if obj.col_diffs(i,3) > 0 || obj.col_diffs(i,5) < 0
+                if obj.col_diffs(i,6) < obj.p_value
                     mx = max(max(vals)) + j*max(max(vals));
                     j = j + 0.2;
                     x = [obj.col_diffs(i,1); obj.col_diffs(i,2)];
@@ -445,7 +447,7 @@ classdef metric < handle
             
             j = 0.1;
             for i=1:size(obj.row_diffs,1)
-                if obj.row_diffs(i,3) > 0 || obj.row_diffs(i,5) < 0
+                if obj.row_diffs(i, 6) < obj.p_value
                     mx = max(max(vals)) + j*max(max(vals));
                     j = j + 0.2;
                     x = ones(1,2)*5.4;
@@ -465,9 +467,9 @@ classdef metric < handle
                 index = 1;
             elseif strcmp(string, 'ET') || strcmp(string, 'IW')
                 index = 2;
-            elseif strcmp(string, 'EA') || strcmp(string, 'DW')
+            elseif strcmp(string, 'EA') || strcmp(string, 'DW') || strcmp(string, 'EA-I')
                 index = 3;
-            elseif strcmp(string, 'FW')
+            elseif strcmp(string, 'FW') || strcmp(string, 'EA-C')
                 index = 4;
             elseif strcmp(string, 'SW')
                 index = 5;
