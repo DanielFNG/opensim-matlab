@@ -43,11 +43,11 @@ classdef metric < handle
             end
         end
         
-        % I think the mapping thing that I've gone with here was a result of
-        % initially inputting the significant differences manually. Really, I
-        % think this should be replaced with a matrix of 1's or 0's where an
-        % element being equal to 1 denotes that there is a significant 
-        % difference between the row and column corresponding to that element.
+        % Calculate the significant difference matrices. These identify 
+        % which combinations of rows/columns exhibit significant differences.
+        % For example row_sig_diffs(1,2) = 1 => there is a significant 
+        % difference between row 1 and row 2. The default is 0, meaning 
+        % no significant differences. 
         function obj = identifySignificantDifferences(obj)
             
             obj.row_sig_diffs = zeros(obj.n_rows);
@@ -78,8 +78,22 @@ classdef metric < handle
         function calcCombinedMeansAndSdevs(obj)
             n_assist = size(obj.assistance_order,2);
             n_context = size(obj.context_order,2);
-            comb_means = [];
-            comb_sdevs = [];
+            comb_means(1:obj.n_rows) = mean(obj.means(1:end, :));
+            comb_means(1:obj.n_columns) = mean(obj.means(:, 1:end));
+            
+            for i=1:obj.n_rows
+                temp = 0;
+                for j=1:obj.context_order
+                    temp = temp + metric.intermediateVariance(obj.sample_size, obj.sdevs(i, j)^2, obj.means(i, j), comb_means(i));
+                end
+                result = sqrt(temp/(d*obj.sample_size - 1));
+                comb_sdevs = [comb_sdevs result];
+            end
+            
+            for i=1:obj.n_rows
+                intermediateVariances(1:obj.context_order) = metric.intermediateVariance(obj.sample_size, obj.sdevs(i, 1:obj.context_order)^2
+            end
+                  
             for i=1:n_assist
                 keys{i} = obj.assistance_order{1,i};
                 comb_means = [comb_means mean(obj.means(i,1:end))];
