@@ -54,3 +54,6 @@ Temporary Items
 
 # Don't sync the startup.m file.
 *startup.m
+
+# Ignore OpenSim log files. 
+Logs/*
