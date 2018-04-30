@@ -1,4 +1,4 @@
-classdef metric < handle
+classdef Metric2D < handle
     
     properties (SetAccess = private)
         name
@@ -19,15 +19,17 @@ classdef metric < handle
     end
         
     properties (SetAccess = private, GetAccess = private)
-        base_row = 1 % Assume baseline corresponds to (1,1)
+        base_row = 1
         base_col = 1
-        combined_means
-        combined_sdevs
+        comb_row_means
+        comb_col_means
+        comb_row_sdevs
+        comb_col_sdevs
     end
     
     methods 
         
-        function obj = metric(name, means, sdevs, sample_size, ...
+        function obj = Metric2D(name, means, sdevs, sample_size, ...
                 col_diffs, row_diffs, row_descriptor, col_descriptor, row_labels, col_labels, baseline)
             if nargin > 0
                 obj.name = name;
@@ -39,8 +41,8 @@ classdef metric < handle
                     obj.n_rows = size(row_diffs, 1);
                     obj.col_diffs = col_diffs;
                     obj.n_cols = size(col_diffs, 1);
-                    obj = obj.identifySignificantDifferences();
-                    obj = obj.calcCombinedMeansAndSdevs();
+                    obj.identifySignificantDifferences();
+                    obj.calcCombinedMeansAndSdevs();
                     if nargin >= 8
                         obj.row_descriptor = row_descriptor;
                         obj.col_descriptor = col_descriptor;
@@ -83,55 +85,52 @@ classdef metric < handle
             
             for i=1:size(obj.col_diffs,1)
                 if obj.col_diffs(i,6) < obj.p_value
-                    obj.col_sig_diffs(obj.col_diffs(i, 1), obj.col_diffs(i, 2)) = 1;
+                    obj.col_sig_diffs(...
+                        obj.col_diffs(i, 1), obj.col_diffs(i, 2)) = 1;
                 end
             end
             
             for i=1:size(obj.row_diffs,1)
                 if obj.row_diffs(i,6) < obj.p_value 
-                    obj.row_sig_diffs(obj.row_diffs(i, 1), obj.row_diffs(i, 2)) = 1;
+                    obj.row_sig_diffs(...
+                        obj.row_diffs(i, 1), obj.row_diffs(i, 2)) = 1;
                 end
             end         
         end
         
-        % This calculates obj.combined_means, which is a map from a label
-        % (corresponding to either a row or column) on to the combined 
-        % mean for that label.
-        %
-        % For example, obj.combined_means('row1') is the mean value of
-        % (row1,col1), (row2,col2), ... etc. And likewise for the column
-        % labels.
+        % This calculates the combined means and combined sdevs which are
+        % later used in Cohen's d calculations. 
         function calcCombinedMeansAndSdevs(obj)
             % Preallocate variables. 
-            n_conditions = obj.n_rows + obj.n_cols;
-            keys = cell(1, n_conditions);
-            comb_means = zeros(1, n_conditions);
-            comb_sdevs = zeros(1, n_conditions);
+            obj.comb_row_means = zeros(1, obj.n_rows);
+            obj.comb_row_sdevs = zeros(1, obj.n_rows);
+            obj.comb_col_means = zeros(1, obj.n_cols);
+            obj.comb_col_sdevs = zeros(1, obj.n_cols);
             
             % Calculate combined row and column means.
-            comb_means(1:obj.n_rows) = mean(obj.means(1:end, :));
-            comb_means(obj.n_rows + 1:obj.n_rows + obj.n_cols) = ...
-                mean(obj.means(:, 1:end));
+            obj.comb_row_means(1:end) = mean(obj.means(1:end, :));
+            obj.comb_col_means(1:end) = mean(obj.means(:, 1:end));
             
             % Calculate combined row sdevs. 
             for i=1:obj.n_rows
-                % Increment assistance/context label for later use in Map.
-                keys{i} = obj.row_labels{i};
-                intRowVars(1:obj.n_cols) = metric.intermediateVariance(obj.sample_size, obj.sdevs(i, 1:end).^2, obj.means(i, 1:end), comb_means(i));
-                comb_sdevs(i) = sqrt(sum(intRowVars)/(obj.n_cols*obj.sample_size - 1));
+                int_row_vars(1:obj.n_cols) = ...
+                    metric.intermediateVariance(obj.sample_size, ...
+                    obj.sdevs(i, 1:end).^2, obj.means(i, 1:end), ...
+                    obj.comb_row_means(i));
+                obj.comb_row_sdevs(i) = sqrt(sum(int_row_vars)/ ...
+                    (obj.n_cols*obj.sample_size - 1));
             end
             
             % Calculate combined column sdevs.
             for i=1:obj.n_cols
-                keys{i + obj.n_rows} = obj.col_labels{i};
-                intColVars(1:obj.n_rows) = metric.intermediateVariance(obj.sample_size, obj.sdevs(1:end, i).^2, obj.means(1:end, i), comb_means(i + obj.n_rows));
-                comb_sdevs(i + obj.n_rows) = sqrt(sum(intColVars)/(obj.n_rows*obj.sample_size - 1));
+                int_col_vars(1:obj.n_rows) = ...
+                    metric.intermediateVariance(obj.sample_size, ...
+                    obj.sdevs(1:end, i).^2, obj.means(1:end, i), ...
+                    obj.comb_col_means(i));
+                obj.comb_col_sdevs(i) = sqrt(sum(int_col_vars)/ ...
+                    (obj.n_rows*obj.sample_size - 1));
             end
             
-            % Create mappings from the condition labels to the combined
-            % means and sdevs. 
-            obj.combined_means = containers.Map(keys, comb_means);
-            obj.combined_sdevs = containers.Map(keys, comb_sdevs);
         end
         
         % Calculate signed or absolute relative differences.
@@ -174,127 +173,94 @@ classdef metric < handle
             end
         end
         
-        % Calculates the value of Cohen's d averaged across 
-        % either assistance, context, or in both directions. 
+        % Calculates the value of Cohen's d averaged across either 
+        % assistance, context, or in both directions. Note that this 
+        % computes the magnitude of Cohen's d.
         function result = calcCohensD(obj, direction)
             
             % Parse command line arguments to see whether to average across
-            % a direction or do the overall average. 
+            % a direction or do the overall average.
+            
             if nargin == 1
                 direction = 0;
             elseif nargin ~= 2
                 error('Require 1 or 2 arguments to calc anova cohens d.');
             else
-                if ~(strcmp(direction, obj.row_descriptor) || strcmp(direction, obj.col_descriptor))
-                    error('If given direction should match either the column or row descriptor.');
+                if ~(strcmp(direction, obj.row_descriptor) || ...
+                        strcmp(direction, obj.col_descriptor))
+                    error(['If given direction should match either ' ...
+                        'the column or row descriptor.']);
                 end
             end
             
             % Calculate Cohen's D for each significant differences, either
-            % in one or both directions. 
-            if ~(strcmp(direction, obj.col_descriptor))
-                if isempty(obj.sig_diffs_A)
-                    contribution_A = 0;
+            % in one or both directions.
+            if ~strcmp(direction, obj.col_descriptor)
+                if obj.row_sig_diffs == 0
+                    row_contribution = 0;
                 else
-                    contribution_A = [];
-                    if ~isempty(obj.sig_diffs_A{1})
-                        for i=1:size(obj.sig_diffs_A,1)
-                            contribution_A = ...
-                                [contribution_A obj.compCohensD(...
-                                obj.sig_diffs_A{i,1}, obj.sig_diffs_A{i,2})];
-                        end
-                    end
+                    
+                    [r_ind1, r_ind2] = ind2sub(...
+                        size(obj.row_sig_diffs), find(obj.row_sig_diffs));
+                    
+                    row_contribution = obj.compCohensD(...
+                        obj.row_descriptor, r_ind1, r_ind2);
                 end
             end
             if ~(strcmp(direction, obj.row_descriptor))
-                contribution_C = [];
-                if ~isempty(obj.sig_diffs_C{1})
-                    for i=1:size(obj.sig_diffs_C,1)
-                        contribution_C = ...
-                            [contribution_C obj.compCohensD(...
-                            obj.sig_diffs_C{i,1}, obj.sig_diffs_C{i,2})];
-                    end
+                if obj.col_sig_diffs == 0
+                    col_contribution = 0;
+                else
+                    [c_ind1, c_ind2] = ind2sub(...
+                        size(obj.col_sig_diffs), find(obj.col_sig_diffs));
+                    
+                    col_contribution = obj.compCohensD(...
+                        obj.row_descriptor, c_ind1, c_ind2);
                 end
             end
+            
+            % Take absolute value of contributions.
+            row_contribution = abs(row_contribution);
+            col_contribution = abs(col_contribution);
             
             % Choose what to return based on the provided direction.
             if direction == 0
-                result = mean([contribution_A contribution_C]);
-            elseif strcmp(direction, 'A')
-                result = mean(contribution_A);
+                result = mean([row_contribution col_contribution]);
+            elseif strcmp(direction, obj.row_descriptor)
+                result = mean(row_contribution);
             else % we already checked direction is either 'A', 'C', or set to 0
-                result = mean(contribution_C);
-            end
-        end
-        
-        % Calculates the absolute value of Cohen's d averaged across 
-        % either assistance, context, or in both directions. 
-        function result = calcAbsCohensD(obj, direction)
-            % Check that the significant difference info has been input.
-%             if isempty(obj.sig_diffs_A)
-%                 error(['The Cohen''s d calculation'...
-%                     ' requires knowledge of significant differences.'...
-%                     ' See inputSignificantDifferences method.']);
-%             end
-            
-            % Parse command line arguments to see whether to average across
-            % a direction or do the overall average. 
-            if nargin == 1
-                direction = 0;
-            elseif nargin ~= 2
-                error('Require 1 or 2 arguments to calc anova cohens d.');
-            else
-                if ~(strcmp(direction, 'A') || strcmp(direction, 'C'))
-                    error('If given direction should be ''A'' or ''C''.');
-                end
-            end
-            
-            % Calculate Cohen's D for each significant differences, either
-            % in one or both directions. 
-            if ~(strcmp(direction, 'C'))
-                contribution_A = [];
-                if ~strcmp(obj.sig_diffs_A{1}, 'n/a')
-                    for i=1:size(obj.sig_diffs_A,1)
-                        contribution_A = ...
-                            [contribution_A abs(obj.compCohensD(...
-                            obj.sig_diffs_A{i,1}, obj.sig_diffs_A{i,2}))];
-                    end
-                end
-            end
-            if ~(strcmp(direction, 'A'))
-                contribution_C = [];
-                if ~strcmp(obj.sig_diffs_C{1}, 'n/a')
-                    for i=1:size(obj.sig_diffs_C,1)
-                        contribution_C = ...
-                            [contribution_C abs(obj.compCohensD(...
-                            obj.sig_diffs_C{i,1}, obj.sig_diffs_C{i,2}))];
-                    end
-                end
-            end
-            
-            % Choose what to return based on the provided direction.
-            if direction == 0
-                result = mean([contribution_A contribution_C]);
-            elseif strcmp(direction, 'A')
-                result = mean(contribution_A);
-            else % we already checked direction is either 'A', 'C', or set to 0
-                result = mean(contribution_C);
+                result = mean(col_contribution);
             end
         end
         
         % Calculates Cohen's d between the groups of data specified by 
         % label1 and label2.
-        function result = compCohensD(obj, label1, label2)
-            if any(strcmp(label1, obj.assistance_order))
-                q = size(obj.context_order,2);
+        function result = compCohensD(obj, direction, labels1, labels2)
+            
+            % Handle the direction. 
+            if strcmp(direction, obj.row_descriptor)
+                q = obj.n_cols;
+                dir_means = obj.combined_row_means;
+                dir_sdevs = obj.combined_row_sdevs;
+            elseif strcmp(direction, obj.col_descriptor)
+                q = obj.n_rows;
+                dir_means = obj.combined_col_means;
+                dir_sdevs = obj.combined_col_sdevs;
             else
-                q = size(obj.assistance_order,2);
+                error('Direction for compCohensD not valid.');
             end
+            
+            % The number of samples is the sample size of the metric * the 
+            % number of scenarios along the dimension that the labels are 
+            % NOT from.
             n = obj.sample_size*q;
-            mean1 = obj.combined_means(label1);
-            mean2 = obj.combined_means(label2);
-            sdev1 = obj.combined_sdevs(label1);
-            sdev2 = obj.combined_sdevs(label2);
+            
+            % Use the combined means and sdevs to calculate Cohen's d.
+            mean1 = dir_means(labels1);
+            mean2 = dir_means(labels2);
+            sdev1 = dir_sdevs(labels1);
+            sdev2 = dir_sdevs(labels2);
+            
             result = metric.cohensD(n,mean1,sdev1,n,mean2,sdev2);
         end
               
@@ -302,18 +268,12 @@ classdef metric < handle
             % t tests comparing means to baselines
             % 14 effect size results for each metric. Start off with a 
             % 5 x 3 matrix for convenience. 
-            cohens_d = zeros(obj.n_rows,obj.n_cols);
+            cohens_d = zeros(obj.n_rows, obj.n_cols);
             % over assistance levels and contexts...
             for i=1:obj.n_cols
-                for j=1:obj.n_rows
-                    % Don't compare the baseline to itself.
-                    if ~ (i == 1 && j == 1)
-                        % Calculate pooled standard deviation.
-                        ss = obj.sample_size;
-                        pool = sqrt(((ss-1)*obj.sdevs(1,1)^2 + (ss-1)*obj.sdevs(j,i)^2)/(2*ss-2));
-                        cohens_d(j,i) = (obj.means(1,1) - obj.means(j,i))/pool;
-                    end
-                end
+                cohens_d(1:end, i) = cohensD(obj.sample_size, ...
+                    obj.means(1, 1), obj.sdevs(1, 1), obj.sample_size, ...
+                    obj.means(1:end, i), obj.sdevs(1:end, i));
             end
         end
         
@@ -420,11 +380,20 @@ classdef metric < handle
                 + (samples * overall_mean.^2);
         end
         
-        % This function calculates Cohen's d for two groups of data, 
-        % given the sample size, mean and variance of each group. 
+        % This function calculates Cohen's d for two sets of groups of data 
+        % given the sample size, mean and sdev of each group. This code
+        % is vectorised to accept vector means and standard deviations. The
+        % sample sizes must be scalar. 
         function result = cohensD(n1, m1, s1, n2, m2, s2)
-            pooled_sdev = sqrt(((n1-1)*s1^2 + (n2-1)*s2^2)/(n1+n2-2));
-            result = abs((m1 - m2)/pooled_sdev);
+            result = abs((m1 - m2)./calcPooledSDev(n1, s1, n2, s2));
+        end
+        
+        % Calculates the pooled standard deviation between two sets of
+        % groups of data given the sample size and standard deviation of
+        % each group. Code is vectorised to accept vector standard
+        % deviations.
+        function result = calcPooledSDev(n1, s1, n2, s2)
+            result = sqrt((n1 - 1)*s1.^2 + (n2 - 1)*s2.^2)./(n1 + n2 - 2);
         end
         
     end
