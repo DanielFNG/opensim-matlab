@@ -98,6 +98,12 @@ classdef Metric2D < handle
             end         
         end
         
+        % This calculates the means and standard deviations given all
+        % observations and the known sample size/input data structure. 
+        function calcMeansAndSdevs(obj)
+            % Preallocate variables.
+            obj.means = zeros(
+        
         % This calculates the combined means and combined sdevs which are
         % later used in Cohen's d calculations. 
         function calcCombinedMeansAndSdevs(obj)
