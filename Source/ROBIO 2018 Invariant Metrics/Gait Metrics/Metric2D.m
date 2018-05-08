@@ -9,18 +9,18 @@ classdef Metric2D < handle
         col_diffs
         n_rows
         n_cols
-        row_sig_diffs
-        col_sig_diffs
         p_value = 0.05
         row_labels
         col_labels
-        row_descriptor = 'row'
-        col_descriptor = 'column'
+        row_descriptor
+        col_descriptor
     end
         
     properties (SetAccess = private, GetAccess = private)
         base_row = 1
         base_col = 1
+        row_sig_diffs
+        col_sig_diffs
         comb_row_means
         comb_col_means
         comb_row_sdevs
@@ -29,26 +29,24 @@ classdef Metric2D < handle
     
     methods 
         
-        function obj = Metric2D(name, means, sdevs, sample_size, ...
-                col_diffs, row_diffs, row_descriptor, col_descriptor, row_labels, col_labels, baseline)
+        function obj = Metric2D(name, observations, sample_size, ...
+                row_descriptor, col_descriptor, row_labels, col_labels, baseline)
             if nargin > 0
                 obj.name = name;
-                if nargin >= 6
-                    obj.means = means;
-                    obj.sdevs = sdevs;
+                if nargin >= 5
                     obj.sample_size = sample_size;
-                    obj.row_diffs = row_diffs;
-                    obj.n_rows = size(row_diffs, 1);
-                    obj.col_diffs = col_diffs;
-                    obj.n_cols = size(col_diffs, 1);
+                    obj.n_rows = size(observations, 1)/sample_size;
+                    obj.n_cols = size(observations, 2);
+                    obj.row_descriptor = row_descriptor;
+                    obj.col_descriptor = col_descriptor;
+                    obj.calcMeansAndSdevs(observations);
+                    obj.runAnova(observations);
                     obj.identifySignificantDifferences();
                     obj.calcCombinedMeansAndSdevs();
-                    if nargin >= 8
-                        obj.row_descriptor = row_descriptor;
-                        obj.col_descriptor = col_descriptor;
+                    if nargin >= 6
                         obj.row_labels = row_labels;
                         obj.col_labels = col_labels;
-                        if nargin == 11
+                        if nargin == 8
                             obj.base_row = baseline(1);
                             obj.base_col = baseline(2);
                         end
@@ -100,9 +98,26 @@ classdef Metric2D < handle
         
         % This calculates the means and standard deviations given all
         % observations and the known sample size/input data structure. 
-        function calcMeansAndSdevs(obj)
+        function calcMeansAndSdevs(obj, observations)
             % Preallocate variables.
-            obj.means = zeros(
+            obj.means = zeros(obj.n_rows, obj.n_cols);
+            obj.sdevs = zeros(obj.n_rows, obj.n_cols);
+            
+            % Calculate means and sdevs. 
+            for column = 1:obj.n_cols
+                start_point = (column - 1)*obj.sample_size + 1;
+                end_point = start_point + obj.sample_size;
+                obj.means(1:end, column) = mean(observations(start_point:end_point, column));
+                obj.sdevs(1:end, column) = std(observations(start_point:end_point, column));
+            end
+        end
+        
+        % Performs an anova2 analysis on the observations & sets the row and column diffs. 
+        function runAnova(obj, observations)
+            [~,~,stats] = anova2(observations, obj.sample_size, 'off');
+            obj.col_diffs = multcompare(stats, 'Estimate', 'column', 'Display', 'off');
+            obj.row_diffs = multcompare(stats, 'Estimate', 'row', 'Display', 'off');
+        end
         
         % This calculates the combined means and combined sdevs which are
         % later used in Cohen's d calculations. 
@@ -246,12 +261,12 @@ classdef Metric2D < handle
             % Handle the direction. 
             if strcmp(direction, obj.row_descriptor)
                 q = obj.n_cols;
-                dir_means = obj.combined_row_means;
-                dir_sdevs = obj.combined_row_sdevs;
+                dir_means = obj.comb_row_means;
+                dir_sdevs = obj.comb_row_sdevs;
             elseif strcmp(direction, obj.col_descriptor)
                 q = obj.n_rows;
-                dir_means = obj.combined_col_means;
-                dir_sdevs = obj.combined_col_sdevs;
+                dir_means = obj.comb_col_means;
+                dir_sdevs = obj.comb_col_sdevs;
             else
                 error('Direction for compCohensD not valid.');
             end
