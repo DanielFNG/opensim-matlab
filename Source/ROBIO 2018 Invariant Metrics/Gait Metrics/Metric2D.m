@@ -175,10 +175,8 @@ classdef Metric2D < handle
             overall = mean(diff);
         end
         
-        % For a metric, calculates the average relative to assistance 
-        % scenario (i.e. for each of 'NE', 'ET', 'EA', average 'BW':'SW')
-        % or context (vice versa). 'direction' should be 'assistance' or 
-        % 'context' depending on the mode. 
+        % Calculates the average in the metric along one dimension, 
+        % specified as an argument. 
         function avg_1d = calculate1DAvg(obj, direction)
             diff = obj.calculateRelativeDifferences('unsigned');
             if strcmp(direction, obj.col_descriptor)
