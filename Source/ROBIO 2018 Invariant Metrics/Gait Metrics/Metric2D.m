@@ -104,11 +104,11 @@ classdef Metric2D < handle
             obj.sdevs = zeros(obj.n_rows, obj.n_cols);
             
             % Calculate means and sdevs. 
-            for column = 1:obj.n_cols
-                start_point = (column - 1)*obj.sample_size + 1;
-                end_point = start_point + obj.sample_size;
-                obj.means(1:end, column) = mean(observations(start_point:end_point, column));
-                obj.sdevs(1:end, column) = std(observations(start_point:end_point, column));
+            for row = 1:obj.n_rows
+                start_point = (row - 1)*obj.sample_size + 1;
+                end_point = start_point + obj.sample_size - 1;
+                obj.means(row, :) = mean(observations(start_point:end_point, :));
+                obj.sdevs(row, :) = std(observations(start_point:end_point, :));
             end
         end
         
@@ -129,13 +129,13 @@ classdef Metric2D < handle
             obj.comb_col_sdevs = zeros(1, obj.n_cols);
             
             % Calculate combined row and column means.
-            obj.comb_row_means(1:end) = mean(obj.means(1:end, :));
-            obj.comb_col_means(1:end) = mean(obj.means(:, 1:end));
+            obj.comb_row_means(1:end) = mean(obj.means, 2);
+            obj.comb_col_means(1:end) = mean(obj.means);
             
             % Calculate combined row sdevs. 
             for i=1:obj.n_rows
                 int_row_vars(1:obj.n_cols) = ...
-                    metric.intermediateVariance(obj.sample_size, ...
+                    Metric2D.intermediateVariance(obj.sample_size, ...
                     obj.sdevs(i, 1:end).^2, obj.means(i, 1:end), ...
                     obj.comb_row_means(i));
                 obj.comb_row_sdevs(i) = sqrt(sum(int_row_vars)/ ...
@@ -145,7 +145,7 @@ classdef Metric2D < handle
             % Calculate combined column sdevs.
             for i=1:obj.n_cols
                 int_col_vars(1:obj.n_rows) = ...
-                    metric.intermediateVariance(obj.sample_size, ...
+                    Metric2D.intermediateVariance(obj.sample_size, ...
                     obj.sdevs(1:end, i).^2, obj.means(1:end, i), ...
                     obj.comb_col_means(i));
                 obj.comb_col_sdevs(i) = sqrt(sum(int_col_vars)/ ...
@@ -253,8 +253,8 @@ classdef Metric2D < handle
         end
         
         % Calculates Cohen's d between the groups of data specified by 
-        % label1 and label2.
-        function result = compCohensD(obj, direction, labels1, labels2)
+        % index1 and index2.
+        function result = compCohensD(obj, direction, index1, index2)
             
             % Handle the direction. 
             if strcmp(direction, obj.row_descriptor)
@@ -275,12 +275,12 @@ classdef Metric2D < handle
             n = obj.sample_size*q;
             
             % Use the combined means and sdevs to calculate Cohen's d.
-            mean1 = dir_means(labels1);
-            mean2 = dir_means(labels2);
-            sdev1 = dir_sdevs(labels1);
-            sdev2 = dir_sdevs(labels2);
+            mean1 = dir_means(index1);
+            mean2 = dir_means(index2);
+            sdev1 = dir_sdevs(index1);
+            sdev2 = dir_sdevs(index2);
             
-            result = metric.cohensD(n,mean1,sdev1,n,mean2,sdev2);
+            result = Metric2D.cohensD(n,mean1,sdev1,n,mean2,sdev2);
         end
               
         function cohens_d = calculateCohensD_tTests(obj)
@@ -290,7 +290,7 @@ classdef Metric2D < handle
             cohens_d = zeros(obj.n_rows, obj.n_cols);
             % over assistance levels and contexts...
             for i=1:obj.n_cols
-                cohens_d(1:end, i) = cohensD(obj.sample_size, ...
+                cohens_d(1:end, i) = Metric2D.cohensD(obj.sample_size, ...
                     obj.means(1, 1), obj.sdevs(1, 1), obj.sample_size, ...
                     obj.means(1:end, i), obj.sdevs(1:end, i));
             end
@@ -404,7 +404,8 @@ classdef Metric2D < handle
         % is vectorised to accept vector means and standard deviations. The
         % sample sizes must be scalar. 
         function result = cohensD(n1, m1, s1, n2, m2, s2)
-            result = abs((m1 - m2)./calcPooledSDev(n1, s1, n2, s2));
+            result = ...
+                (m1 - m2)./Metric2D.calcPooledSDev(n1, s1, n2, s2);
         end
         
         % Calculates the pooled standard deviation between two sets of
@@ -412,7 +413,8 @@ classdef Metric2D < handle
         % each group. Code is vectorised to accept vector standard
         % deviations.
         function result = calcPooledSDev(n1, s1, n2, s2)
-            result = sqrt((n1 - 1)*s1.^2 + (n2 - 1)*s2.^2)./(n1 + n2 - 2);
+            result = ...
+                sqrt(((n1 - 1)*s1.^2 + (n2 - 1)*s2.^2)./(n1 + n2 - 2));
         end
         
     end

@@ -360,7 +360,7 @@ classdef metric < handle
                     % Don't compare the baseline to itself.
                     if ~ (i == 1 && j == 1)
                         % Calculate pooled standard deviation.
-                        ss = 70;
+                        ss = obj.sample_size;
                         pool = sqrt(((ss-1)*obj.sdevs(1,1)^2 + (ss-1)*obj.sdevs(j,i)^2)/(2*ss-2));
                         cohens_d(j,i) = (obj.means(1,1) - obj.means(j,i))/pool;
                     end
