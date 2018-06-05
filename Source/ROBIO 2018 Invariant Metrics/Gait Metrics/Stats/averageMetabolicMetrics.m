@@ -3,12 +3,13 @@ load_dir_1 = 'D:\metrics_results';
 load_dir_2 = 'D:\Dropbox\PhD\Exoskeleton Metrics Offsets Axial\Results';
 
 % The parameters we want to look at data for. 
-subjects = [1:4,6:8];
+%subjects = [1:4,6:8];
+subjects = 1;
 contexts = 2:2:10;
 assistances = 1:3;
 feet = 1;
 
-save_dir = [load_dir_1 filesep 'allsubjectsmetrics.mat'];
+save_dir = ['C:\Users\Daniel\Documents\GitHub\exopt\Source\ROBIO 2018 Invariant Metrics\Gait Metrics\Stats' filesep 'allsubjectsmetrics.mat'];
 
 % Load the subjects and store the metric information for each subject only.
 for subject = subjects
@@ -70,23 +71,16 @@ for nmetric = 1:(length(metric_names)-6)/2
                     end
                 end
             end
-            inner_means = [inner_means; mean(values)];
-            inner_stds = [inner_stds; std(values)];
             inner_observations = [inner_observations; values];
         end
-        outer_means = [outer_means, inner_means];
-        outer_stds = [outer_stds, inner_stds];
         outer_observations = [outer_observations, inner_observations];
     end
     if ~isempty(outer_observations)
         nmbob = size(outer_observations,1)/length(assistances);
-        [~,~,stats] = anova2(outer_observations, nmbob, 'off');
-        col_diffs = multcompare(stats, 'Estimate', 'column', 'Display', 'off');
-        row_diffs = multcompare(stats, 'Estimate', 'row', 'Display', 'off');
 
         % Create the metric.
-        Metrics.(metric_names{nmetric}(1:end-2)) = metric(metric_names{nmetric}, ...
-            outer_means, outer_stds, nmbob, col_diffs, row_diffs);
+        Metrics.(metric_names{nmetric}(1:end-2)) = MetricStats2D(metric_names{nmetric}, ...
+            outer_observations, nmbob, 'assistance', 'context');
     end
 end
 for nmetric = (length(metric_names)-5):2:(length(metric_names)-1)
@@ -113,22 +107,15 @@ for nmetric = (length(metric_names)-5):2:(length(metric_names)-1)
                     end
                 end
             end
-            inner_means = [inner_means; mean(values)];
-            inner_stds = [inner_stds; std(values)];
             inner_observations = [inner_observations; values];
         end
-        outer_means = [outer_means, inner_means];
-        outer_stds = [outer_stds, inner_stds];
         outer_observations = [outer_observations, inner_observations];
     end
     nmbob = size(outer_observations,1)/length(assistances);
-    [~,~,stats] = anova2(outer_observations, nmbob, 'off');
-    col_diffs = multcompare(stats, 'Estimate', 'column', 'Display', 'off');
-    row_diffs = multcompare(stats, 'Estimate', 'row', 'Display', 'off');
     
     % Create the metric.
-    Metrics.(metric_names{nmetric}(1:end-2)) = metric(metric_names{nmetric}, ...
-        outer_means, outer_stds, nmbob, col_diffs, row_diffs);
+    Metrics.(metric_names{nmetric}(1:end-2)) = MetricStats2D(metric_names{nmetric}, ...
+        outer_observations, nmbob, 'assistance', 'context');
 end
 
 % Save the final result.
