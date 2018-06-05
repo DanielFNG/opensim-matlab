@@ -1,4 +1,4 @@
-classdef Metric2D < handle
+classdef MetricStats2D < handle
     
     properties (SetAccess = private)
         name
@@ -29,9 +29,9 @@ classdef Metric2D < handle
     
     methods 
         
-        function obj = Metric2D(name, observations, sample_size, ...
-                row_descriptor, col_descriptor, row_labels, col_labels, ...
-                baseline)
+        function obj = MetricStats2D(name, observations, ...
+                sample_size, row_descriptor, col_descriptor, ...
+                row_labels, col_labels, baseline)
             if nargin > 0
                 obj.name = name;
                 if nargin >= 5
