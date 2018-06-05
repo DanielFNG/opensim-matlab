@@ -14,13 +14,13 @@ classdef Metric2D < handle
         col_labels
         row_descriptor
         col_descriptor
+        row_sig_diffs
+        col_sig_diffs
     end
         
     properties (SetAccess = private, GetAccess = private)
         base_row = 1
         base_col = 1
-        row_sig_diffs
-        col_sig_diffs
         comb_row_means
         comb_col_means
         comb_row_sdevs
@@ -30,7 +30,8 @@ classdef Metric2D < handle
     methods 
         
         function obj = Metric2D(name, observations, sample_size, ...
-                row_descriptor, col_descriptor, row_labels, col_labels, baseline)
+                row_descriptor, col_descriptor, row_labels, col_labels, ...
+                baseline)
             if nargin > 0
                 obj.name = name;
                 if nargin >= 5
@@ -71,10 +72,10 @@ classdef Metric2D < handle
         end
         
         % Calculate the significant difference matrices. These identify 
-        % which combinations of rows/columns exhibit significant differences.
-        % For example row_sig_diffs(1,2) = 1 => there is a significant 
-        % difference between row 1 and row 2. The default is 0, meaning 
-        % no significant differences. The matrix is left as upper
+        % which combinations of rows/columns exhibit significant 
+        % differences. For example row_sig_diffs(1,2) = 1 => there is a 
+        % significant difference between row 1 and row 2. The default is 0,
+        % meaning no significant differences. The matrix is left as upper
         % triangular.
         function identifySignificantDifferences(obj)
             
@@ -107,16 +108,20 @@ classdef Metric2D < handle
             for row = 1:obj.n_rows
                 start_point = (row - 1)*obj.sample_size + 1;
                 end_point = start_point + obj.sample_size - 1;
-                obj.means(row, :) = mean(observations(start_point:end_point, :));
-                obj.sdevs(row, :) = std(observations(start_point:end_point, :));
+                obj.means(row, :) = ...
+                    mean(observations(start_point:end_point, :));
+                obj.sdevs(row, :) = ...
+                    std(observations(start_point:end_point, :));
             end
         end
         
         % Performs an anova2 analysis on the observations & sets the row and column diffs. 
         function runAnova(obj, observations)
             [~,~,stats] = anova2(observations, obj.sample_size, 'off');
-            obj.col_diffs = multcompare(stats, 'Estimate', 'column', 'Display', 'off');
-            obj.row_diffs = multcompare(stats, 'Estimate', 'row', 'Display', 'off');
+            obj.col_diffs = ...
+                multcompare(stats, 'Estimate', 'column', 'Display', 'off');
+            obj.row_diffs = ...
+                multcompare(stats, 'Estimate', 'row', 'Display', 'off');
         end
         
         % This calculates the combined means and combined sdevs which are
@@ -159,7 +164,8 @@ classdef Metric2D < handle
             diff = zeros(size(obj.means));
             baseline = obj.means(obj.base_row, obj.base_col);
             if strcmp(mode, 'unsigned')
-                diff(:, :) = 100*(abs(obj.means(:, :) - baseline)/baseline);
+                diff(:, :) = ...
+                    100*(abs(obj.means(:, :) - baseline)/baseline);
             elseif strcmp(mode, 'signed')
                 diff(:, :) = 100*(obj.means(:, :) - baseline)/baseline;
             else
@@ -222,8 +228,8 @@ classdef Metric2D < handle
                     [r_ind1, r_ind2] = ind2sub(...
                         size(obj.row_sig_diffs), find(obj.row_sig_diffs));
                     
-                    row_contribution = obj.compCohensD(...
-                        obj.row_descriptor, r_ind1, r_ind2);
+                    row_contribution = abs(obj.compCohensD(...
+                        obj.row_descriptor, r_ind1, r_ind2));
                 end
             end
             if ~(strcmp(direction, obj.row_descriptor))
@@ -233,21 +239,17 @@ classdef Metric2D < handle
                     [c_ind1, c_ind2] = ind2sub(...
                         size(obj.col_sig_diffs), find(obj.col_sig_diffs));
                     
-                    col_contribution = obj.compCohensD(...
-                        obj.row_descriptor, c_ind1, c_ind2);
+                    col_contribution = abs(obj.compCohensD(...
+                        obj.col_descriptor, c_ind1, c_ind2));
                 end
             end
-            
-            % Take absolute value of contributions.
-            row_contribution = abs(row_contribution);
-            col_contribution = abs(col_contribution);
             
             % Choose what to return based on the provided direction.
             if direction == 0
                 result = mean([row_contribution col_contribution]);
             elseif strcmp(direction, obj.row_descriptor)
                 result = mean(row_contribution);
-            else % we already checked direction is either 'A', 'C', or set to 0
+            else % we already checked direction for input errors
                 result = mean(col_contribution);
             end
         end
@@ -302,8 +304,10 @@ classdef Metric2D < handle
             % Compute relative differences from the baseline. 
             if strcmp(mode, 'absolute')
                 diff = obj.means;
+                z_axis = 'Absolute value';
             else
                 diff = obj.calculateRelativeDifferences(mode);
+                z_axis = '% difference from baseline';
             end
             
             % Set dimensions.
@@ -331,15 +335,13 @@ classdef Metric2D < handle
             obj.plotSignificantDifferences(diff);
             hold off
             
-            obj.context_order{2} = 'UW';
-            
             % Handle labels etc.
-            xlabel('Walking context', 'FontWeight', 'bold');
-            zlabel('% difference from baseline', 'FontWeight', 'bold');
-            ylabel('Assistance Level', 'FontWeight', 'bold');
+            xlabel(obj.col_descriptor, 'FontWeight', 'bold');
+            zlabel(z_axis, 'FontWeight', 'bold');
+            ylabel(obj.row_descriptor, 'FontWeight', 'bold');
             set(ax, 'FontSize', 20, 'FontWeight', 'bold', 'XTick', ...
-                1:obj.n_cols, 'XTickLabel', obj.context_order, 'YTick', ...
-                1:obj.n_rows, 'YTickLabel', obj.assistance_order);
+                1:obj.n_cols, 'XTickLabel', obj.col_labels, 'YTick', ...
+                1:obj.n_rows, 'YTickLabel', obj.row_labels);
             words = strsplit(obj.name(1:end-2), '_');
             if length(words) > 1
                 for i=1:length(words)
