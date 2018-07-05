@@ -46,10 +46,6 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-# Ignore logs 
-*.tlog
-*.log
-
 # Ignore Matlab autosaves. 
 *.asv
 
@@ -58,3 +54,6 @@ Temporary Items
 
 # Don't sync the startup.m file.
 *startup.m
+
+# Ignore OpenSim log files. 
+Logs/*

@@ -1,32 +1,41 @@
 % The directory where the subject data is stored (as Matlab data).
-load_dir = 'F:\one_subject_pipeline_metabolic';
+load_dir_1 = 'F:\one_subject_pipeline_metabolic';
+load_dir_2 = 'F:\Dropbox\PhD\Exoskeleton Metrics Compliant\Results';
 
 % The parameters we want to look at data for. 
 subjects = [1:4,6:8];
-feet = 1:2;
 contexts = 2:2:10;
 assistances = 1:3;
 feet = 1;
 
-save_dir = ['F:\one_subject_pipeline_metabolic\allsubjectsmetrics.mat'];
+save_dir = [load_dir_2 filesep 'allsubjectsmetricsbycontext.mat'];
 
 % Load the subjects and store the metric information for each subject only.
 for subject = subjects
-    result = loadSubject(load_dir, subject);
-    MetricsData.(['Subject' num2str(subject)]) = result.MetricsData;
+    result = loadSubject(load_dir_1, subject);
+    result_2 = loadSubject(load_dir_2, subject);
+    temp_names = fieldnames(result.MetricsData.MusclePowers);
+    for i=1:length(temp_names)
+        for j=2:2:10
+            MetricsData.(['Subject' num2str(subject)]).MusclePowers.(temp_names{i}){1, j, 1} = result.MetricsData.MusclePowers.(temp_names{i}){1, j, 1};
+            MetricsData.(['Subject' num2str(subject)]).MusclePowers.(temp_names{i}){1, j, 2} = result.MetricsData.MusclePowers.(temp_names{i}){1, j, 2};
+            MetricsData.(['Subject' num2str(subject)]).MusclePowers.(temp_names{i}){1, j, 3} = result_2.MetricsData.MusclePowers.(temp_names{i}){1, j, 3};
+        end
+    end
     clear('result');
+    clear('result2');
 end
 
+% Identify the metrics we want to look at.
 metric_names = fieldnames(MetricsData.( ...
     ['Subject' num2str(subjects(1))]).MusclePowers);
-for nmetric = 1:(length(metric_names)-6)/2
-    outer_observations = [];
-    outer_means = [];
-    outer_stds = [];
-    for context = contexts
-        inner_means = [];
-        inner_stds = [];
-        inner_observations = [];
+
+for context = contexts
+    context_identifier = ['Context' num2str(context)];
+    for nmetric = 1:(length(metric_names)-6)/2
+        observations = [];
+        means = [];
+        stds = [];
         for assistance = assistances
             values = [];
             for subject = subjects
@@ -61,33 +70,24 @@ for nmetric = 1:(length(metric_names)-6)/2
                     end
                 end
             end
-            inner_means = [inner_means; mean(values)];
-            inner_stds = [inner_stds; std(values)];
-            inner_observations = [inner_observations; values];
+            means = [means, mean(values)];
+            stds = [stds, std(values)];
+            observations = [observations, values];
         end
-        outer_means = [outer_means, inner_means];
-        outer_stds = [outer_stds, inner_stds];
-        outer_observations = [outer_observations, inner_observations];
-    end
-    if ~isempty(outer_observations)
-        nmbob = size(outer_observations,1)/length(assistances);
-        [~,~,stats] = anova2(outer_observations, nmbob, 'off');
-        col_diffs = multcompare(stats, 'Estimate', 'column', 'Display', 'off');
-        row_diffs = multcompare(stats, 'Estimate', 'row', 'Display', 'off');
+        if ~isempty(observations)
+            [~,~,stats] = anova1(observations, [], 'off');
+            diffs = multcompare(stats, 'Display', 'off');
 
-        % Create the metric.
-        Metrics.(metric_names{nmetric}(1:end-2)) = metric(metric_names{nmetric}, ...
-            outer_means, outer_stds, nmbob, col_diffs, row_diffs);
+            % Create the metric.
+            Metrics.(metric_names{nmetric}(1:end-2)).(context_identifier).means = means;
+            Metrics.(metric_names{nmetric}(1:end-2)).(context_identifier).stds = stds;
+            Metrics.(metric_names{nmetric}(1:end-2)).(context_identifier).diffs = diffs;
+        end
     end
-end
-for nmetric = (length(metric_names)-5):2:(length(metric_names)-1)
-    outer_observations = [];
-    outer_means = [];
-    outer_stds = [];
-    for context = contexts
-        inner_means = [];
-        inner_stds = [];
-        inner_observations = [];
+    for nmetric = (length(metric_names)-5):2:(length(metric_names)-1)
+        observations = [];
+        means = [];
+        stds = [];
         for assistance = assistances
             values = [];
             for subject = subjects
@@ -104,22 +104,18 @@ for nmetric = (length(metric_names)-5):2:(length(metric_names)-1)
                     end
                 end
             end
-            inner_means = [inner_means; mean(values)];
-            inner_stds = [inner_stds; std(values)];
-            inner_observations = [inner_observations; values];
+            means = [means, mean(values)];
+            stds = [stds, std(values)];
+            observations = [observations, values];
         end
-        outer_means = [outer_means, inner_means];
-        outer_stds = [outer_stds, inner_stds];
-        outer_observations = [outer_observations, inner_observations];
+        [~,~,stats] = anova1(observations, [], 'off');
+        diffs = multcompare(stats, 'Display', 'off');
+        
+        % Create the metric.
+        Metrics.(metric_names{nmetric}(1:end-2)).(context_identifier).means = means;
+        Metrics.(metric_names{nmetric}(1:end-2)).(context_identifier).stds = stds;
+        Metrics.(metric_names{nmetric}(1:end-2)).(context_identifier).diffs = diffs;
     end
-    nmbob = size(outer_observations,1)/length(assistances);
-    [~,~,stats] = anova2(outer_observations, nmbob, 'off');
-    col_diffs = multcompare(stats, 'Estimate', 'column', 'Display', 'off');
-    row_diffs = multcompare(stats, 'Estimate', 'row', 'Display', 'off');
-    
-    % Create the metric.
-    Metrics.(metric_names{nmetric}(1:end-2)) = metric(metric_names{nmetric}, ...
-        outer_means, outer_stds, nmbob, col_diffs, row_diffs);
 end
 
 % Save the final result.
