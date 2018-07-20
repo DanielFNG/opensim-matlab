@@ -56,4 +56,4 @@ Temporary Items
 *startup.m
 
 # Ignore OpenSim log files. 
-Logs/*
+Logs/*.log
