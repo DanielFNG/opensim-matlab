@@ -49,6 +49,7 @@ fprintf(fileID, '\n%s', 'test = Model();');
 fprintf(...
     fileID, '\n%s', 'setenv(''EXOPT_OUT'', [pwd filesep ''out.log'']);');
 fprintf(fileID, '\n%s', 'cd(current_dir)');
+fprintf(fileID, '\n%s', 'clear;');
 
 % Close the startup file.
 fclose(fileID);
