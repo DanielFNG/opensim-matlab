@@ -49,9 +49,6 @@ Temporary Items
 # Ignore Matlab autosaves. 
 *.asv
 
-# Ignore RRA controls results.
-*controls.xml
-
 # Don't sync the startup.m file.
 *startup.m
 

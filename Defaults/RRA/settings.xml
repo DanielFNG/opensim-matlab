@@ -2,12 +2,12 @@
 <OpenSimDocument Version="20302">
 	<RRATool name="RRA">
 	<!--Name of the .osim file used to construct a model.-->
-	<model_file> gait2392_APO.osim </model_file>
+	<model_file> ../model.osim </model_file>
 	<!--Replace the model's force set with sets specified in
 	<force_set_files>? If false, the force set is appended to.-->
 	<replace_force_set> true </replace_force_set>
 	<!--List of xml files used to construct an force set for the model.-->
-	<force_set_files> gait2392_RRA_Actuators.xml </force_set_files>
+	<force_set_files> actuators.xml </force_set_files>
 	<!--Directory used for writing results.-->
 	<!--<results_directory> ResultsRRA/ </results_directory>--!>
 		<!--Output precision.  It is 20 by default.-->
@@ -37,7 +37,7 @@
 	<desired_kinematics_file> ik.mot </desired_kinematics_file>
 	<!--File containing the tracking tasks. Which coordinates are tracked and
 	    with what weights are specified here.-->
-	<task_set_file> gait2392_RRA_Tasks.xml </task_set_file>
+	<task_set_file> tasks.xml </task_set_file>
 		<!--File containing the controls output by RRA. These can be used to place
 		    constraints on the residuals during CMC.-->
 		<rra_controls_file>  </rra_controls_file>
