@@ -20,18 +20,17 @@ classdef OpenSimTrial2 < handle
     properties (SetAccess = private)
         model_path % path to model
         grfs_path % path to external forces data
-        load % A description of the external forces being applied
         kinematics_path % path to kinematics
         results_directory % path to high level results directory
-    end
-    
-    properties (GetAccess = private, SetAccess = private)
         ik_computed = 0
         rra_computed = 0
         bk_computed = 0
         id_computed = 0
         cmc_computed = 0
-        ik_results = 'IK_Results'
+    end
+    
+    properties (GetAccess = private, SetAccess = private)
+        ik_results = 'ik.mot'
         rra_results = 'RRA_Results'
         bk_results = 'BK_Results'
         id_results = 'ID_Results'
@@ -43,6 +42,7 @@ classdef OpenSimTrial2 < handle
         cmc_settings
         load_settings
         gait2392_proportions
+        best_kinematics
     end
     
     methods
@@ -54,7 +54,8 @@ classdef OpenSimTrial2 < handle
             if nargin > 0
                 obj.model_path = model;
                 obj.grfs_path = grfs;
-                obj.kinematics_path = kinematics;
+                obj.input_kinematics = kinematics;
+                obj.best_kinematics = kinematics;
                 if ~exist(results, 'dir')
                     mkdir(results);
                 end
@@ -62,6 +63,9 @@ classdef OpenSimTrial2 < handle
                 [obj.ik_settings, obj.rra_settings, obj.bk_settings, ...
                     obj.cmc_settings, obj.id_settings, obj.load_settings, ...
                     obj.gait2392_proportions] = obj.loadDefaults();
+                
+                % Import OpenSim model class.
+                import org.opensim.modeling.Model;
             end
         end
         
@@ -77,31 +81,81 @@ classdef OpenSimTrial2 < handle
             end
         end
         
-        function runIK(obj, start, final, results, settings)
-            
-            if nargin == 0 || nargin == 2 || nargin > 5
-                error('Incorrect number of arguments.');
-            elseif obj.ik_computed
-                error('IK already computed or provided.');
+        function [start, final, results, settings] = ...
+            parseKinematicInputs(obj, func, start, final, results, settings)
+            % Set the default results/settings based on function.
+            if strcmp(func, 'IK') 
+                default_settings = obj.ik_settings
+                default_results = obj.ik_results;
+            elseif strcmp(func, 'BK')
+                default_settings = obj.bk_settings;
+                default_results = obj.bk_results;
+            elseif strcmp(func, 'RRA')
+                default_settings = obj.rra_settings; 
+                default_results = obj.rra_results;
+            elseif strcmp(func, 'ID')
+                default_settings = obj.id_settings; 
+                default_results = obj.id_results;
+            elseif strcmp(func, 'CMC')
+                default_settings = obj.cmc_settings; 
+                default_results = obj.cmc_results;
             end
             
+            
+            if nargin < 2 || nargin == 3 || nargin > 6
+                error('Incorrect number of arguments.');
+            end 
+            if nargin ~= 6 
+                settings = default_settings;
+            end
             if nargin ~= 5
-                settings = obj.ik_settings;
+                results = default_results;
             end
             if nargin ~= 4
-                results = [obj.results filesep obj.ik_results];
+                kinematics = Data(obj.best_kinematics);
+                start = kinematics.Timesteps(1, 1);
+                final = kinematics.Timesteps(end, 1);
             end
-            if nargin ~= 3
-                kinematics = Data(obj.input_kinematic_data);
-                start = kinematics.Timesteps(1,1);
-                final = kinematics.Timesteps(end,1);
+        end
+        
+        function [start, final, results, load, settings] = ...
+            parseDynamicInputs(obj, func, start, final, results, load, settings)
+            
+            if nargin < 2 || nargin == 3 || nargin > 7 
+                error('Incorrect number of arguments.');
+            end
+            if nargin < 6
+                load = obj.load_settings;
+            end
+            if nargin == 7 
+                [start, final, results, settings] = obj.parseKinematicInputs(...
+                    func, start, final, results, settings);
+            elseif nargin == 6 || nargin == 5
+                [start, final, results, settings] = obj.parseKinematicInputs(...
+                    func, start, final, results);
+            elseif nargin == 4
+                [start, final, results, settings] = obj.parseKinematicInputs(...
+                    func, start, final];
+            else 
+                [start, final, results, settings] = obj.parseKinematicInputs(...
+                    func);
+            end
+        end      
+        
+        % varargin format: start, final, results, settings
+        function runIK(obj, varargin)
+            
+            [start, final, results, settings] = ...
+                obj.parseKinematicInputs('IK', varargin);
+            
+            if obj.ik_computed
+                error('IK already computed or provided.');
             end
                 
-            % Import OpenSim IKTool class and Model class.
+            % Import OpenSim IKTool class.
             import org.opensim.modeling.InverseKinematicsTool;
-            import org.opensim.modeling.Model;
             
-            % Load IKTool. If settings file not provided, use default.
+            % Load IKTool.
             ikTool = InverseKinematicsTool(settings);
             
             % Assign parameters.
@@ -109,80 +163,53 @@ classdef OpenSimTrial2 < handle
             ikTool.setModel(model);
             ikTool.setStartTime(start);
             ikTool.setEndTime(final);
-            ikTool.setMarkerDataFileName(obj.input_kinematic_data);
+            ikTool.setMarkerDataFileName(obj.best_kinematics);
             ikTool.setOutputMotionFileName(results);
             
             % Run IK.
             ikTool.run();
+            
+            % Store the best current kinematics for this trial.
+            obj.best_kinematics = results;
                 
         end
         
-        % Setup ID from the default settings file, with input initial and
-        % final times, according to the OpenSimTrial properties. 
-        function idTool = setupID(obj, start, final, results, load, settings)
-            % Import OpenSim InverseDynamicsTool class.
-            import org.opensim.modeling.InverseDynamicsTool
-            
-            % Load InverseDynamicsTool, using default settings if required.
-            if ~exist('settings', 'var')
-                settings = obj.id_settings;
+        % varargin format: start, final, results, load, settings
+        function runID(obj, varargin)
+        
+            if obj.id_computed
+                error('ID already computed or provided.');
             end
+            
+            [start, final, results, load, settings] = ...
+                obj.parseDynamicInputs('ID', varargin);
+                
+            % Import OpenSim IDTool class.
+            import org.opensim.modeling.InverseDynamicsTool;
+            
+            % Load IDTool.
             idTool = InverseDynamicsTool(settings);
             
-            % Assign parameters.
-            Tool.setModelFileName(obj.model_path);
-            Tool.setResultsDir([obj.results_directory '/' dir]);
-            Tool.setStartTime(initialTime);
-            Tool.setEndTime(finalTime);
-            Tool.setCoordinatesFileName(obj.kinematics_path);
+            % Assign parameters. 
+            idTool.setModelFileName(obj.model_path);
+            idTool.setResultsDir(results);
+            idTool.setStartTime(start);
+            idTool.setEndTime(final);
+            idTool.setCoordinatesFilename(obj.best_kinematics);
             
-            % Set external loads. 
-            external_loads = xmlread(obj.load_path);
-            external_loads.getElementsByTagName('datafile').item(0). ...
-                getFirstChild.setNodeValue(obj.grfs_path);
-            xmlwrite('temp.xml', external_loads);
+            % Set external loads.
+            ext = xmlread(load);
+            ext.getElementsByTagName('datafile').item(0).getFirstChild. ...
+                setNodeValue(obj.grfs_path);
+            temp = [results filesep 'temp.xml'];
+            xmlwrite(temp, ext);
+            idTool.setExternalLoadsFilename(temp);
             
-            
-                Tool.setExternalLoadsFileName(getFullPath('temp.xml'));
-            
-        end
-        
-        % Run the ID algorithm. 
-        function ID = runID(obj, startTime, endTime)
-            
-            % If we just want to do it for the entire file. 
-            if nargin == 1
-                startTime = obj.kinematics.Timesteps(1,1);
-                endTime = obj.kinematics.Timesteps(end,1);
-                
-            % If only a start time is given. 
-            elseif nargin == 2
-                endTime = obj.kinematics.Timesteps(end,1);
-            
-            % If we have both a start time and an end time. 
-            elseif nargin ~= 3
-                error('Incorrect number of arguments to runID.');
-            end
-            
-            dir = ['ID_' 'load=' obj.load ...
-                '_time=' num2str(startTime) '-' num2str(endTime)];
-            
-            idTool = obj.setupID(dir,startTime,endTime);
-            
+            % Run ID.
             idTool.run();
             
-            % Having to delete this file here is a byproduct of the OpenSim
-            % InverseDynamicsTool class not having a getModel method. It's
-            % not possible to associate external forces with an IDTool without
-            % reading from a settings file. So, we have to let the external 
-            % forces setup file survive until we run the tool and then delete 
-            % it afterwards. 
-            delete('temp.xml');
-            
-            % If required, create an IDResult object to store ID result. 
-            if nargout == 1
-                ID = IDResult(obj, [obj.results_directory '/' dir '/']);
-            end
+            % Delete temp file.
+            delete(temp);    
         end
         
         % Setup RRA from the default settings file, with input initial and
