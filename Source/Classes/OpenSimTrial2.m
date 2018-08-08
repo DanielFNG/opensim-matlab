@@ -30,18 +30,7 @@ classdef OpenSimTrial2 < handle
     end
     
     properties (GetAccess = private, SetAccess = private)
-        ik_results = 'ik.mot'
-        rra_results = 'RRA_Results'
-        bk_results = 'BK_Results'
-        id_results = 'ID_Results'
-        cmc_results = 'CMC_Results'
-        ik_settings
-        rra_settings
-        bk_settings
-        id_settings
-        cmc_settings
-        load_settings
-        gait2392_proportions
+        defaults
         best_kinematics
     end
     
@@ -67,6 +56,10 @@ classdef OpenSimTrial2 < handle
                 % Import OpenSim model class.
                 import org.opensim.modeling.Model;
             end
+        end
+        
+        function status(obj)
+            fprintf('\nIK %i\n', ik_computed);
         end
         
         function analyseInputKinematics(obj)
@@ -482,21 +475,39 @@ classdef OpenSimTrial2 < handle
             end
             
         end
+        
+        % Load the filenames for default RRA, ID settings etc. 
+        function loadDefaults(obj)
+            % Get access to the OPENSIM_MATLAB Defaults folder.
+            default_folder = [getenv('OPENSIM_MATLAB_HOME') filesep 'Defaults'];
+            
+            % Assign default settings paths. 
+            obj.defaults.settings.ik = ...
+                [default_folder filesep 'ik.xml'];
+            obj.defaults.settings.bk = ...
+                [default_folder filesep 'bk.xml'];
+            obj.defaults.settings.rra = ...
+                [default_folder filesep 'RRA' filesep 'settings.xml'];
+            obj.defaults.settings.id = ...
+                [default_folder filesep 'id.xml'];
+            obj.defaults.settings.cmc = ...
+                [default_folder filesep 'CMC' filesep 'settings.xml'];
+            obj.defaults.settings.loads = ...
+                [default_folder filesep 'loads.xml'];
+            
+            % Assign default mass proportions. 
+            obj.defaults.prop = [default_folder filesep 'mass_proportions.txt'];
+            
+            % Assign default results files/directories. 
+            obj.defaults.results.ik = [obj.results_directory filesep 'ik.mot'];
+            obj.defaults.results.id = [obj.results_directory filesep 'ID'];
+            obj.defaults.results.rra = [obj.results_directory filesep 'RRA'];
+            obj.defaults.results.bk = [obj.results_directory filesep 'BK'];
+            obj.defaults.results.cmc = [obj.results_directory filesep 'CMC'];
+        end
     end
     
     methods(Static)
-        
-        % Load the filenames for default RRA, ID settings etc. 
-        function [ik, rra, bk, cmc, id, ext, prop] = loadDefaults()
-            defaults = [getenv('OPENSIM_MATLAB_HOME') filesep 'Defaults'];
-            ik = [defaults filesep 'ik.xml'];
-            bk = [defaults filesep 'bk.xml'];
-            rra = [defaults filesep 'RRA' filesep 'settings.xml'];
-            id = [defaults filesep 'id.xml'];
-            cmc = [defaults filesep 'CMC' filesep 'settings.xml'];
-            ext = [defaults filesep 'loads.xml'];
-            prop = [defaults filesep 'mass_proportions.txt'];
-        end
         
         % Find the total mass change suggested by an RRA log file. 
         function mass = getTotalMassChange(log)
