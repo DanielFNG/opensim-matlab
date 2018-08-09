@@ -431,27 +431,29 @@ classdef OpenSimTrial2 < handle
         end
         
         function setupID2(obj, start, final, results, load)
-            % Import OpenSim IDTool class & array class.
+            
+            % Import OpenSim IDTool class.
             import org.opensim.modeling.InverseDynamicsTool;
-            import org.opensim.modeling.Array;
             
             % Load IDTool.
-            idTool = InverseDynamicsTool();
+            idTool = InverseDynamicsTool(settings);
             
-            % Assign parameters.
+            % Assign parameters. 
             model = Model(obj.model_path);
             idTool.setModel(model);
-            idTool.setOutputGenForceFileName(obj.defaults.results.id);
+            idTool.setResultsDir(results);
             idTool.setStartTime(start);
             idTool.setEndTime(final);
             idTool.setCoordinatesFilename(obj.best_kinematics);
-            idTool.createExternalLoads(load, model);
-            test = Array('');
-            test.append('Muscles');
-            state = model.initSystem();
-            idTool.disableModelForces(model, state, test);
-            idTool.setResultsDir(results);
-            idTool.setLowpassCutoffFrequency(-1);
+            
+            % Set external loads.
+            ext = xmlread(load);
+            ext.getElementsByTagName('datafile').item(0).getFirstChild. ...
+                setNodeValue(obj.grfs_path);
+            temp = [results filesep 'temp.xml'];
+            xmlwrite(temp, ext);
+            idTool.createExternalLoads(temp, model);
+            delete(temp);
         end
         
         function cmcTool = setupCMC(obj, start, final, results, load, settings)
