@@ -19,10 +19,10 @@ rra_struct = dir([rra_folder '/*.sto']);
 grf_struct = dir([grf_folder '/*.mot']);
 
 % Create a cell array to hold the CMC results.
-CMC_array{vectorSize(rra_struct)} = {};
+CMC_array{length(rra_struct)} = {};
 
 % Iterate over the files doing CMC and storing the results.
-for i=1:vectorSize(rra_struct)
+for i=1:length(rra_struct)
     Trial = OpenSimTrial(model, ...
         [rra_folder filesep rra_struct(i,1).name], load, ...
         [grf_folder filesep grf_struct(i,1).name], [results filesep ...
