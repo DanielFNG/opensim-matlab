@@ -67,7 +67,6 @@ classdef OpenSimTrial2 < handle
                 OpenSimTrial2.statusMessage(obj.computed.cmc));
         end     
         
-        % varargin format: start, final, results, settings
         function runIK(obj, varargin)
             
             % Check compuation status.
@@ -76,102 +75,117 @@ classdef OpenSimTrial2 < handle
             end
             
             % Parse inputs. 
-            [start, final, results, settings] = ...
-                obj.parseKinematicArgs('IK', varargin{:});
+            options = obj.parseAnalaysisArguments('IK', varargin{:});
                 
             % Setup IK.
-            ikTool = obj.setupIK(start, final, results, settings);
+            ikTool = obj.setupIK(...
+                options.timerange, options.results, options.settings);
             
             % Run IK.
             ikTool.run();
-            obj.computed.ik = true;
+            obj.computed.IK = true;
             
             % Store the best current kinematics for this trial.
             obj.best_kinematics = results;
         end
         
-        % varargin format: start, final, results, load, settings
+        function runBK(obj, varargin)
+            
+            % Check computation status. 
+            if ~obj.computed.IK
+                error('Require IK to compute BK.');
+            end
+            
+            options = obj.parseAnalysisArguments('BK', varargin{:});
+            
+            % Setup BK.
+            bkTool = obj.setupBK(options.timerange, options.results, ...
+                options.load, options.settings);
+            
+            % Run BK.
+            bkTool.run();
+            obj.computed.BK = true;
+        end
+        
         function runID(obj, varargin)
         
-            if ~obj.computed.ik
+            if ~obj.computed.IK
                 error('Require at least IK to compute ID.');
             end
             
-            [start, final, results, load, settings] = ...
-                obj.parseDynamicArgs('ID', varargin{:});
+            options = obj.parseAnalysisArguments('ID', varargin{:});
                 
             % Setup ID.
-            [idTool, temp] = obj.setupID(start, final, results, load, settings);
+            [idTool, temp] = obj.setupID(options.timerange, options.results, ...
+                options.load, options.settings);
             
             % Run ID.
             idTool.run();
-            obj.computed.id = true;
+            obj.computed.ID = true;
             
             % Delete temp file.
             delete(temp);    
         end
         
-        % varargin format: start, final, results, load, settings
         function runRRA(obj, varargin)
             
-            if ~obj.computed.ik
+            if ~obj.computed.IK
                 error('Require IK to compute RRA.');
             end
             
-            [start, final, results, load, settings] = ...
-                obj.parseDynamicArgs('RRA', varargin{:});
+            options = obj.parseAnalysisArguments('RRA', varargin{:});
             
             % Setup RRA.
-            rraTool = obj.setupRRA(start, final, results, load, settings);
+            rraTool = obj.setupRRA(options.timerange, options.results, ...
+                options.load, options.settings);
             
             % Run RRA.
             rraTool.run()
-            obj.computed.rra = true;
+            obj.computed.RRA = true;
             
             % Store the best current kinematics for this trial.
             obj.best_kinematics = [results filesep 'RRA_Kinematics_q.sto'];
         end
             
-        % varargin format: start, final, results, load, settings
         function runAdjustmentRRA(obj, body, new_model, varargin)
             
-            if obj.computed.rra
+            if obj.computed.RRA
                 error('RRA already computed or provided.');
-            elseif ~obj.computed.ik
+            elseif ~obj.computed.IK
                 error('Require IK to compute RRA.');
             end
             
-            [start, final, results, load, settings] = ...
-                obj.parseDynamicArgs('RRA', varargin{:});
+            options = obj.parseAnalysisArguments('RRA', varargin{:});
             
             % Setup adjustment RRA.
-            rraTool = obj.setupAdjustmentRRA(...
-                body, new_model, start, final, results, load, settings);
+            rraTool = obj.setupAdjustmentRRA(body, new_model, ...
+                options.timerange, options.results, options.load, ...
+                options.settings);
             
             % Run RRA.
             rraTool.run();
-            obj.computed.rra_adjusted = true;
+            obj.computed.RRA_adjusted = true;
             
             % Perform mass adjustments.
             obj.performMassAdjustments(new_model, getenv('OPENSIM_MATLAB_OUT')); 
         end
         
         function runCMC(obj, varargin)
-            if obj.computed.cmc
+            if obj.computed.CMC
                 error('CMC already computed or provided.');
-            elseif ~obj.computed.ik
+            elseif ~obj.computed.IK
                 error('Require at least IK to compute CMC.');
             end
             
-            [start, final, results, load, settings] = ...
-                obj.parseDynamicArgs('CMC', varargin{:});
+            options = obj.parseAnalysisArguments('CMC', varargin{:});
             
             % Setup CMC.
-            cmcTool = obj.setupCMC(start, final, results, load, settings);
+            cmcTool = obj.setupCMC(options.timerange, options.results, ...
+                options.load, options.settings);
             
             % Run CMC.
             cmcTool.run();
-            obj.computed.cmc = true;
+            obj.computed.CMC = true;
         end
     end
     
@@ -183,15 +197,15 @@ classdef OpenSimTrial2 < handle
             default_folder = [getenv('OPENSIM_MATLAB_HOME') filesep 'Defaults'];
             
             % Assign default settings paths. 
-            obj.defaults.settings.ik = ...
+            obj.defaults.settings.IK = ...
                 [default_folder filesep 'ik.xml'];
-            obj.defaults.settings.bk = ...
+            obj.defaults.settings.BK = ...
                 [default_folder filesep 'bk.xml'];
-            obj.defaults.settings.rra = ...
+            obj.defaults.settings.RRA = ...
                 [default_folder filesep 'RRA' filesep 'settings.xml'];
-            obj.defaults.settings.id = ...
+            obj.defaults.settings.ID = ...
                 [default_folder filesep 'id.xml'];
-            obj.defaults.settings.cmc = ...
+            obj.defaults.settings.CMC = ...
                 [default_folder filesep 'CMC' filesep 'settings.xml'];
             obj.defaults.settings.loads = ...
                 [default_folder filesep 'loads.xml'];
@@ -200,30 +214,30 @@ classdef OpenSimTrial2 < handle
             obj.defaults.prop = [default_folder filesep 'mass_proportions.txt'];
             
             % Assign default results files/directories. 
-            obj.defaults.results.ik = [obj.results_directory filesep 'ik.mot'];
-            obj.defaults.results.id = 'id.sto';
-            obj.defaults.results.rra = [obj.results_directory filesep 'RRA'];
-            obj.defaults.results.bk = [obj.results_directory filesep 'BK'];
-            obj.defaults.results.cmc = [obj.results_directory filesep 'CMC'];
+            obj.defaults.results.IK = [obj.results_directory filesep 'ik.mot'];
+            obj.defaults.results.ID = 'id.sto';
+            obj.defaults.results.RRA = [obj.results_directory filesep 'RRA'];
+            obj.defaults.results.BK = [obj.results_directory filesep 'BK'];
+            obj.defaults.results.CMC = [obj.results_directory filesep 'CMC'];
             
             % Set statuses to 0.
-            obj.computed.ik = false;
-            obj.computed.rra = false;
-            obj.computed.rra_adjusted = false;
-            obj.computed.bk = false;
-            obj.computed.id = false;
-            obj.computed.cmc = false;
+            obj.computed.IK = false;
+            obj.computed.RRA = false;
+            obj.computed.RRA_adjusted = false;
+            obj.computed.BK = false;
+            obj.computed.ID = false;
+            obj.computed.CMC = false;
         end
         
         function analyseInputCoordinates(obj)
             [~, ~, ext] = fileparts(obj.input_coordinates);
             
             if strcmp(ext, '.mot')
-                obj.computed.ik = true;
+                obj.computed.IK = true;
                 obj.best_kinematics = obj.input_coordinates;
             elseif strcmp(ext, '.sto')
-                obj.computed.ik = true;
-                obj.computed.rra = true;
+                obj.computed.IK = true;
+                obj.computed.RRA = true;
                 obj.best_kinematics = obj.input_coordinates;
             elseif ~strcmp(ext, '.trc')
                 error('Wrong file format for input kinematic data.');
@@ -232,71 +246,47 @@ classdef OpenSimTrial2 < handle
             end
         end
         
-        function [start, final, results, settings] = ...
-            parseKinematicArgs(obj, func, start, final, results, settings)
-            % Set the default results/settings based on function.
-            if strcmp(func, 'IK') 
-                default_settings = obj.defaults.settings.ik;
-                default_results = obj.defaults.results.ik;
-            elseif strcmp(func, 'BK')
-                default_settings = obj.defaults.settings.bk;
-                default_results = obj.defaults.results.bk;
-            elseif strcmp(func, 'RRA')
-                default_settings = obj.defaults.settings.rra; 
-                default_results = obj.defaults.results.rra;
-            elseif strcmp(func, 'ID')
-                default_settings = obj.defaults.settings.id; 
-                default_results = obj.defaults.results.id;
-            elseif strcmp(func, 'CMC')
-                default_settings = obj.defaults.settings.cmc; 
-                default_results = obj.defaults.results.cmc;
+        function options = parseAnalysisArguments(obj, func, varargin)
+        
+            % Set the default arguments, note timerange handled separately.
+            options = struct('timerange', false, ...
+                'results', obj.defaults.results.(func), ...
+                'settings', obj.defaults.settings.(func), ...
+                'load', obj.defaults.settings.loads);
+            
+            % Get possible option names.
+            option_names = fieldnames(options);
+            
+            % Check name-value pairs have been provided.
+            n_args = length(varargin);
+            if round(n_args/2) ~= nArgs/2
+                error('Please use name value pair arguments.');
             end
             
-            if nargin < 2 || nargin == 3 || nargin > 6
-                error('Incorrect number of arguments.');
-            end 
-            if nargin ~= 6 
-                settings = default_settings;
+            % Replace default options if specified by user. 
+            for pair = reshape(varargin, 2, [])
+                input_arg = lower(pair{1});
+                
+                if any(strcmp(input_arg, option_names))
+                    options.(input_arg) = pair{2};
+                else
+                    error('%s is not a valid argument name', input_arg)
+                end
             end
-            if nargin ~= 5
-                results = default_results;
-            end
-            if nargin ~= 4
+            
+            % Replace time with full range if not specified by user.
+            if ~options.timerange
                 if strcmp(func, 'IK')
                     kinematics = Data(obj.marker_data);
                 else
                     kinematics = Data(obj.best_kinematics);
                 end
-                start = kinematics.Timesteps(1, 1);
-                final = kinematics.Timesteps(end, 1);
-            end
-        end
-        
-        function [start, final, results, load, settings] = ...
-            parseDynamicArgs(obj, func, start, final, results, load, settings)
-            
-            if nargin < 2 || nargin == 3 || nargin > 7 
-                error('Incorrect number of arguments.');
-            end
-            if nargin < 6
-                load = obj.defaults.settings.loads;
-            end
-            if nargin == 7 
-                [start, final, results, settings] = obj.parseKinematicArgs(...
-                    func, start, final, results, settings);
-            elseif nargin == 6 || nargin == 5
-                [start, final, results, settings] = obj.parseKinematicArgs(...
-                    func, start, final, results);
-            elseif nargin == 4
-                [start, final, results, settings] = obj.parseKinematicArgs(...
-                    func, start, final);
-            else 
-                [start, final, results, settings] = obj.parseKinematicArgs(...
-                    func);
+                options.timerange = ...
+                    [kinematics.Timesteps(1, 1), kinematics.Timesteps(end, 1)];
             end
         end 
         
-        function ikTool = setupIK(obj, start, final, results, settings)
+        function ikTool = setupIK(obj, timerange, results, settings)
             % Import OpenSim IKTool class and Model class.
             import org.opensim.modeling.InverseKinematicsTool;
             import org.opensim.modeling.Model;
@@ -307,13 +297,31 @@ classdef OpenSimTrial2 < handle
             % Assign parameters.
             model = Model(obj.model_path);
             ikTool.setModel(model);
-            ikTool.setStartTime(start);
-            ikTool.setEndTime(final);
+            ikTool.setStartTime(timerange(1));
+            ikTool.setEndTime(timerange(2));
             ikTool.setMarkerDataFileName(obj.marker_data);
             ikTool.setOutputMotionFileName(results);
         end
         
-        function rraTool = setupRRA(obj, start, final, results, load, settings)
+        function bkTool = setupBK(obj, timerange, results, settings)
+            % Import OpenSim AnalyzeTool class and Model class.
+            import org.opensim.modeling.AnalyzeTool;
+            import org.opensim.modeling.Model;
+            
+            % Load bkTool.
+            bkTool = AnalyzeTool(settings);
+            
+            % Assign parameters.
+            model = Model(obj.model_path);
+            model.initSystem();
+            bkTool.setModel(model);
+            tool.setCoordinatesFileName(obj.best_kinematics);
+            tool.setInitialTime(timerange(1));
+            tool.setFinalTime(timerange(2));
+            tool.setResultsDir(results);
+        end
+        
+        function rraTool = setupRRA(obj, timerange, results, load, settings)
             % Modify pelvis COM in actuators file.
             obj.modifyPelvisCOM(settings);
             
@@ -327,8 +335,8 @@ classdef OpenSimTrial2 < handle
             rraTool.setModelFilename(obj.model_path);
             rraTool.loadModel(settings);
             rraTool.updateModelForces(rraTool.getModel(), settings);
-            rraTool.setInitialTime(start);
-            rraTool.setFinalTime(final);
+            rraTool.setInitialTime(timerange(1));
+            rraTool.setFinalTime(timerange(2));
             rraTool.setDesiredKinematicsFileName(obj.best_kinematics);
             rraTool.setResultsDir(results);
             
@@ -378,9 +386,9 @@ classdef OpenSimTrial2 < handle
         end
         
         function rraTool = setupAdjustmentRRA(...
-                obj, body, new_model, start, final, results, load,  settings)
+                obj, body, new_model, timerange, results, load,  settings)
             % General RRA settings.
-            rraTool = obj.setupRRA(start, final, results, load, settings);
+            rraTool = obj.setupRRA(timerange, results, load, settings);
             
             % Adjustment specific settings.
             rraTool.setAdjustCOMToReduceResiduals(true);
@@ -411,7 +419,7 @@ classdef OpenSimTrial2 < handle
         end
         
         function [idTool, temp] = ...
-                setupID(obj, start, final, results, load, settings)
+                setupID(obj, timerange, results, load, settings)
             % Import OpenSim IDTool class.
             import org.opensim.modeling.InverseDynamicsTool;
             
@@ -422,8 +430,8 @@ classdef OpenSimTrial2 < handle
             idTool.setModelFileName(obj.model_path);
             idTool.setResultsDir(obj.results_directory);
             idTool.setOutputGenForceFileName(results);
-            idTool.setStartTime(start);
-            idTool.setEndTime(final);
+            idTool.setStartTime(timerange(1));
+            idTool.setEndTime(timerange(2));
             idTool.setCoordinatesFileName(obj.best_kinematics);
             
             % Set external loads.
@@ -435,7 +443,7 @@ classdef OpenSimTrial2 < handle
             idTool.setExternalLoadsFileName(temp);
         end
         
-        function cmcTool = setupCMC(obj, start, final, results, load, settings)
+        function cmcTool = setupCMC(obj, timerange, results, load, settings)
             % Import OpenSim CMCTool class.
             import org.opensim.modeling.CMCTool
             
@@ -448,8 +456,8 @@ classdef OpenSimTrial2 < handle
             cmcTool.addAnalysisSetToModel();
             cmcTool.updateModelForces(cmcTool.getModel(), settings);
             cmcTool.setResultsDir(results);
-            cmcTool.setInitialTime(start);
-            cmcTool.setFinalTime(final);
+            cmcTool.setInitialTime(timerange(1));
+            cmcTool.setFinalTime(timerange(2));
             cmcTool.setDesiredKinematicsFileName(obj.best_kinematics);
             
             % Setup external loads.
