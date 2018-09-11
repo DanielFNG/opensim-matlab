@@ -33,7 +33,7 @@ classdef OpenSimTrial < handle
     
     methods
         % Construct OpenSimTrial.
-        function obj = OpenSimTrial2(model, ...
+        function obj = OpenSimTrial(model, ...
                                     input, ...
                                     results, ...
                                     grfs)
@@ -55,18 +55,18 @@ classdef OpenSimTrial < handle
         
         % Prints a message descriping the computation status of the OST.
         function status(obj)
-            fprintf('\nIK %s.\n', ...
-                OpenSimTrial2.statusMessage(obj.computed.ik));
-            fprintf('Model adjustment %s.\n', ...
-                OpenSimTrial2.statusMessage(obj.computed.model_adjustment));
-            fprintf('RRA %s.\n', ...
-                OpenSimTrial2.statusMessage(obj.computed.rra));
-            fprintf('BK %s.\n', ...
-                OpenSimTrial2.statusMessage(obj.computed.bk));
-            fprintf('ID %s.\n', ...
-                OpenSimTrial2.statusMessage(obj.computed.id));
-            fprintf('CMC %s.\n\n', ...
-                OpenSimTrial2.statusMessage(obj.computed.cmc));
+            fprintf('\nModel adjustment %scompleted.\n', ...
+                OpenSimTrial.statusMessage(obj.computed.model_adjustment));
+            fprintf('\nIK %scomputed.\n', ...
+                OpenSimTrial.statusMessage(obj.computed.IK));
+            fprintf('RRA %scomputed.\n', ...
+                OpenSimTrial.statusMessage(obj.computed.RRA));
+            fprintf('BK %scomputed.\n', ...
+                OpenSimTrial.statusMessage(obj.computed.BK));
+            fprintf('ID %scomputed.\n', ...
+                OpenSimTrial.statusMessage(obj.computed.ID));
+            fprintf('CMC %scomputed.\n\n', ...
+                OpenSimTrial.statusMessage(obj.computed.CMC));
         end
         
         function run(obj, method, varargin)
@@ -88,7 +88,7 @@ classdef OpenSimTrial < handle
             obj.computed.(method) = true;
             
             if strcmp(method, 'IK')
-                obj.best_kinematics = options.results;
+                obj.best_kinematics = [options.results filesep 'ik.mot'];
             elseif strcmp(method, 'RRA')
                 obj.best_kinematics = ...
                     [options.results filesep 'RRA_Kinematics_q.sto'];
@@ -160,16 +160,16 @@ classdef OpenSimTrial < handle
             obj.defaults.prop = [default_folder filesep 'mass_proportions.txt'];
             
             % Assign default results files/directories. 
-            obj.defaults.results.IK = [obj.results_directory filesep 'ik.mot'];
-            obj.defaults.results.ID = 'id.sto';
+            obj.defaults.results.IK = [obj.results_directory filesep 'IK'];
+            obj.defaults.results.ID = [obj.results_directory filesep 'ID'];
             obj.defaults.results.RRA = [obj.results_directory filesep 'RRA'];
             obj.defaults.results.BK = [obj.results_directory filesep 'BK'];
             obj.defaults.results.CMC = [obj.results_directory filesep 'CMC'];
             
             % Set statuses to 0.
             obj.computed.IK = false;
+            obj.computed.model_adjustment = false;
             obj.computed.RRA = false;
-            obj.computed.RRA_adjusted = false;
             obj.computed.BK = false;
             obj.computed.ID = false;
             obj.computed.CMC = false;
@@ -288,7 +288,11 @@ classdef OpenSimTrial < handle
             ikTool.setStartTime(timerange(1));
             ikTool.setEndTime(timerange(2));
             ikTool.setMarkerDataFileName(obj.marker_data);
-            ikTool.setOutputMotionFileName(results);
+            if ~exist(results, 'dir')
+                mkdir(results);
+            end
+            ikTool.setResultsDir(results);
+            ikTool.setOutputMotionFileName([results filesep 'ik.mot']);
         end
         
         function bkTool = setupBK(obj, timerange, results, settings)
@@ -432,8 +436,11 @@ classdef OpenSimTrial < handle
             
             % Assign parameters. 
             idTool.setModelFileName(obj.model_path);
-            idTool.setResultsDir(obj.results_directory);
-            idTool.setOutputGenForceFileName(results);
+            if ~exist(results, 'dir')
+                mkdir(results)
+            end
+            idTool.setResultsDir(results);
+            idTool.setOutputGenForceFileName('id.sto');
             idTool.setStartTime(timerange(1));
             idTool.setEndTime(timerange(2));
             idTool.setCoordinatesFileName(obj.best_kinematics);
@@ -498,9 +505,9 @@ classdef OpenSimTrial < handle
         
         function message = statusMessage(bool)
             if bool
-                message = 'computed';
+                message = '';
             else
-                message = 'not computed';
+                message = 'not ';
             end
         end
         
