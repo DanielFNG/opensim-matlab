@@ -30,8 +30,8 @@ classdef Data
                 if ischar(filename)
                     % Different behaviour for TRC files. 
                     if strcmp(filename(end-3:end), '.trc')
-                        obj.hasHeader = true;
-                        obj.isLabelled = true;
+                        obj.HasHeader = true;
+                        obj.IsLabelled = true;
                         
                         % Open the file.
                         id = fopen(filename);
@@ -130,9 +130,7 @@ classdef Data
                 end
                 obj.checkValues();
                 if sum(strcmpi('time',obj.Labels)) == 1
-                    obj.isTimeSeries = true;
-                    obj.Timesteps = obj.getTimeColumn();
-                    obj = obj.checkFrequency();
+                    % Use TimeSeriesData instead.
                 elseif sum(strcmpi('time',obj.Labels)) > 1
                     error(['More than one column recognised as time data. '...
                            'Check column labels in data file.'])
@@ -154,12 +152,12 @@ classdef Data
                 end
             else
                 obj.Labels = textData(end,:);
-                obj.isLabelled = true;
+                obj.IsLabelled = true;
             end
-            if obj.isLabelled
+            if obj.IsLabelled
                 if size(textData,1) > 1
-                    obj.hasHeader = true;
-                    obj.Header = textData(1:end-1,:);
+                    obj.HasHeader = true;
+                    obj.Header = textData(1:end-1,1);
                 end
             end
         end
@@ -252,6 +250,21 @@ classdef Data
                 fprintf(fileID,'\n');
             end
             fclose(fileID);
+        end
+        
+        function logical = eq(obj1, obj2)
+            
+            if all(size(obj1.Values) == size(obj2.Values)) && ...
+                    all(size(obj1.Labels) == size(obj2.Labels)) && ...
+                    all(size(obj1.Header) == size(obj2.Header)) && ...
+                    all(all(obj1.Values == obj2.Values)) && ...
+                    all(strcmp(obj1.Labels, obj2.Labels)) && ...
+                    all(strcmp(obj1.Header, obj2.Header))
+                logical = true;
+            else
+                logical = false;
+            end
+            
         end
         
         % Overload addition. Data objects which share an identical timestep
