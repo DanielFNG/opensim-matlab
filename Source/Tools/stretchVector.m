@@ -1,5 +1,5 @@
-function scaled_vector = stretchVector(input_vector, desired_size)
 % Stretch/compress a vector to a specified size using linear interpolation.
+function scaled_vector = stretchVector(input_vector, desired_size)
 
     if ~isvector(input_vector)
         error('Input must be vector.');

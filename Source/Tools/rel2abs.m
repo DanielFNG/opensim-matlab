@@ -1,7 +1,11 @@
-function F = rel2abs(F)
+% Convert paths to absolute format. 
+function varargout = rel2abs(varargin)
 
-if ~java.io.File(F).isAbsolute
-    F = fullfile(pwd,F);
+for i=1:length(varargin)
+    if ~java.io.File(varargin{i}).isAbsolute
+        varargout{i} = fullfile(pwd, varargin{i});
+    end
+end
     
 end
 

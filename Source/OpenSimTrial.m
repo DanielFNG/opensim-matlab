@@ -41,14 +41,13 @@ classdef OpenSimTrial < handle
                 if nargin > 3
                     obj.grfs_path = rel2abs(grfs);
                 end
-                obj.model_path = rel2abs(model);
-                obj.input_coordinates = rel2abs(input);
+                [obj.model_path, obj.input_coordinates, ...
+                    obj.results_directory] = rel2abs(model, input, results);
                 obj.best_kinematics = obj.input_coordinates;
-                obj.results_directory = rel2abs(results);
                 if ~exist(obj.results_directory, 'dir')
                     mkdir(obj.results_directory);
                 end
-                obj.analyseInputCoordinates;
+                obj.analyseInputCoordinates();
                 obj.loadDefaults();
             end
         end
