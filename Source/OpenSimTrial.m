@@ -22,11 +22,11 @@ classdef OpenSimTrial < handle
         grfs_path % path to external forces data
         input_coordinates % path to kinematics
         results_directory % path to high level results directory
+        computed
     end
     
     properties (GetAccess = private, SetAccess = private)
         defaults
-        computed
         marker_data 
         best_kinematics
     end
@@ -226,8 +226,7 @@ classdef OpenSimTrial < handle
                 else
                     kinematics = Data(obj.best_kinematics);
                 end
-                options.timerange = ...
-                    [kinematics.Timesteps(1, 1), kinematics.Timesteps(end, 1)];
+                options.timerange = kinematics.getTimeRange();
             end
         end
         
@@ -338,7 +337,12 @@ classdef OpenSimTrial < handle
             temp = [results filesep 'temp.xml'];
             xmlwrite(temp, ext);
             rraTool.createExternalLoads(temp, rraTool.getModel());
-            delete(temp);
+            while true
+                if exist(temp, 'file')
+                    delete(temp);
+                    break;
+                end
+            end
         end
         
         % Modify the pelvis COM in the default RRA_actuators file in order
@@ -384,7 +388,7 @@ classdef OpenSimTrial < handle
             % Adjustment specific settings.
             rraTool.setAdjustCOMToReduceResiduals(true);
             rraTool.setAdjustedCOMBody(body);
-            rraTool.setOutputModelFileName([results filesep new_model]);
+            rraTool.setOutputModelFileName(new_model);
         end
         
         % Performs the mass adjustments recommended by the RRA algorithm.
@@ -477,7 +481,12 @@ classdef OpenSimTrial < handle
             temp = [results filesep 'temp.xml'];
             xmlwrite(temp, external_loads);
             cmcTool.createExternalLoads(temp, cmcTool.getModel());
-            delete(temp);
+            while true
+                if exist(temp, 'file')
+                    delete(temp);
+                    break;
+                end
+            end
         end
     end
     

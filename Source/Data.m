@@ -9,11 +9,11 @@ classdef Data < handle & matlab.mixin.Copyable
         Filetype
         NFrames
         Frequency
+        Labels
     end
     
     properties (GetAccess = private, SetAccess = private)
         Header
-        Labels
         Frames
         Timesteps
         Values
@@ -185,6 +185,10 @@ classdef Data < handle & matlab.mixin.Copyable
             obj.Values(1:end, indices) = ...
                 multiplier * obj.Values(1:end, indices);
         end 
+        
+        function range = getTimeRange(obj)
+            range = [obj.Timesteps(1), obj.Timesteps(end)];
+        end
         
         % Use splines to obtain smooth data of the desired frequency.
         function obj = fitToSpline(obj, desired_frequency)
