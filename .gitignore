@@ -54,3 +54,6 @@ Temporary Items
 
 # Ignore OpenSim log files. 
 Logs/*.log
+
+# Ignore changes to the RRA Actuator file.
+Defaults/RRA/actuators.xml
