@@ -312,6 +312,12 @@ classdef OpenSimTrial < handle
         end
         
         function rraTool = setupRRA(obj, timerange, results, load, settings)
+            % Temporarily copy RRA settings folder to new location.
+            [folder, name, ext] = fileparts(settings);
+            temp_settings = [results filesep 'temp'];
+            copyfile(folder, temp_settings);
+            settings = [temp_settings filesep name ext];
+            
             % Modify pelvis COM in actuators file.
             obj.modifyPelvisCOM(settings);
             
@@ -343,6 +349,9 @@ classdef OpenSimTrial < handle
                     break;
                 end
             end
+            
+            % Remove temporary settings folder. 
+            rmdir(temp_settings, 's');
         end
         
         % Modify the pelvis COM in the default RRA_actuators file in order
@@ -461,6 +470,15 @@ classdef OpenSimTrial < handle
             % Import OpenSim CMCTool class.
             import org.opensim.modeling.CMCTool
             
+            % Temporarily copy CMC settings folder to new location.
+            [folder, name, ext] = fileparts(settings);
+            temp_settings = [results filesep 'temp'];
+            copyfile(folder, temp_settings);
+            settings = [temp_settings filesep name ext];
+            
+            % Modify pelvis COM in actuators file.
+            obj.modifyPelvisCOM(settings);
+            
             % Load default CMCTool.
             cmcTool = CMCTool(settings);
             
@@ -487,6 +505,9 @@ classdef OpenSimTrial < handle
                     break;
                 end
             end
+            
+            % Remove temporary settings folder.
+            rmdir(temp_settings, 's');
         end
     end
     
