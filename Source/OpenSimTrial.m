@@ -29,6 +29,7 @@ classdef OpenSimTrial < handle
         defaults
         marker_data 
         best_kinematics
+        
     end
     
     methods
@@ -343,15 +344,16 @@ classdef OpenSimTrial < handle
             temp = [results filesep 'temp.xml'];
             xmlwrite(temp, ext);
             rraTool.createExternalLoads(temp, rraTool.getModel());
-            while true
-                if exist(temp, 'file')
-                    delete(temp);
-                    break;
-                end
-            end
+            
+            delete(temp);
             
             % Remove temporary settings folder. 
-            rmdir(temp_settings, 's');
+            try
+                rmdir(temp_settings, 's');
+            catch
+                warning('%s\n', temp_settings);
+            end
+            
         end
         
         % Modify the pelvis COM in the default RRA_actuators file in order
@@ -499,12 +501,8 @@ classdef OpenSimTrial < handle
             temp = [results filesep 'temp.xml'];
             xmlwrite(temp, external_loads);
             cmcTool.createExternalLoads(temp, cmcTool.getModel());
-            while true
-                if exist(temp, 'file')
-                    delete(temp);
-                    break;
-                end
-            end
+            
+            delete(temp);
             
             % Remove temporary settings folder.
             rmdir(temp_settings, 's');
