@@ -78,6 +78,8 @@ classdef OpenSimTrial < handle
             % Setup analysis.
             if strcmp(method, 'ID')
                 [tool, file] = obj.setup(method, options);
+            elseif strcmp(method, 'RRA') || strcmp(method, 'CMC')
+                [tool, folder] = obj.setup(method, options);
             else
                 tool = obj.setup(method, options);
             end
@@ -91,8 +93,12 @@ classdef OpenSimTrial < handle
             elseif strcmp(method, 'RRA')
                 obj.best_kinematics = ...
                     [options.results filesep 'RRA_Kinematics_q.sto'];
-            elseif strcmp(method, 'ID')
+            end
+            
+            if strcmp(method, 'ID')
                 delete(file);
+            elseif strcmp(method, 'RRA') || strcmp(method, 'CMC')
+                rmdir(folder, 's');
             end
             
         end
@@ -263,11 +269,13 @@ classdef OpenSimTrial < handle
                         options.timerange, options.results, options.load, ...
                         options.settings);
                 case 'RRA'
-                    varargout{1} = obj.setupRRA(options.timerange, ...
-                        options.results, options.load, options.settings);
+                    [varargout{1}, varargout{2}] = obj.setupRRA(...
+                        options.timerange, options.results, options.load, ...
+                        options.settings);
                 case 'CMC'
-                    varargout{1} = obj.setupCMC(options.timerange, ...
-                        options.results, options.load, options.settings);
+                    [varargout{1}, varargout{2}] = obj.setupCMC(...
+                        options.timerange, options.results, options.load, ...
+                        options.settings);
             end
             
         end
@@ -311,7 +319,8 @@ classdef OpenSimTrial < handle
             bkTool.setResultsDir(results);
         end
         
-        function rraTool = setupRRA(obj, timerange, results, load, settings)
+        function [rraTool, temp_settings] = ...
+                setupRRA(obj, timerange, results, load, settings)
             % Temporarily copy RRA settings folder to new location.
             [folder, name, ext] = fileparts(settings);
             temp_settings = [results filesep 'temp'];
@@ -349,9 +358,6 @@ classdef OpenSimTrial < handle
                     break;
                 end
             end
-            
-            % Remove temporary settings folder. 
-            rmdir(temp_settings, 's');
         end
         
         % Modify the pelvis COM in the default RRA_actuators file in order
@@ -466,7 +472,8 @@ classdef OpenSimTrial < handle
             idTool.setExternalLoadsFileName(temp);
         end
         
-        function cmcTool = setupCMC(obj, timerange, results, load, settings)
+        function [cmcTool, temp_settings] = ...
+                setupCMC(obj, timerange, results, load, settings)
             % Import OpenSim CMCTool class.
             import org.opensim.modeling.CMCTool
             
@@ -505,9 +512,6 @@ classdef OpenSimTrial < handle
                     break;
                 end
             end
-            
-            % Remove temporary settings folder.
-            rmdir(temp_settings, 's');
         end
     end
     
