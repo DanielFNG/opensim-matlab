@@ -79,6 +79,8 @@ classdef OpenSimTrial < handle
             % Setup analysis.
             if strcmp(method, 'ID')
                 [tool, file] = obj.setup(method, options);
+            elseif strcmp(method, 'RRA') || strcmp(method, 'CMC')
+                [tool, file, folder] = obj.setup(method, options);
             else
                 tool = obj.setup(method, options);
             end
@@ -89,11 +91,13 @@ classdef OpenSimTrial < handle
             
             if strcmp(method, 'IK')
                 obj.best_kinematics = [options.results filesep 'ik.mot'];
-            elseif strcmp(method, 'RRA')
+            elseif strcmp(method, 'RRA') || strcmp(method, 'CMC')
                 obj.best_kinematics = ...
                     [options.results filesep 'RRA_Kinematics_q.sto'];
+                OpenSimTrial.attemptDelete(file);
+                OpenSimTrial.attemptDelete(folder);
             elseif strcmp(method, 'ID')
-                delete(file);
+                OpenSimTrial.attemptDelete(file);
             end
             
         end
@@ -264,10 +268,12 @@ classdef OpenSimTrial < handle
                         options.timerange, options.results, options.load, ...
                         options.settings);
                 case 'RRA'
-                    varargout{1} = obj.setupRRA(options.timerange, ...
+                    [varargout{1}, varargout{2}, varargout{3}] = ...
+                        obj.setupRRA(options.timerange, ...
                         options.results, options.load, options.settings);
                 case 'CMC'
-                    varargout{1} = obj.setupCMC(options.timerange, ...
+                    [varargout{1}, varargout{2}, varargout{3}] = ...
+                        obj.setupCMC(options.timerange, ...
                         options.results, options.load, options.settings);
             end
             
@@ -312,7 +318,8 @@ classdef OpenSimTrial < handle
             bkTool.setResultsDir(results);
         end
         
-        function rraTool = setupRRA(obj, timerange, results, load, settings)
+        function [rraTool, temp, temp_settings] = ...
+                setupRRA(obj, timerange, results, load, settings)
             % Temporarily copy RRA settings folder to new location.
             [folder, name, ext] = fileparts(settings);
             temp_settings = [results filesep 'temp'];
@@ -344,15 +351,6 @@ classdef OpenSimTrial < handle
             temp = [results filesep 'temp.xml'];
             xmlwrite(temp, ext);
             rraTool.createExternalLoads(temp, rraTool.getModel());
-            
-            delete(temp);
-            
-            % Remove temporary settings folder. 
-            try
-                rmdir(temp_settings, 's');
-            catch
-                warning('%s\n', temp_settings);
-            end
             
         end
         
@@ -535,6 +533,22 @@ classdef OpenSimTrial < handle
                 message = '';
             else
                 message = 'not ';
+            end
+        end
+        
+        function attemptDelete(path)
+            if ~exist(path, 'dir')
+                lastwarn('');
+                delete(path);
+                if strcmp(lastwarn, 'File not found or permission denied')
+                    fprintf('%s requires manual deletion.', path);
+                end
+            else
+                try
+                    rmdir(path, 's');
+                catch
+                    fprintf('%s requires manual deletion.', path);
+                end
             end
         end
         
