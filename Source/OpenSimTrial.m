@@ -79,7 +79,7 @@ classdef OpenSimTrial < handle
             if strcmp(method, 'ID')
                 [tool, file] = obj.setup(method, options);
             elseif strcmp(method, 'RRA') || strcmp(method, 'CMC')
-                [tool, file, folder] = obj.setup(method, options);
+                [tool, folder] = obj.setup(method, options);
             else
                 tool = obj.setup(method, options);
             end
@@ -98,7 +98,6 @@ classdef OpenSimTrial < handle
             if strcmp(method, 'ID')
                 delete(file);
             elseif strcmp(method, 'RRA') || strcmp(method, 'CMC')
-                delete(file);
                 rmdir(folder, 's');
             end
             
@@ -270,13 +269,13 @@ classdef OpenSimTrial < handle
                         options.timerange, options.results, options.load, ...
                         options.settings);
                 case 'RRA'
-                    [varargout{1}, varargout{2}, varargout{3}] = ...
-                        obj.setupRRA(options.timerange, options.results, ...
-                        options.load, options.settings);
+                    [varargout{1}, varargout{2}] = obj.setupRRA(...
+                        options.timerange, options.results, options.load, ...
+                        options.settings);
                 case 'CMC'
-                    [varargout{1}, varargout{2}, varargout{3}] = ...
-                        obj.setupCMC(options.timerange, options.results, ...
-                        options.load, options.settings);
+                    [varargout{1}, varargout{2}] = obj.setupCMC(...
+                        options.timerange, options.results, options.load, ...
+                        options.settings);
             end
             
         end
@@ -320,7 +319,7 @@ classdef OpenSimTrial < handle
             bkTool.setResultsDir(results);
         end
         
-        function [rraTool, temp_loads, temp_settings] = ...
+        function [rraTool, temp_settings] = ...
                 setupRRA(obj, timerange, results, load, settings)
             % Temporarily copy RRA settings folder to new location.
             [folder, name, ext] = fileparts(settings);
@@ -350,9 +349,15 @@ classdef OpenSimTrial < handle
             ext = xmlread(load);
             ext.getElementsByTagName('datafile').item(0).getFirstChild. ...
                 setNodeValue(obj.grfs_path);
-            temp_loads = [results filesep 'temp.xml'];
-            xmlwrite(temp_loads, ext);
-            rraTool.createExternalLoads(temp_loads, rraTool.getModel());
+            temp = [results filesep 'temp.xml'];
+            xmlwrite(temp, ext);
+            rraTool.createExternalLoads(temp, rraTool.getModel());
+            while true
+                if exist(temp, 'file')
+                    delete(temp);
+                    break;
+                end
+            end
         end
         
         % Modify the pelvis COM in the default RRA_actuators file in order
@@ -467,7 +472,7 @@ classdef OpenSimTrial < handle
             idTool.setExternalLoadsFileName(temp);
         end
         
-        function [cmcTool, temp_loads, temp_settings] = ...
+        function [cmcTool, temp_settings] = ...
                 setupCMC(obj, timerange, results, load, settings)
             % Import OpenSim CMCTool class.
             import org.opensim.modeling.CMCTool
@@ -498,9 +503,15 @@ classdef OpenSimTrial < handle
             external_loads = xmlread(load);
             external_loads.getElementsByTagName('datafile').item(0). ...
                 getFirstChild.setNodeValue(obj.grfs_path);
-            temp_loads = [results filesep 'temp.xml'];
-            xmlwrite(temp_loads, external_loads);
-            cmcTool.createExternalLoads(temp_loads, cmcTool.getModel());
+            temp = [results filesep 'temp.xml'];
+            xmlwrite(temp, external_loads);
+            cmcTool.createExternalLoads(temp, cmcTool.getModel());
+            while true
+                if exist(temp, 'file')
+                    delete(temp);
+                    break;
+                end
+            end
         end
     end
     
