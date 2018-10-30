@@ -541,7 +541,7 @@ classdef OpenSimTrial < handle
                 lastwarn('');
                 delete(path);
                 if strcmp(lastwarn, 'File not found or permission denied')
-                    fprintf('%s requires manual deletion.', path);
+                    fprintf('%s requires manual deletion.\n', path);
                 end
             else
                 try
