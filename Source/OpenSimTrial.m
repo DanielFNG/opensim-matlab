@@ -69,6 +69,18 @@ classdef OpenSimTrial < handle
                 OpenSimTrial.statusMessage(obj.computed.CMC));
         end
         
+        function assertComputed(obj, analyses)
+            % Assert that an analysis has been computed. 
+            % Also supports taking a cell array of analyses as input. 
+            if length(analyses) == 1
+                obj.computed.(analyses) = true;
+            else
+                for i=1:length(analyses)
+                    obj.computed.(analyses{i}) = true;
+                end
+            end
+        end
+        
         function run(obj, method, varargin)
             
             obj.checkValidity(method);
@@ -101,14 +113,6 @@ classdef OpenSimTrial < handle
             end
             
         end
-        
-        function fullRun(obj, varargin)
-            
-            for i = 1:length(obj.defaults.methods)
-                obj.run(obj.defaults.methods{i}, varargin{:});
-            end
-            
-        end   
             
         function performModelAdjustment(...
                 obj, body, new_model, human_model, varargin)
