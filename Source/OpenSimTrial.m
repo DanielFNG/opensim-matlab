@@ -29,7 +29,7 @@ classdef OpenSimTrial < handle
         defaults
         marker_data 
         best_kinematics
-        
+        results_paths
     end
     
     methods
@@ -237,6 +237,9 @@ classdef OpenSimTrial < handle
                 end
                 options.timerange = kinematics.getTimeRange();
             end
+            
+            % Set specific results directories.
+            obj.results_path.(func) = options.results;
         end
         
         function checkValidity(obj, method)
