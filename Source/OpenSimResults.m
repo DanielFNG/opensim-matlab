@@ -1,6 +1,7 @@
 classdef OpenSimResults < handle 
 
     properties (SetAccess = private)
+        GRF = 'Not loaded.'
         IK = 'Not loaded.'
         RRA = 'Not loaded.'
         BK = 'Not loaded.'
@@ -46,6 +47,8 @@ classdef OpenSimResults < handle
             obj.(analysis) = {};
             
             switch analysis
+                case 'GRF'
+                    obj.GRF.Forces = Data(obj.Trial.grfs_path);
                 case 'IK'
                     obj.IK.Kinematics = Data([folder filesep 'ik.mot']);
                     obj.IK.InputMarkers = Data(obj.Trial.input_coordinates);
