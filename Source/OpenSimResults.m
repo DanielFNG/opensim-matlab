@@ -10,14 +10,16 @@ classdef OpenSimResults < handle
     
     properties (GetAccess = private, SetAccess = private)
         Trial
-        Analyses
+        ResultsPaths
+    end
+        
     methods
     
         % Construct OpenSimResults.
         function obj = OpenSimResults(ost, analyses)
             obj.Trial = ost;
-            obj.Analyses = analyses;
-            obj.createDataStruct();
+            obj.ResultsPaths = ost.getResultsPaths();
+            obj.createDataStruct(analyses);
         end
         
     end
@@ -25,58 +27,50 @@ classdef OpenSimResults < handle
     methods (Access = private)
         
         function createDataStruct(obj, analyses)
-            if any(strcmp(analyses, 'IK'))
-                obj.loadIK();
-            elseif any(strcmp(analyses, 'RRA'))
-                obj.loadRRA();
-            elseif any(strcmp(analyses, 'BK'))
-                obj.loadBK();
-            elseif any(strcmp(analyses, 'ID'))
-                obj.loadID();
-            elseif any(strcmp(analyses, 'CMC'))
-                obj.loadCMC();
+            for i=1:length(analyses)
+                obj.load(analyses{i});
             end
         end
         
-        function loadIK(obj)
-            if ~obj.Trial.computed.IK
-                error('IK not computed.');
+        function folder = preload(obj, analysis)
+            if ~obj.Trial.computed.(analysis)
+                error([analysis ' not computed.']);
             end
             
-            obj.IK.Kinematics = 0;
-            obj.IK.InputMarkers = 0;
-            obj.IK.OutputMarkers = 0;
+            folder = obj.ResultsPaths.(analysis);
         end
         
-        function loadRRA(obj)
-            if ~obj.Trial.computed.RRA
-                error('RRA not computed.');
-            end
+        function load(obj, analysis)
             
-            obj.RRA.Kinematics = 0;
-        end
-        
-        function loadBK(obj)
-            if ~obj.Trial.computed.BK
-                error('BK not computed.');
-            end
+            folder = obj.preload(analysis);
+            obj.(analysis) = {};
             
-            obj.BK.Positions = 0;
-            obj.BK.Velocities = 0;
-            obj.BK.Accelerations = 0;
-        end
-        
-        function loadID(obj)
-            if ~obj.Trial.computed.ID
-                error('ID not computed.');
-            end
-            
-            obj.ID.JointTorques = 0;
-        end
-        
-        function loadCMC(obj)
-            if ~obj.Trial.computed.CMC
-                error('CMC not computed.');
+            switch analysis
+                case 'IK'
+                    obj.IK.Kinematics = Data([folder filesep 'ik.mot']);
+                    obj.IK.InputMarkers = Data(obj.Trial.input_coordinates);
+                    obj.IK.OutputMarkers = ...
+                        Data([folder filesep 'ik_model_marker_locations.sto']);
+                case 'RRA'
+                    obj.RRA.Kinematics = ...
+                        Data([folder filesep 'RRA_Kinematics_q.sto']);
+                    obj.RRA.Forces = ...
+                        Data([folder filesep 'RRA_Actuation_force.sto']);
+                    obj.RRA.TrackingErrors = ...
+                        Data([folder filesep 'RRA_Kinematics_q.sto']);
+                case 'BK'
+                    obj.BK.Positions = Data([folder filesep ...
+                        'Analysis_BodyKinematics_pos_global.sto']);
+                    obj.BK.Velocities = Data([folder filesep ...
+                        'Analysis_BodyKinematics_vel_global.sto']);
+                    obj.BK.Accelerations = Data([folder filesep ...
+                        'Analysis_BodyKinematics_acc_global.sto']);
+                case 'ID'
+                    obj.ID.JointTorques = Data([folder filesep 'id.sto']);
+                case 'CMC'
+                    % Not yet implemented - need to see which files need to
+                    % be read in. Will wait until more CMC-based analysis
+                    % is required.
             end
         end
     
