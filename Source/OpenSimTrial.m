@@ -113,6 +113,12 @@ classdef OpenSimTrial < handle
             end
             
         end
+        
+        function fullRun(obj, varargin)
+            for i=1:length(obj.defaults.methods)
+                obj.run(obj.defaults.methods{i}, varargin{:});
+            end
+        end
             
         function performModelAdjustment(...
                 obj, body, new_model, human_model, varargin)
@@ -136,6 +142,10 @@ classdef OpenSimTrial < handle
                 new_model, human_model, getenv('OPENSIM_MATLAB_OUT')); 
             
             obj.computed.model_adjustment = true;
+        end
+        
+        function paths = getResultsPaths(obj)
+            paths = obj.results_paths;
         end
         
     end
@@ -239,7 +249,7 @@ classdef OpenSimTrial < handle
             end
             
             % Set specific results directories.
-            obj.results_path.(func) = options.results;
+            obj.results_paths.(func) = options.results;
         end
         
         function checkValidity(obj, method)
@@ -387,7 +397,7 @@ classdef OpenSimTrial < handle
             
             % Change the CoM for each of FX/FY/FZ. We skip i=0 since this
             % occurs in the 'default' node. 
-            for i=1:3
+            for i=0:2
                 bodies.item(i).getNextSibling().getNextSibling(). ...
                     setTextContent(com_string);
             end
@@ -473,7 +483,8 @@ classdef OpenSimTrial < handle
             idTool.setExternalLoadsFileName(temp);
         end
         
-        function cmcTool = setupCMC(obj, timerange, results, load, settings)
+        function [cmcTool, temp, temp_settings] = ...
+                setupCMC(obj, timerange, results, load, settings)
             % Import OpenSim CMCTool class.
             import org.opensim.modeling.CMCTool
             
@@ -506,11 +517,6 @@ classdef OpenSimTrial < handle
             temp = [results filesep 'temp.xml'];
             xmlwrite(temp, external_loads);
             cmcTool.createExternalLoads(temp, cmcTool.getModel());
-            
-            delete(temp);
-            
-            % Remove temporary settings folder.
-            rmdir(temp_settings, 's');
         end
     end
     

@@ -57,3 +57,6 @@ Logs/*.log
 
 # Ignore changes to the RRA Actuator file.
 Defaults/RRA/actuators.xml
+
+# Ignore testing files.
+Testing/*
