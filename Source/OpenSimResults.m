@@ -13,6 +13,14 @@ classdef OpenSimResults < handle
         Trial
         ResultsPaths
     end
+    
+    properties (GetAccess = private, SetAccess = private)
+        StanceCutoff = 10
+        CoM = 'center_of_mass_'
+        RightFoot = '    ground_force1'
+        LeftFoot = '    ground_force2'
+        Torque = '_moment'
+    end
         
     methods
     
@@ -23,9 +31,45 @@ classdef OpenSimResults < handle
             obj.createDataStruct(analyses);
         end
         
+        function result = calculateCoMD(obj)
+            directions = {'x', 'y', 'z'};
+            for i=1:length(directions)
+                label = [obj.CoM directions{i}];
+                data = obj.BK.Positions.getColumn(label);
+                result.(directions{i}) = max(data) - min(data);
+            end
+        end
+        
+        function result = calculateCoPD(obj)
+            directions = {'x', 'z'};
+            foot = obj.identifyLeadingFoot();
+            stance = obj.isolateStancePhase(foot);
+            for i=1:length(directions)
+                label = directions{i};
+                cp = ['p' label];
+                cop = obj.GRF.Forces.getColumn([foot cp]);
+                result.(label) = max(cop(stance)) - min(cop(stance));
+            end
+        end
+        
+        function result = calculateWNPT(obj, joint)
+            torque = obj.ID.JointTorques.getColumn([joint obj.Torque]);
+            result = (max(torque) - min(torque))/obj.getModelMass();
+        end
+        
+        function result = calculateROM(obj, joint)
+            trajectory = obj.IK.Kinematics.getColumn(joint);
+            result = max(trajectory) - min(trajectory);
+        end
     end
     
     methods (Access = private)
+        
+        function checkDataAvailability(obj, analysis)
+            if strcmp(obj.(analysis), 'Not loaded.')
+                error('Analysis data not available.');
+            end
+        end
         
         function createDataStruct(obj, analyses)
             for i=1:length(analyses)
@@ -75,6 +119,35 @@ classdef OpenSimResults < handle
                     % be read in. Will wait until more CMC-based analysis
                     % is required.
             end
+        end
+        
+        function label = identifyLeadingFoot(obj)
+            vert = 'vy';
+            right = obj.GRF.Forces.getColumn([obj.RightFoot vert]);
+            left = obj.GRF.Forces.getColumn([obj.LeftFoot vert]);
+            if right(1) > left(1)
+                label = obj.LeftFoot;
+            else
+                label = obj.RightFoot;
+            end
+        end
+        
+        function indices = isolateStancePhase(obj, label)
+            vert = 'vy';
+            indices = find(grfs.getColumn([label vert]) > obj.StanceCutoff);
+        end
+        
+        function mass = getModelMass(obj)
+            import org.opensim.modeling.Model;
+            osim = Model(obj.Trial.model_path);
+            bodies = osim.getBodySet();
+            masses = zeros(1, bodies.getSize() - 1);
+            for i=0:bodies.getSize()-1
+                if ~strcmp(name, 'ground')
+                    masses(min(masses == 0)) = bodies.get(i).getMass();
+                end
+            end
+            mass = sum(masses);
         end
     
     end
