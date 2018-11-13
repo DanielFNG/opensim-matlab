@@ -261,11 +261,11 @@ classdef OpenSimTrial < handle
                     error('Marker data not provided.');
                 end
             else
-                if isempty(obj.grfs_path)
-                    error(['External forces required for analyses other' ...
-                        ' than IK.']);
-                elseif ~obj.computed.IK 
+                if ~obj.computed.IK
                     error('Require IK to compute subsequent analyses.');
+                elseif isempty(obj.grfs_path) && ~strcmp(method, 'BK')
+                    error(['External forces required for analyses other' ...
+                        ' than IK and BK.']);
                 end
             end
             
