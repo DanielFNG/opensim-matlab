@@ -49,6 +49,14 @@ classdef Data < handle & matlab.mixin.Copyable
                 obj.getFrequency();
             end
         end
+        
+        function new_obj = slice(obj, frames)
+            new_obj = copy(obj);
+            new_obj.NFrames = length(frames);
+            new_obj.Frames = frames;
+            new_obj.Timesteps = obj.Timesteps(frames);
+            new_obj.Values = obj.Values(frames,1:end);
+        end
 
         % Write data object to a tab delimited file. 
         % TRC files should be written with headers only because of the
