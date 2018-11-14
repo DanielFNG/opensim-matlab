@@ -82,7 +82,7 @@ classdef Data < handle & matlab.mixin.Copyable
                     fprintf(fileID, '%i\t', obj.Frames(i));
                 end
                 fprintf(fileID, '%12.14f\t', obj.Timesteps(i));
-                for j=1:size(obj.Values,2)
+                for j=2:size(obj.Values,2)
                     fprintf(fileID,'%12.14f\t', obj.Values(i,j));
                 end
                 fprintf(fileID,'\n');
@@ -154,17 +154,18 @@ classdef Data < handle & matlab.mixin.Copyable
             end
             
             % Define some sizes - number of colums of data in each object. 
-            size1 = size(obj1.Values,2);
-            size2 = size(obj2.Values,2);
+            size1 = size(obj1.Values,2) - 1;
+            size2 = size(obj2.Values,2) - 1;
             
             % Set up and result and re-allocate the Values.
             new_col_size = size1 + size2;
             
             result = copy(obj1);
-            result.Values = zeros(size(obj1.Timesteps,1),new_col_size);
+            result.Values = zeros(size(obj1.Timesteps,1),new_col_size + 1);
             
             % Copy over the values from the input objects.
-            result.Values(1:end,1:size1) = obj1.Values;
+            result.Values(1:end, 1) = obj1.Timesteps;
+            result.Values(1:end,2:size1) = obj1.Values;
             result.Values(1:end,size1+1:end) = obj2.Values;
             
             % Add labels together, and update header to reflect changes.
@@ -315,7 +316,7 @@ classdef Data < handle & matlab.mixin.Copyable
         function updateHeader(obj)
             if strcmp(obj.Filetype, 'TRC')
                 obj.Header{3} = [sprintf('%i\t', obj.Frequency, ...
-                    obj.CameraRate, obj.NFrames, size(obj.Values, 2)/3) ...
+                    obj.CameraRate, obj.NFrames, (size(obj.Values, 2) -1)/3) ...
                     sprintf('%s\t', obj.CameraUnits), sprintf('%i\t', ...
                     obj.CameraRate), sprintf('%i', obj.Values(1,1))];
             elseif strcmp(obj.Filetype, 'MOT')
