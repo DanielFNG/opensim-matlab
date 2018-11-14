@@ -274,7 +274,7 @@ classdef Data < handle & matlab.mixin.Copyable
             for i=1:size(str_values,2)
                 values(i,1:end) = str2double(str_values{1,i});
             end
-            obj.Values = values(1:end, 3:end);
+            obj.Values = values(1:end, 2:end);
             obj.Timesteps = values(1:end, 2);
             obj.Frames = round(values(1:end, 1));
             
@@ -288,7 +288,7 @@ classdef Data < handle & matlab.mixin.Copyable
             try
                 values = data_array.data;
                 obj.Timesteps = values(1:end, 1);
-                obj.Values = values(1:end, 2:end);
+                obj.Values = values(1:end, 1:end);
                 obj.Header = data_array.textdata(1:end-1, 1);
                 obj.Labels = data_array.colheaders;
             catch
