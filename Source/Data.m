@@ -10,13 +10,13 @@ classdef Data < handle & matlab.mixin.Copyable
         NFrames
         Frequency
         Labels
+        Values
     end
     
     properties (GetAccess = private, SetAccess = private)
         Header
         Frames
         Timesteps
-        Values
         CameraRate = 100; % Fixed camera rate for Vicon cameras.
         CameraUnits = 'mm'; % Fixed camera units for Vicon cameras.
     end
