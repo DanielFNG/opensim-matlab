@@ -72,17 +72,31 @@ classdef Data < handle & matlab.mixin.Copyable
                     fprintf(fileID,'%s\n', char(obj.Header(i)));
                 end
             if  ~strcmp(obj.Filetype, 'TRC')
-                for i=1:size(obj.Labels,2)
+                for i=1:size(obj.Labels, 2)
                     fprintf(fileID,'%s\t', char(obj.Labels(i)));
                 end
-                fprintf(fileID,'\n');
+                fprintf(fileID, '\n');
+            else
+                fprintf(fileID, '%s\t%s\t', ...
+                    char(obj.Labels(1)), char(obj.Labels(2)));
+                for i=3:size(obj.Labels, 2)
+                    str = char(obj.Labels(i));
+                    if any(strcmp(str(end-1:end), {'_Y', '_Z'}))
+                        fprintf(fileID, '%s\t', '');
+                    else
+                        fprintf(fileID, '%s\t', str(1:end-2));
+                    end
+                end
+                fprintf(fileID, '\n\t\t');
+                for i=3:3:length(obj.Labels) - 2
+                    fprintf(fileID, '%s\t', ['X' num2str(i/3)]);
+                    fprintf(fileID, '%s\t', ['Y' num2str(i/3)]);
+                    fprintf(fileID, '%s\t', ['Z' num2str(i/3)]);
+                end
+                fprintf(fileID, '\n\n');
             end
             for i=1:size(obj.Values,1)
-                if strcmp(obj.Filetype, 'TRC')
-                    fprintf(fileID, '%i\t', obj.Frames(i));
-                end
-                fprintf(fileID, '%12.14f\t', obj.Timesteps(i));
-                for j=2:size(obj.Values,2)
+                for j=1:size(obj.Values,2)
                     fprintf(fileID,'%12.14f\t', obj.Values(i,j));
                 end
                 fprintf(fileID,'\n');
@@ -237,25 +251,28 @@ classdef Data < handle & matlab.mixin.Copyable
             id = fopen(filename);
             
             % Read in the header to a cell array.
-            for i=1:6
+            for i=1:3
                 line = fgetl(id);
                 obj.Header{i} = line;
             end
             
             % Construct the labels.
-            labels = strsplit(obj.Header{4});
+            line = fgetl(id);
+            labels = strsplit(line);
             
             obj.Labels{1} = labels{1};
             obj.Labels{2} = labels{2};
             k = 3;
-            for i=3:size(labels,2)-1
-                obj.Labels{k} = labels{i};
-                obj.Labels{k+1} = '';
-                obj.Labels{k+2} = '';
+            for i=3:length(labels) - 1
+                obj.Labels{k} = [labels{i} '_X'];
+                obj.Labels{k + 1} = [labels{i} '_Y'];
+                obj.Labels{k + 2} = [labels{i} '_Z'];
                 k = k + 3;
             end
             
             % Now get the values.
+            fgetl(id);
+            fgetl(id);
             n_cols = length(obj.Labels);
             count = 1;
             while true
@@ -275,7 +292,7 @@ classdef Data < handle & matlab.mixin.Copyable
             for i=1:size(str_values,2)
                 values(i,1:end) = str2double(str_values{1,i});
             end
-            obj.Values = values(1:end, 2:end);
+            obj.Values = values(1:end, 1:end);
             obj.Timesteps = values(1:end, 2);
             obj.Frames = round(values(1:end, 1));
             
