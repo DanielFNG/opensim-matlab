@@ -57,6 +57,11 @@ classdef Data < handle & matlab.mixin.Copyable
             new_obj.Timesteps = obj.Timesteps(frames);
             new_obj.Values = obj.Values(frames,1:end);
         end
+        
+        function extend(obj, labels, values)
+            obj.Values = [obj.Values values];
+            obj.Labels(end + 1:end + length(labels)) = labels;
+        end
 
         % Write data object to a tab delimited file. 
         % TRC files should be written with headers only because of the
@@ -187,6 +192,27 @@ classdef Data < handle & matlab.mixin.Copyable
                 result.Labels{1,i} = obj2.Labels{1,i-size1};
             end
         end
+        
+        function rotate(obj, xrot, yrot, zrot)
+            
+            % Construct the rotation matrix.
+            R = rotz(zrot)*roty(yrot)*rotx(xrot);
+            
+            % Get the labels with the X axis data.
+            x_labels = ...
+                obj.Labels(cellfun(@(x) strcmpi(x(end), 'x'), obj.Labels));
+            
+            % Step through rotating the data. 
+            for i=1:length(x_labels)
+                label = x_labels{i}(1:end-1);
+                x_index = obj.getIndex(x_labels{i});
+                coordinates = transpose([obj.getColumn([label 'X']), ...
+                    obj.getColumn([label 'Y']), obj.getColumn([label 'Z'])]);
+                rotation = transpose(R*coordinates);
+                obj.Values(:, x_index:x_index + 2) = rotation;
+            end
+            
+        end
       
         % Get, as a vector, the data corresponding to a specific label.
         % Returns 0 if the label could not be matched. 
@@ -294,7 +320,7 @@ classdef Data < handle & matlab.mixin.Copyable
             end
             obj.Values = values(1:end, 1:end);
             obj.Timesteps = values(1:end, 2);
-            obj.Frames = round(values(1:end, 1));
+            obj.Frames = 1:length(obj.Timesteps);
             
             % Close the file.
             fclose(id);
@@ -306,6 +332,7 @@ classdef Data < handle & matlab.mixin.Copyable
             try
                 values = data_array.data;
                 obj.Timesteps = values(1:end, 1);
+                obj.Frames = 1:length(obj.Timesteps);
                 obj.Values = values(1:end, 1:end);
                 obj.Header = data_array.textdata(1:end-1, 1);
                 obj.Labels = data_array.colheaders;
