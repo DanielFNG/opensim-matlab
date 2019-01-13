@@ -5,18 +5,18 @@ classdef Data < handle & matlab.mixin.Copyable
     %   including spline fitting and combining data objects. Compliance
     %   with the OpenSim data file formats (.trc, .mot, .sto) is assumed.
     
-    properties (SetAccess = private)
+    properties %(SetAccess = private)
         Filetype
         NFrames
         Frequency
         Labels
         Values
+        Timesteps
+        Frames
     end
     
     properties (GetAccess = private, SetAccess = private)
         Header
-        Frames
-        Timesteps
         CameraRate = 100; % Fixed camera rate for Vicon cameras.
         CameraUnits = 'mm'; % Fixed camera units for Vicon cameras.
     end
@@ -233,7 +233,7 @@ classdef Data < handle & matlab.mixin.Copyable
         function obj = scaleColumns(obj, indices, multiplier)
             obj.Values(1:end, indices) = ...
                 multiplier * obj.Values(1:end, indices);
-        end 
+        end
         
         function range = getTimeRange(obj)
             range = [obj.Timesteps(1), obj.Timesteps(end)];
@@ -316,7 +316,11 @@ classdef Data < handle & matlab.mixin.Copyable
             end
             values = zeros(size(str_values,2), n_cols);
             for i=1:size(str_values,2)
-                values(i,1:end) = str2double(str_values{1,i});
+                if size(str_values{1, i}, 2) == size(values, 2)
+                    values(i,1:end) = str2double(str_values{1,i});
+                else
+                    error('Error: gaps in marker data or missing markers.');
+                end
             end
             obj.Values = values(1:end, 1:end);
             obj.Timesteps = values(1:end, 2);
