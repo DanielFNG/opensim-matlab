@@ -104,7 +104,11 @@ classdef Data < handle & matlab.mixin.Copyable
             end
             for i=1:size(obj.Values,1)
                 for j=1:size(obj.Values,2)
-                    fprintf(fileID,'%12.14f\t', obj.Values(i,j));
+                    if j == 1 && strcmp(obj.Filetype, 'TRC')
+                        fprintf(fileID, '%i\t', obj.Values(i,j));
+                    else
+                        fprintf(fileID,'%12.14f\t', obj.Values(i,j));
+                    end
                 end
                 fprintf(fileID,'\n');
             end
@@ -300,24 +304,23 @@ classdef Data < handle & matlab.mixin.Copyable
             
             % Now get the values.
             fgetl(id);
-            line = fgetl(id);
-            while isempty(line)
-                line = fgetl(id);
-            end
             n_cols = length(obj.Labels);
             count = 1;
             while true
+                line = fgetl(id);
                 if ~ischar(line)
                     break;
                 end
-                str_values{count} = strsplit(line); %#ok<*AGROW>
-                % Sometimes the last column can be just a new
-                % line, which we don't want.
-                if isempty(str_values{count}{end})
-                    str_values{count} = str_values{count}(1:end-1);
+                contents = strsplit(line);
+                if length(contents) > 2 % sometimes blank line = 2 empty chars
+                    str_values{count} = strsplit(line); %#ok<*AGROW>
+                    % Sometimes the last column can be just a new
+                    % line, which we don't want.
+                    if isempty(str_values{count}{end})
+                        str_values{count} = str_values{count}(1:end-1);
+                    end
+                    count = count + 1;
                 end
-                count = count + 1;
-                line = fgetl(id);
             end
             values = zeros(size(str_values,2), n_cols);
             for i=1:size(str_values,2)
