@@ -19,6 +19,7 @@ classdef Data < handle & matlab.mixin.Copyable
         Header
         CameraRate = 100; % Fixed camera rate for Vicon cameras.
         CameraUnits = 'mm'; % Fixed camera units for Vicon cameras.
+        OrigNumFrames
     end
     
     methods
@@ -46,6 +47,7 @@ classdef Data < handle & matlab.mixin.Copyable
                 
                 % Store the # of frames and the frequency of the data.
                 obj.NFrames = length(obj.Timesteps);
+                obj.OrigNumFrames = obj.NFrames;
                 obj.getFrequency();
             end
         end
@@ -298,11 +300,13 @@ classdef Data < handle & matlab.mixin.Copyable
             
             % Now get the values.
             fgetl(id);
-            fgetl(id);
+            line = fgetl(id);
+            while isempty(line)
+                line = fgetl(id);
+            end
             n_cols = length(obj.Labels);
             count = 1;
             while true
-                line = fgetl(id);
                 if ~ischar(line)
                     break;
                 end
@@ -313,6 +317,7 @@ classdef Data < handle & matlab.mixin.Copyable
                     str_values{count} = str_values{count}(1:end-1);
                 end
                 count = count + 1;
+                line = fgetl(id);
             end
             values = zeros(size(str_values,2), n_cols);
             for i=1:size(str_values,2)
@@ -364,9 +369,10 @@ classdef Data < handle & matlab.mixin.Copyable
         function updateHeader(obj)
             if strcmp(obj.Filetype, 'TRC')
                 obj.Header{3} = [sprintf('%i\t', obj.Frequency, ...
-                    obj.CameraRate, obj.NFrames, (size(obj.Values, 2) -1)/3) ...
+                    obj.CameraRate, obj.NFrames, (size(obj.Values, 2) - 2)/3)...
                     sprintf('%s\t', obj.CameraUnits), sprintf('%i\t', ...
-                    obj.CameraRate), sprintf('%i', obj.Values(1,1))];
+                    obj.CameraRate), sprintf('%i\t', obj.Values(1,1)), ...
+                    sprintf('%i', obj.OrigNumFrames)];
             elseif strcmp(obj.Filetype, 'MOT')
                 obj.Header{2} = ['datacolumns ' num2str(length(obj.Labels))];
                 obj.Header{3} = ['datarows ' num2str(size(obj.Values, 1))];
