@@ -48,8 +48,8 @@ classdef OpenSimTrial < handle
                 if ~exist(obj.results_directory, 'dir')
                     mkdir(obj.results_directory);
                 end
-                obj.analyseInputCoordinates();
                 obj.loadDefaults();
+                obj.analyseInputCoordinates();
             end
         end
         
