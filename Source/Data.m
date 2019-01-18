@@ -62,7 +62,17 @@ classdef Data < handle & matlab.mixin.Copyable
         
         function extend(obj, labels, values)
             obj.Values = [obj.Values values];
-            obj.Labels(end + 1:end + length(labels)) = labels;
+            if strcmp(obj.Filetype, 'TRC')
+                k = length(obj.Labels);
+                for i=1:length(labels)
+                    obj.Labels{k + 1} = [labels{i} '_X'];
+                    obj.Labels{k + 2} = [labels{i} '_Y'];
+                    obj.Labels{k + 3} = [labels{i} '_Z'];
+                    k = k + 3;
+                end
+            else
+                obj.Labels(end + 1:end + length(labels)) = labels;
+            end
         end
 
         % Write data object to a tab delimited file. 
