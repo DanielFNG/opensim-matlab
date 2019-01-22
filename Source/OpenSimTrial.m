@@ -296,7 +296,7 @@ classdef OpenSimTrial < handle
             
         end
         
-        function ikTool = setupIK(obj, timerange, results, settings)
+        function tool = setupIK(obj, timerange, results, settings)
             % Import OpenSim IKTool class and Model class.
             import org.opensim.modeling.InverseKinematicsTool;
             import org.opensim.modeling.Model;
@@ -305,8 +305,6 @@ classdef OpenSimTrial < handle
             ikTool = InverseKinematicsTool(settings);
             
             % Assign parameters.
-            model = Model(obj.model_path);
-            ikTool.setModel(model);
             ikTool.setStartTime(timerange(1));
             ikTool.setEndTime(timerange(2));
             ikTool.setMarkerDataFileName(obj.marker_data);
@@ -315,6 +313,15 @@ classdef OpenSimTrial < handle
             end
             ikTool.setResultsDir(results);
             ikTool.setOutputMotionFileName([results filesep 'ik.mot']);
+            
+            ikTool.print('oi.xml');
+            oi = xmlread('oi.xml');
+            oi.getElementsByTagName('model_file').item(0).getFirstChild. ...
+                setNodeValue(obj.model_path);
+            xmlwrite('oi2.xml', oi);
+            tool = InverseKinematicsTool('oi2.xml');
+            delete('oi.xml');
+            delete('oi2.xml');
         end
         
         function bkTool = setupBK(obj, timerange, results, settings)
