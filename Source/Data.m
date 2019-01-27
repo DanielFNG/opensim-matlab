@@ -25,22 +25,33 @@ classdef Data < handle & matlab.mixin.Copyable
     methods
     
         % Construct Data object from filename.
-        function obj = Data(filename)
+        function obj = Data(file, values, header, labels)
             if nargin > 0
-                % Different behaviour for TRC files.
-                [~, ~, ext] = fileparts(filename);
-                if strcmpi('.trc', ext)
-                    obj.loadTRC(filename);
-                    obj.Filetype = 'TRC';
-                else
-                    obj.loadMOTSTO(filename);
-                    if strcmp('.sto', ext)
-                        obj.Filetype = 'STO';
-                    elseif strcmp('.mot', ext)
-                        obj.Filetype = 'MOT';
+                if nargin == 1
+                    % Different behaviour for TRC files.
+                    [~, ~, ext] = fileparts(filename);
+                    if strcmpi('.trc', ext)
+                        obj.loadTRC(filename);
+                        obj.Filetype = 'TRC';
                     else
-                        obj.Filetype = 'Unrecognised';
+                        obj.loadMOTSTO(filename);
+                        if strcmp('.sto', ext)
+                            obj.Filetype = 'STO';
+                        elseif strcmp('.mot', ext)
+                            obj.Filetype = 'MOT';
+                        else
+                            obj.Filetype = 'Unrecognised';
+                        end
                     end
+                elseif nargin == 4
+                    obj.Filetype = file;
+                    obj.Values = values;
+                    obj.Timesteps = values(1:end, 1);
+                    obj.Header = header;
+                    obj.Labels = labels;
+                    obj.Frames = 1:length(obj.Timesteps);
+                else
+                    error('Data must be initialised with 1 or 4 arguments.');
                 end
                 % Check for NaN's in the data file. 
                 obj.checkValues();
