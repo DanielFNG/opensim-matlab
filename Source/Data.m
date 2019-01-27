@@ -6,6 +6,7 @@ classdef Data < handle & matlab.mixin.Copyable
     %   with the OpenSim data file formats (.trc, .mot, .sto) is assumed.
     
     properties %(SetAccess = private)
+        File
         Filetype
         NFrames
         Frequency
@@ -29,6 +30,7 @@ classdef Data < handle & matlab.mixin.Copyable
             if nargin > 0
                 if nargin == 1
                     % Different behaviour for TRC files.
+                    obj.File = file;
                     [~, ~, ext] = fileparts(filename);
                     if strcmpi('.trc', ext)
                         obj.loadTRC(filename);
@@ -44,7 +46,9 @@ classdef Data < handle & matlab.mixin.Copyable
                         end
                     end
                 elseif nargin == 4
-                    obj.Filetype = file;
+                    obj.File = file;
+                    [~, ~, ext] = fileparts(file);
+                    obj.Filetype = upper(ext(2:end));
                     obj.Values = values;
                     obj.Timesteps = values(1:end, 1);
                     obj.Header = header;
@@ -94,6 +98,10 @@ classdef Data < handle & matlab.mixin.Copyable
             
             % Before writing to file, update the header.
             obj.updateHeader();
+            
+            if nargin == 1
+                filename = obj.File;
+            end
             
             fileID = fopen(filename,'w');
                 for i=1:length(obj.Header)
