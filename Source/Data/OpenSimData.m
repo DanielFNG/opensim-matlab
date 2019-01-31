@@ -21,7 +21,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         IsCartesian = false 
     end
     
-    properties (GetAccess = private, SetAccess = private)
+    properties (GetAccess = protected, SetAccess = protected)
         CameraRate = 100; % Fixed camera rate for Vicon cameras.
         CameraUnits = 'mm'; % Fixed camera units for Vicon cameras.
         OrigNumFrames
@@ -105,7 +105,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             obj.updateHeader();
             
             % Open proposed filename.
-            fileID = fopen(filename, 'w');
+            fileID = fopen([filename obj.Filetype], 'w');
             
             % Print file.
             obj.printHeader(fileID);
@@ -141,12 +141,12 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         function bool = eq(obj1, obj2, tol)
         
             if nargin < 3
-                tol = obj.EqualityTolerance;
+                tol = obj1.EqualityTolerance;
             end
         
             if all(strcmp(obj1.Labels, obj2.Labels)) && ...
-                all(strcmp(obj.Header, obj2.Header)) && ...
-                all(abs(obj1.Values - obj2.Values) < tol)
+                all(strcmp(obj1.Header, obj2.Header)) && ...
+                all(all(abs(obj1.Values - obj2.Values) < tol))
                 bool = true;
             else
                 bool = false;
