@@ -25,6 +25,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         CameraRate = 100; % Fixed camera rate for Vicon cameras.
         CameraUnits = 'mm'; % Fixed camera units for Vicon cameras.
         OrigNumFrames
+        OrigFrequency
         EqualityTolerance = 1e-6  % Tolerance for testing Data equality.
     end
     
@@ -201,7 +202,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         function rotate(obj, xrot, yrot, zrot)
         
             if ~obj.IsCartesian
-                error('Attempting to rotate non-cartesian data incorrectly.')
+                error('Rotate only supported for Cartesian data.')
             end
             
             % Construct the rotation matrix.
@@ -311,10 +312,13 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         
         function checkCartesian(obj)
         
-            compare_last_char = @(x, y) strcmpi(x(end), y);
-            x_labels = obj.Labels(cellfun(compare_last_char, obj.Labels, 'x'));
-            y_labels = obj.Labels(cellfun(compare_last_char, obj.Labels, 'y'));
-            z_labels = obj.Labels(cellfun(compare_last_char, obj.Labels, 'z'));
+            function h = compare(direction)
+                h = @(c) strcmpi(c(end), direction);
+            end
+      
+            x_labels = obj.Labels(cellfun(compare('x'), obj.Labels));
+            y_labels = obj.Labels(cellfun(compare('y'), obj.Labels));
+            z_labels = obj.Labels(cellfun(compare('z'), obj.Labels));
                 
             if length(obj.Labels) == obj.getIndex('time') + ...
                 length(x_labels) + length(y_labels) + length(z_labels)

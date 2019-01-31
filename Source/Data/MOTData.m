@@ -1,7 +1,7 @@
 classdef MOTData < OpenSimData
-
+    
     properties
-        Filetype = '.mot' 
+        Filetype = '.mot'
     end
     
     methods

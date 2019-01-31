@@ -59,11 +59,11 @@ classdef TRCData < OpenSimData
     
     methods (Static)
     
-        function [values, header, labels] = parse(filename)
+        function [values, labels, header] = parse(filename)
         
-            [vals, head, lab] = TRCData.load(filename);
+            [vals, lab, head] = TRCData.load(filename);
             
-            header = header;
+            header = head;
             
             labels{1} = lab{1};
             labels{2} = lab{2};
@@ -89,7 +89,7 @@ classdef TRCData < OpenSimData
         
         end
     
-        function [str_values, header, labels] = load(filename)
+        function [str_values, labels, header] = load(filename)
         
             id = fopen(filename);
             
