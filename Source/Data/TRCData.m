@@ -48,9 +48,10 @@ classdef TRCData < OpenSimData
             
             for i=1:obj.NFrames
                 fprintf(fileID, '%i\t', obj.Values(i, 1));
-                for j=2:obj.NCols
+                for j=2:obj.NCols-1
                     fprintf(fileID, '%12.14f\t', obj.Values(i, j));
                 end
+                fprintf(fileID, '%12.14f\n', obj.Values(i, obj.NCols));
             end
             
         end
