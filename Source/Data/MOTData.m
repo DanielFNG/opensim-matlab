@@ -1,4 +1,4 @@
-classdef MOTData < OpenSimData
+classdef MOTData < MOTSTOData
     
     properties
         Filetype = '.mot'
@@ -8,7 +8,7 @@ classdef MOTData < OpenSimData
     
         function obj = MOTData(varargin)
         % Construct MOTData from (file) or from (values, header, labels). 
-            obj@OpenSimData(varargin{:});
+            obj@MOTSTOData(varargin{:});
         end
         
         % Updates header info to match the data object. Intended only to be
@@ -19,5 +19,7 @@ classdef MOTData < OpenSimData
             obj.Header{4} = ['range ' num2str(obj.Timesteps(1)) ' ' ...
                 num2str(obj.Timesteps(end))];
         end
+        
+    end
 
 end

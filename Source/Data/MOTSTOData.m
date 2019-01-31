@@ -20,7 +20,7 @@ classdef (Abstract) MOTSTOData < OpenSimData
         
             for i=1:obj.NFrames
                 for j=1:obj.NCols
-                    fprintf(fileID,'%12.14f\t', obj.Values(i,j));
+                    fprintf(fileID,'%.10g\t', obj.Values(i,j));
                 end
                 fprintf(fileID,'\n');
             end
