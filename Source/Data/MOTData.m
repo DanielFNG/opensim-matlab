@@ -43,12 +43,18 @@ classdef MOTData < OpenSimData
     
     methods (Static)
         
-        function [values, labels, header] = parse(filename)
+        function [values, labels, header] = load(filename)
         
             data_array = importdata(filename);
             values = data_array.data;
             labels = data_array.colheaders;
             header = data_array.textdata(1:end - 1, 1);
+        
+        end
+        
+        function [values, labels, header] = parse(filename)
+        
+            [values, labels, header] = MOTData.load(filename);
         
         end
     

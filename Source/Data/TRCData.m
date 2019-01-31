@@ -59,28 +59,28 @@ classdef TRCData < OpenSimData
     
     methods (Static)
     
-        function obj = parse(filename)
+        function [values, header, labels] = parse(filename)
         
-            [values, header, labels] = TRCData.split(filename);
+            [vals, head, lab] = TRCData.load(filename);
             
-            obj.Header = header;
+            header = header;
             
-            obj.Labels{1} = labels{1};
-            obj.Labels{2} = labels{2};
+            labels{1} = lab{1};
+            labels{2} = lab{2};
             k = 3;
-            for i=3:length(labels) - 1
-                obj.Labels{k} = [labels{i} '_X'];
-                obj.Labels{k + 1} = [labels{i} '_Y'];
-                obj.Labels{k + 2} = [labels{i} '_Z'];
+            for i=3:length(lab) - 1
+                labels{k} = [lab{i} '_X'];
+                labels{k + 1} = [lab{i} '_Y'];
+                labels{k + 2} = [lab{i} '_Z'];
                 k = k + 3;
             end
             
-            n_rows = length(values);
-            n_cols = length(obj.Labels);
+            n_rows = length(vals);
+            n_cols = length(labels);
             values = zeros(n_rows, n_cols);
             for i = 1:n_rows
-                if size(values{i}, 2) == n_cols
-                    values(i, :) = str2double(values{i});
+                if size(vals{i}, 2) == n_cols
+                    values(i, :) = str2double(vals{i});
                 else
                     error('Data:Gaps', ...
                         'Error: gaps in marker data or missing markers.');
@@ -89,7 +89,7 @@ classdef TRCData < OpenSimData
         
         end
     
-        function [str_values, header, labels] = split(filename)
+        function [str_values, header, labels] = load(filename)
         
             id = fopen(filename);
             

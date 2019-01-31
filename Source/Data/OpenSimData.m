@@ -39,7 +39,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
     methods (Abstract, Static)
         
         load(filename)
-        split(filename)
+        parse(filename)
         
     end
     
@@ -50,7 +50,10 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             if nargin > 0
                 if nargin == 1
                     try
-                        obj = obj.load(varargin{1});
+                        [values, labels, header] = obj.parse(varargin{1});
+                        obj.Values = values;
+                        obj.Header = header;
+                        obj.Labels = labels;
                     catch err
                         fprintf('Data loading failed.\n')
                         rethrow(err);
