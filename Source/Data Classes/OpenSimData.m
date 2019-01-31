@@ -5,27 +5,26 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
     %   including spline fitting and combining data objects. Compliance
     %   with the OpenSim data file formats (.trc, .mot, .sto) is assumed.
     
-    properties (Abstract)
+    properties (Abstract, SetAccess = protected)
         Filetype
     end
     
-    properties %(SetAccess = private)
+    properties (SetAccess = protected)
+        IsCartesian = false
+        Frequency
         NFrames
         NCols
-        Frequency
-        Labels
-        Values
-        Timesteps
-        Frames
-        Header
-        IsCartesian = false 
     end
     
-    properties (GetAccess = protected, SetAccess = protected)
-        CameraRate = 100; % Fixed camera rate for Vicon cameras.
-        CameraUnits = 'mm'; % Fixed camera units for Vicon cameras.
-        OrigNumFrames
-        OrigFrequency
+    properties (SetAccess = protected)
+        Header
+        Labels
+        Frames
+        Timesteps
+        Values
+    end
+    
+    properties (SetAccess = protected, GetAccess = protected)
         EqualityTolerance = 1e-6  % Tolerance for testing Data equality.
     end
     
