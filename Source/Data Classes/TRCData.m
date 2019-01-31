@@ -4,7 +4,7 @@ classdef TRCData < OpenSimData
         Filetype = '.trc' 
     end
     
-    properties
+    properties (SetAccess = protected, GetAccess = protected)
         CameraRate = 100; % Fixed camera rate for Vicon cameras.
         CameraUnits = 'mm'; % Fixed camera units for Vicon cameras.
     end
