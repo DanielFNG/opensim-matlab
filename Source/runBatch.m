@@ -23,6 +23,10 @@ function runBatch(...
         error('Unmatched number of motion/grf files.');
     end
     
+    if n_motions == 0
+        error('Could not find files.');
+    end
+    
     % Iterate over the files.
     for i=1:n_motions
         % Create an OpenSimTrial.
