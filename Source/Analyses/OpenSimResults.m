@@ -35,7 +35,7 @@ classdef OpenSimResults < handle
             directions = {'x', 'y', 'z'};
             for i=1:length(directions)
                 label = [obj.CoM directions{i}];
-                data = obj.BK.Positions.getColumn(label);
+                data = obj.BK.Positions.get(label);
                 result.(directions{i}) = max(data) - min(data);
             end
         end
@@ -47,7 +47,7 @@ classdef OpenSimResults < handle
             for i=1:length(directions)
                 label = directions{i};
                 cp = ['p' label];
-                cop = obj.GRF.Forces.getColumn([foot cp]);
+                cop = obj.GRF.Forces.get([foot cp]);
                 result.(label) = max(cop(stance)) - min(cop(stance));
             end
         end
@@ -123,8 +123,8 @@ classdef OpenSimResults < handle
         
         function label = identifyLeadingFoot(obj)
             vert = 'vy';
-            right = obj.GRF.Forces.getColumn([obj.RightFoot vert]);
-            left = obj.GRF.Forces.getColumn([obj.LeftFoot vert]);
+            right = obj.GRF.Forces.get([obj.RightFoot vert]);
+            left = obj.GRF.Forces.get([obj.LeftFoot vert]);
             if right(1) > left(1)
                 label = obj.LeftFoot;
             else
@@ -134,7 +134,7 @@ classdef OpenSimResults < handle
         
         function indices = isolateStancePhase(obj, label)
             vert = 'vy';
-            indices = find(grfs.getColumn([label vert]) > obj.StanceCutoff);
+            indices = find(grfs.get([label vert]) > obj.StanceCutoff);
         end
         
         function mass = getModelMass(obj)
