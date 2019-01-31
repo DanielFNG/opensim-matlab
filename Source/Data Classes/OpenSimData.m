@@ -16,16 +16,15 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         NCols
     end
     
-    properties (SetAccess = protected)
+    properties (SetAccess = protected, GetAccess = protected)
         Header
         Labels
         Frames
         Timesteps
         Values
-    end
-    
-    properties (SetAccess = protected, GetAccess = protected)
-        EqualityTolerance = 1e-6  % Tolerance for testing Data equality.
+        OrigNumFrames
+        OrigFrequency
+        EqualityTolerance = 1e-6
     end
     
     methods (Abstract)
