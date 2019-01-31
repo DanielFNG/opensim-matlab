@@ -26,6 +26,11 @@ classdef (Abstract) MOTSTOData < OpenSimData
             end
         
         end
+        
+        function assignSpline(obj, timesteps, values)
+            obj.Values = [timesteps, values];
+        end
+        
     end
     
     methods (Static)

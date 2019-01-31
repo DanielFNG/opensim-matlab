@@ -60,6 +60,13 @@ classdef TRCData < OpenSimData
             end
             
         end
+        
+        function assignSpline(obj, timesteps, values)
+        
+            frames = 1:length(timesteps);
+            obj.Values = [frames, timesteps, values];
+        
+        end
     
     end
     

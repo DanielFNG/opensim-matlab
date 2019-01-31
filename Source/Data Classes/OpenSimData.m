@@ -10,10 +10,10 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
     end
     
     properties (SetAccess = protected)
-        IsCartesian = false
         Frequency
         NFrames
         NCols
+        IsCartesian = false
     end
     
     properties (SetAccess = protected, GetAccess = protected)
@@ -32,6 +32,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         updateHeader(obj)
         printLabels(obj, fileID)
         printValues(obj, fileID)
+        assignSpline(obj, timesteps, values)
     
     end
     
@@ -121,21 +122,6 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             new_obj.update();
         end
         
-        function extend(obj, labels, values)
-            obj.Values = [obj.Values values];
-            if strcmp(obj.Filetype, 'TRC')
-                k = length(obj.Labels);
-                for i=1:length(labels)
-                    obj.Labels{k + 1} = [labels{i} '_X'];
-                    obj.Labels{k + 2} = [labels{i} '_Y'];
-                    obj.Labels{k + 3} = [labels{i} '_Z'];
-                    k = k + 3;
-                end
-            else
-                obj.Labels(end + 1:end + length(labels)) = labels;
-            end
-        end
-        
         function bool = eq(obj1, obj2, tol)
         
             if nargin < 3
@@ -150,6 +136,102 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
                 bool = false;
             end
         
+        end
+        
+        function rotate(obj, xrot, yrot, zrot)
+        
+            if ~obj.IsCartesian
+                error('Rotate only supported for Cartesian data.')
+            end
+            
+            % Construct the rotation matrix.
+            R = rotz(zrot)*roty(yrot)*rotx(xrot);
+            
+            % Get the labels with the X axis data.
+            x_labels = ...
+                obj.Labels(cellfun(@(x) strcmpi(x(end), 'x'), obj.Labels));
+            
+            % Step through rotating the data. 
+            for i=1:length(x_labels)
+                label = x_labels{i}(1:end-1);
+                x_index = obj.getIndex(x_labels{i});
+                coordinates = transpose([obj.getColumn([label 'X']), ...
+                    obj.getColumn([label 'Y']), obj.getColumn([label 'Z'])]);
+                rotation = transpose(R*coordinates);
+                obj.Values(:, x_index:x_index+2) = rotation;
+            end
+            
+        end
+        
+        function index = getIndex(obj, label)
+        % Get index corresponding to a specific label.
+            index = find(strcmpi(obj.Labels, label));
+        end
+        
+        function indices = getSpatialIndices(obj)
+        
+            time = obj.getIndex('time');
+            indices = (time + 1):obj.NCols;
+        
+        end
+        
+        function values = getSpatialValues(obj)
+        
+            indices = obj.getSpatialIndices();
+            values = obj.Values(:, indices);
+            
+        end
+      
+        function vector = getColumn(obj, parameter)
+        % Get column corresponding to label, index (int) or indices (row vec).
+            if isa(parameter, 'char')
+                vector = obj.Values(1:end, obj.getIndex(parameter));
+            else
+                vector = obj.Values(1:end, parameter);
+            end
+        end
+        
+        function setColumn(obj, parameter, array)
+        
+            if isa(parameter, 'char')
+                index = obj.getIndex(parameter);
+                obj.Values(:, index) = array;
+            else
+                obj.Values(:, parameter) = array;
+            end
+        
+        end
+        
+        % Scale row vec of columns by some multiplier. 
+        function obj = scaleColumns(obj, indices, multiplier)
+            if any(indices <= obj.getIndex('time'))
+                error('Attempting to scale non spatial data.');
+            end
+            obj.Values(1:end, indices) = ...
+                multiplier * obj.Values(1:end, indices);
+        end
+        
+        function range = getTimeRange(obj)
+            range = [obj.Timesteps(1), obj.Timesteps(end)];
+        end
+        
+        function time = getTotalTime(obj)
+            time = obj.Timesteps(end) - obj.Timesteps(1);
+        end
+        
+        function spline(obj, desired_frequency)
+        
+            timesteps = stretchVector(...
+                obj.Timesteps, desired_frequency*obj.getTotalTime();
+            values = obj.getSpatialValues();
+            
+            splined_values = ...
+                interp1(obj.Timesteps, values, timesteps, 'spline');
+                
+            obj.assignSpline(timesteps, splined_values);
+            
+            obj.update();
+
         end
         
         % Overload addition. Data objects which share an identical timestep
@@ -197,102 +279,19 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             end
         end
         
-        function rotate(obj, xrot, yrot, zrot)
-        
-            if ~obj.IsCartesian
-                error('Rotate only supported for Cartesian data.')
-            end
-            
-            % Construct the rotation matrix.
-            R = rotz(zrot)*roty(yrot)*rotx(xrot);
-            
-            % Get the labels with the X axis data.
-            x_labels = ...
-                obj.Labels(cellfun(@(x) strcmpi(x(end), 'x'), obj.Labels));
-            
-            % Step through rotating the data. 
-            for i=1:length(x_labels)
-                label = x_labels{i}(1:end-1);
-                x_index = obj.getIndex(x_labels{i});
-                coordinates = transpose([obj.getColumn([label 'X']), ...
-                    obj.getColumn([label 'Y']), obj.getColumn([label 'Z'])]);
-                rotation = transpose(R*coordinates);
-                obj.Values(:, x_index:x_index+2) = rotation;
-            end
-            
-        end
-        
-        function index = getIndex(obj, label)
-        % Get index corresponding to a specific label.
-            index = find(strcmpi(obj.Labels, label));
-        end
-        
-        function indices = getSpatialIndices(obj)
-        
-            time = obj.getIndex('time');
-            indices = (time + 1):obj.NCols;
-        
-        end
-      
-        function vector = getColumn(obj, parameter)
-        % Get column corresponding to label, index (int) or indices (row vec).
-            if isa(parameter, 'char')
-                vector = obj.Values(1:end, obj.getIndex(parameter));
+        function extend(obj, labels, values)
+            obj.Values = [obj.Values values];
+            if strcmp(obj.Filetype, 'TRC')
+                k = length(obj.Labels);
+                for i=1:length(labels)
+                    obj.Labels{k + 1} = [labels{i} '_X'];
+                    obj.Labels{k + 2} = [labels{i} '_Y'];
+                    obj.Labels{k + 3} = [labels{i} '_Z'];
+                    k = k + 3;
+                end
             else
-                vector = obj.Values(1:end, parameter);
+                obj.Labels(end + 1:end + length(labels)) = labels;
             end
-        end
-        
-        function setColumn(obj, parameter, array)
-        
-            if isa(parameter, 'char')
-                index = obj.getIndex(parameter);
-                obj.Values(:, index) = array;
-            else
-                obj.Values(:, parameter) = array;
-            end
-        
-        end
-        
-        % Scale row vec of columns by some multiplier. 
-        function obj = scaleColumns(obj, indices, multiplier)
-            if any(indices <= obj.getIndex('time'))
-                error('Attempting to scale non spatial data.');
-            end
-            obj.Values(1:end, indices) = ...
-                multiplier * obj.Values(1:end, indices);
-        end
-        
-        function range = getTimeRange(obj)
-            range = [obj.Timesteps(1), obj.Timesteps(end)];
-        end
-        
-        % Use splines to obtain smooth data of the desired frequency.
-        function obj = fitToSpline(obj, desired_frequency)
-            % Generate the desired sample points. Rounding is necessary to
-            % ensure that the resultant array properly goes from the start
-            % to the end point, inclusive. 
-            x = (round(obj.Timesteps(1),4): ...
-                round(1/desired_frequency,4): ...
-                round(obj.Timesteps(end),4))';
-            
-            % Isolate the matrix of values.
-            y = obj.Values(1:end,2:end);
-
-            % Re-allocate the values array. 
-            obj.Values = zeros(size(x,1), size(obj.Values,2));
-            
-            % Fit to spline.
-            obj.Values(1:end,2:end) = interp1(obj.Timesteps, y, x, 'spline');
-            
-            % Re-allocate and set timesteps.
-            obj.Timesteps = zeros(size(x,1),1);
-            obj.Timesteps(1:end,1) = x;
-            obj.Values(1:end,1) = x;
-            
-            % Update frequency information.
-            obj.NFrames = length(obj.Timesteps);
-            obj.Frequency = desired_frequency;
         end
         
     end
