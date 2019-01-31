@@ -1,6 +1,6 @@
 classdef TRCData < OpenSimData
 
-    properties
+    properties (SetAccess = protected)
         Filetype = '.trc' 
     end
     

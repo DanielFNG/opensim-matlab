@@ -1,6 +1,6 @@
 classdef MOTData < MOTSTOData
     
-    properties
+    properties (SetAccess = protected)
         Filetype = '.mot'
     end
     

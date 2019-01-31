@@ -1,6 +1,6 @@
 classdef STOData < MOTSTOData
     
-    properties
+    properties (SetAccess = protected)
         Filetype = '.sto'
     end
     
