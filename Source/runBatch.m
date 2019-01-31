@@ -8,10 +8,6 @@
 % - varargin: arguments to OpenSim analyses 
 function runBatch(...
     analyses, model, motion_folder, results_folder, grf_folder, varargin)
-    
-    % Get absolute paths.
-    [model, motion_folder, results_folder, grf_folder] = ...
-        rel2abs(model, motion_folder, results_folder, grf_folder);
 
     % If the desired results folder doesn't exist, create it.
     if ~exist(results_folder, 'dir')
@@ -19,21 +15,19 @@ function runBatch(...
     end
     
     % Obtain the files in the motion and grf folders.
-    motions = dirNoDots(motion_folder);
-    grfs = dirNoDots(grf_folder);
+    [n_motions, motions] = dirNoDots(motion_folder);
+    [n_grfs, grfs] = dirNoDots(grf_folder);
     
     % Check you have the same number of files.
-    if length(motions) ~= length(grfs) 
+    if n_motions ~= n_grfs 
         error('Unmatched number of motion/grf files.');
     end
     
     % Iterate over the files.
-    for i=1:length(motions)
+    for i=1:n_motions
         % Create an OpenSimTrial.
-        trial = OpenSimTrial(model, ...
-            [motion_folder filesep motions(i,1).name], ...
-            [results_folder filesep num2str(i)], ...
-            [grf_folder filesep grfs(i,1).name]);
+        trial = OpenSimTrial(model, motions{i}, ...
+            [results_folder filesep num2str(i)], grfs{i});
         
         % Perform each analysis in turn.
         for j=1:length(analyses)
