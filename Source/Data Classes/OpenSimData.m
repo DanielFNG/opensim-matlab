@@ -222,7 +222,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         function spline(obj, desired_frequency)
         
             timesteps = stretchVector(...
-                obj.Timesteps, desired_frequency*obj.getTotalTime();
+                obj.Timesteps, desired_frequency*obj.getTotalTime()+1);
             values = obj.getSpatialValues();
             
             splined_values = ...
