@@ -43,21 +43,12 @@ classdef MOTData < OpenSimData
     
     methods (Static)
         
-        function obj = load(filename)
-        
-            [values, labels, header] = split(filename);
-            obj.Values = values;
-            obj.Header = header;
-            obj.Labels = labels;
-        
-        end
-        
-        function [values, labels, header] = split(filename)
+        function [values, labels, header] = parse(filename)
         
             data_array = importdata(filename);
             values = data_array.data;
-            obj.Labels = data_array.colheaders;
-            obj.Header = data_array.textdata(1:end - 1, 1);
+            labels = data_array.colheaders;
+            header = data_array.textdata(1:end - 1, 1);
         
         end
     

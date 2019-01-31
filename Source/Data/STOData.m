@@ -8,7 +8,7 @@ classdef STOData < MOTData
     
         function obj = STOData(varargin)
         % Construct STOData from (file) or from (values, header, labels). 
-            obj@OpenSimData(varargin{:});
+            obj@MOTData(varargin{:});
         end
         
         % Updates header info to match the data object. Intended only to be

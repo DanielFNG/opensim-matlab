@@ -59,9 +59,9 @@ classdef TRCData < OpenSimData
     
     methods (Static)
     
-        function obj = load(filename);
+        function obj = parse(filename)
         
-            [values, header, labels] = load(filename);
+            [values, header, labels] = TRCData.split(filename);
             
             obj.Header = header;
             
@@ -75,12 +75,12 @@ classdef TRCData < OpenSimData
                 k = k + 3;
             end
             
-            n_rows = length(str_values);
+            n_rows = length(values);
             n_cols = length(obj.Labels);
             values = zeros(n_rows, n_cols);
             for i = 1:n_rows
-                if size(str_values{i}, 2) == n_cols
-                    values(i, :) = str2double(str_values{i});
+                if size(values{i}, 2) == n_cols
+                    values(i, :) = str2double(values{i});
                 else
                     error('Data:Gaps', ...
                         'Error: gaps in marker data or missing markers.');
@@ -89,7 +89,7 @@ classdef TRCData < OpenSimData
         
         end
     
-        function [values, header, labels] = split(filename);
+        function [str_values, header, labels] = split(filename)
         
             id = fopen(filename);
             
@@ -115,7 +115,7 @@ classdef TRCData < OpenSimData
                     % Sometimes the last column can be just a new line, which
                     % we don't want.
                     if isempty(str_values{count}{end})
-                        str_values{count} = str_values{count}(1:end - 1)
+                        str_values{count} = str_values{count}(1:end - 1);
                     end
                     count = count + 1;
                 end

@@ -18,7 +18,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         Timesteps
         Frames
         Header
-        IsCartesian = False 
+        IsCartesian = false 
     end
     
     properties (GetAccess = private, SetAccess = private)
@@ -50,7 +50,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             if nargin > 0
                 if nargin == 1
                     try
-                        obj = load(varargin{1});
+                        obj = obj.load(varargin{1});
                     catch err
                         fprintf('Data loading failed.\n')
                         rethrow(err);
@@ -142,7 +142,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         
             if all(strcmp(obj1.Labels, obj2.Labels)) && ...
                 all(strcmp(obj.Header, obj2.Header)) && ...
-                all(abs(obj1.Values - obj2.Values) < obj.EqualityTolerance))
+                all(abs(obj1.Values - obj2.Values) < tol)
                 bool = true;
             else
                 bool = false;
@@ -254,7 +254,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         
         % Scale row vec of columns by some multiplier. 
         function obj = scaleColumns(obj, indices, multiplier)
-            if any(indices <= obj.getIndex('time')
+            if any(indices <= obj.getIndex('time'))
                 error('Attempting to scale non spatial data.');
             end
             obj.Values(1:end, indices) = ...
@@ -315,7 +315,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
                 
             if length(obj.Labels) == obj.getIndex('time') + ...
                 length(x_labels) + length(y_labels) + length(z_labels)
-                obj.IsCartesian = True;
+                obj.IsCartesian = true;
             end
         
         end
