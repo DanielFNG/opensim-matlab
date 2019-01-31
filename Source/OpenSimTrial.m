@@ -103,9 +103,12 @@ classdef OpenSimTrial < handle
             
             if strcmp(method, 'IK')
                 obj.best_kinematics = [options.results filesep 'ik.mot'];
-            elseif strcmp(method, 'RRA') || strcmp(method, 'CMC')
+            elseif strcmp(method, 'RRA')
                 obj.best_kinematics = ...
                     [options.results filesep 'RRA_Kinematics_q.sto'];
+            end
+            
+            if strcmp(method, 'RRA') || strcmp(method, 'CMC')
                 OpenSimTrial.attemptDelete(file);
                 OpenSimTrial.attemptDelete(folder);
             elseif strcmp(method, 'ID')
