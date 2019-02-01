@@ -61,11 +61,10 @@ classdef TRCData < OpenSimData
             
         end
         
-        function splined_obj = assignSpline(obj, timesteps, values)
+        function assignSpline(obj, timesteps, values)
         
-            splined_obj = copy(obj);
             frames = 1:length(timesteps);
-            splined_obj.Values = [frames, timesteps, values];
+            obj.Values = [frames, timesteps, values];
         
         end
     
@@ -73,28 +72,46 @@ classdef TRCData < OpenSimData
     
     methods (Static)
     
-        function [values, labels, header] = parse(filename)
+        function header = convertHeader(input_header)
         
-            [vals, lab, head] = TRCData.load(filename);
-            
-            header = head;
-            
-            labels{1} = lab{1};
-            labels{2} = lab{2};
-            k = 3;
-            for i=3:length(lab) - 1
-                labels{k} = [lab{i} '_X'];
-                labels{k + 1} = [lab{i} '_Y'];
-                labels{k + 2} = [lab{i} '_Z'];
+            header = input_header;
+        
+        end
+    
+        function labels = convertLabels(input_labels)
+        % Convert input labels in to Cartesian form for TRC file. 
+        %
+        % Supports both labels from TRCData.load - in which case the Frame#
+        % and time entries are parsed - and also a generic cell array of 
+        % spatial labels.
+        
+            if strcmp(input_labels{1}, 'Frame#')
+                labels{1} = input_labels{1};
+                labels{2} = input_labels{2};
+                start_index = 3;
+                end_index = length(input_labels) - 1;
+            else
+                start_index = 1;
+                end_index = length(input_labels);
+            end
+            k = start_index;
+            for i=start_index:end_index
+                labels{k} = [input_labels{i} '_X'];
+                labels{k + 1} = [input_labels{i} '_Y'];
+                labels{k + 2} = [input_labels{i} '_Z'];
                 k = k + 3;
             end
-            
-            n_rows = length(vals);
-            n_cols = length(labels);
+        
+        end
+        
+        function values = convertValues(input_values, input_labels)
+        
+            n_rows = length(input_values);
+            n_cols = length(input_labels);
             values = zeros(n_rows, n_cols);
             for i = 1:n_rows
-                if size(vals{i}, 2) == n_cols
-                    values(i, :) = str2double(vals{i});
+                if size(input_values{i}, 2) == n_cols
+                    values(i, :) = str2double(input_values{i});
                 else
                     error('Data:Gaps', ...
                         'Error: gaps in marker data or missing markers.');

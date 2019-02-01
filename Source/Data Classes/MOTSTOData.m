@@ -27,10 +27,9 @@ classdef (Abstract) MOTSTOData < OpenSimData
         
         end
         
-        function splined_obj = assignSpline(obj, timesteps, values)
+        function assignSpline(obj, timesteps, values)
         
-            splined_obj = copy(obj);
-            splined_obj.Values = [timesteps', values];
+            obj.Values = [timesteps', values];
         end
         
     end
@@ -46,9 +45,21 @@ classdef (Abstract) MOTSTOData < OpenSimData
         
         end
         
-        function [values, labels, header] = parse(filename)
+        function header = convertHeader(input_header)
+            
+            header = input_header;
+            
+        end
         
-            [values, labels, header] = MOTSTOData.load(filename);
+        function labels = convertLabels(input_labels)
+        
+            labels = input_labels;
+            
+        end
+        
+        function values = convertValues(input_values)
+        
+            values = input_values;
         
         end
     
