@@ -82,7 +82,6 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         
             bool = false;
             if all(strcmp(obj1.Labels, obj2.Labels)) && ...
-                all(strcmp(obj1.Header, obj2.Header)) && ...
                 all(all(abs(obj1.Values - obj2.Values) < tol))
                 bool = true;
             end
