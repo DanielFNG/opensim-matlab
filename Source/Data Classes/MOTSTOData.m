@@ -57,7 +57,7 @@ classdef (Abstract) MOTSTOData < OpenSimData
             
         end
         
-        function values = convertValues(input_values)
+        function values = convertValues(input_values, ~)
         
             values = input_values;
         

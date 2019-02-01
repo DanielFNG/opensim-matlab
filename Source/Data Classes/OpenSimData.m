@@ -218,11 +218,11 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         function new_obj = slice(obj, frames)
         % Take a slice of a Data object. Like pizza. 
         %
-        % Originally this was done by copying the input object, but I think
-        % creating a new object from scratch using the subset of values should
-        % be more efficient. 
+        % Originally this was done by copying the input object, but this
+        % method is more efficient.
             values = obj.Values(frames,1:end);
-            new_obj = OpenSimData(values, obj.Labels, obj.Header);
+            constructor = class(obj);
+            new_obj = feval(constructor, values, obj.Header, obj.Labels);
         end
         
         function new_obj = old_slice(obj, frames)
@@ -235,7 +235,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
     
     methods (Access = private)  % Checks & update calculations.
     
-        function [values, labels, header] = parse(obj, filename)
+        function parse(obj, filename)
         % Load filename, convert + assign Data properties. 
         
             [vals, lab, head] = obj.load(filename);
@@ -244,7 +244,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             
             obj.Labels = obj.convertLabels(lab);
             
-            obj.Values = obj.convertValues(vals, labels);
+            obj.Values = obj.convertValues(vals, obj.Labels);
         
         end
         
