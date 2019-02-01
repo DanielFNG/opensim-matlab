@@ -9,6 +9,21 @@ classdef (Abstract) MOTSTOData < OpenSimData
         end
         
     end
+    
+    methods (Static)
+        
+        function [values, labels, header] = load(filename)
+        % Load data from file. 
+        
+            data_array = importdata(filename);
+            values = data_array.data;
+            labels = data_array.colheaders;
+            header = data_array.textdata(1:end - 1, 1);
+        
+        end
+        
+        
+    end
         
     methods (Static, Access = protected)
         
@@ -38,16 +53,6 @@ classdef (Abstract) MOTSTOData < OpenSimData
         % Create values array from splined data & timesteps. 
         
             obj.Values = [timesteps', values];
-        end
-        
-        function [values, labels, header] = load(filename)
-        % Load data from file. 
-        
-            data_array = importdata(filename);
-            values = data_array.data;
-            labels = data_array.colheaders;
-            header = data_array.textdata(1:end - 1, 1);
-        
         end
         
         function header = convertHeader(input_header)

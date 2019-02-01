@@ -14,7 +14,7 @@ classdef MOTData < MOTSTOData
         
     end
     
-    methods (Access = private)
+    methods (Access = protected)
         
         function updateHeader(obj)
         % Updates header info to match Data object.

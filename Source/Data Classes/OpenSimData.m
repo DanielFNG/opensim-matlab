@@ -36,9 +36,14 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
     
     end
     
-    methods (Abstract, Access = protected, Static)
-        
+    methods (Abstract, Static)
+       
         load(filename)
+        
+    end
+    
+    methods (Abstract, Access = protected, Static)
+       
         convertHeader(input_header)
         convertLabels(input_labels)
         convertValues(input_values, input_labels)
@@ -273,7 +278,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         function calculateFrequency(obj)
         % Calculate the frequency of a data object. Note that number of actual
         % steps in time = total time frames - 1.
-            obj.Frequency = round((obj.NFrames - 1)/(obj.getTotalTime());
+            obj.Frequency = round((obj.NFrames - 1)/(obj.getTotalTime()));
         end
         
         function update(obj)
