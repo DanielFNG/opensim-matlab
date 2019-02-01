@@ -32,7 +32,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         updateHeader(obj)
         printLabels(obj, fileID)
         printValues(obj, fileID)
-        assignSpline(obj, timesteps, values)
+        splined_obj = assignSpline(obj, timesteps, values)
     
     end
     
@@ -219,7 +219,8 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             time = obj.Timesteps(end) - obj.Timesteps(1);
         end
         
-        function spline(obj, desired_frequency)
+        
+        function splined_obj = spline(obj, desired_frequency)
         
             timesteps = stretchVector(...
                 obj.Timesteps, desired_frequency*obj.getTotalTime()+1);
@@ -228,9 +229,9 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             splined_values = ...
                 interp1(obj.Timesteps, values, timesteps, 'spline');
                 
-            obj.assignSpline(timesteps, splined_values);
+            splined_obj = obj.assignSpline(timesteps, splined_values);
             
-            obj.update();
+            splined_obj.update();
 
         end
         

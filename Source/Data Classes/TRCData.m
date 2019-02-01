@@ -61,10 +61,11 @@ classdef TRCData < OpenSimData
             
         end
         
-        function assignSpline(obj, timesteps, values)
+        function splined_obj = assignSpline(obj, timesteps, values)
         
+            splined_obj = copy(obj);
             frames = 1:length(timesteps);
-            obj.Values = [frames, timesteps, values];
+            splined_obj.Values = [frames, timesteps, values];
         
         end
     

@@ -27,8 +27,10 @@ classdef (Abstract) MOTSTOData < OpenSimData
         
         end
         
-        function assignSpline(obj, timesteps, values)
-            obj.Values = [timesteps', values];
+        function splined_obj = assignSpline(obj, timesteps, values)
+        
+            splined_obj = copy(obj);
+            splined_obj.Values = [timesteps', values];
         end
         
     end
