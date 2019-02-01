@@ -1,4 +1,5 @@
 classdef STOData < MOTSTOData
+% Class for storing & working with OpenSim data in .sto format.
     
     properties (SetAccess = protected)
         Filetype = '.sto'
@@ -11,9 +12,12 @@ classdef STOData < MOTSTOData
             obj@MOTSTOData(varargin{:});
         end
         
-        % Updates header info to match the data object. Intended only to be
-        % used as part of writeToFile function. 
+    end
+    
+    methods (Access = private)
+        
         function updateHeader(obj)
+        % Update header info to match Data object. 
             obj.Header{3} = ['nRows=' num2str(obj.NFrames)];
             obj.Header{4} = ['nColumns=' num2str(length(obj.Labels))];
         end

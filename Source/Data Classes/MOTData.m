@@ -1,4 +1,5 @@
 classdef MOTData < MOTSTOData
+% Class for storing & working with OpenSim Data in .mot format.
     
     properties (SetAccess = protected)
         Filetype = '.mot'
@@ -11,9 +12,12 @@ classdef MOTData < MOTSTOData
             obj@MOTSTOData(varargin{:});
         end
         
-        % Updates header info to match the data object. Intended only to be
-        % used as part of writeToFile function. 
+    end
+    
+    methods (Access = private)
+        
         function updateHeader(obj)
+        % Updates header info to match Data object.
             obj.Header{2} = ['datacolumns ' num2str(length(obj.Labels))];
             obj.Header{3} = ['datarows ' num2str(size(obj.Values, 1))];
             obj.Header{4} = ['range ' num2str(obj.Timesteps(1)) ' ' ...

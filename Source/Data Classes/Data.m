@@ -5,7 +5,7 @@ function data_object = Data(varargin)
 %                                 2) (header, labels, values)
 %
 % If nargin == 1: loads from filename
-% If nargin == 4: assigns properties as provided  
+% If nargin == 3: assigns properties as provided  
 
 [~, ~, ext] = fileparts(varargin{1});
 if strcmpi(ext, '.trc')

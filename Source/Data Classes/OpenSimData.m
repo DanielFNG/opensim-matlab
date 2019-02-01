@@ -16,7 +16,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         IsCartesian = false
     end
     
-    properties (SetAccess = protected, GetAccess = protected)
+    properties (Access = protected)
         Header
         Labels
         Frames
@@ -27,7 +27,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         EqualityTolerance = 1e-6
     end
     
-    methods (Abstract)
+    methods (Abstract, Access = protected)
     
         updateHeader(obj)
         printLabels(obj, fileID)
@@ -36,7 +36,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
     
     end
     
-    methods (Abstract, Static)
+    methods (Abstract, Access = protected, Static)
         
         load(filename)
         convertHeader(input_header)
@@ -69,75 +69,24 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             end
         end
         
-        function writeToFile(obj, filename)
-        % Write Data object with given filename - without extension.
-        
-            % Update header before writing to file.
-            obj.updateHeader();
-            
-            % Open proposed filename.
-            fileID = fopen([filename obj.Filetype], 'w');
-            
-            % Print file.
-            obj.printHeader(fileID);
-            obj.printLabels(fileID);
-            obj.printValues(fileID);
-            
-            % Close file.
-            fclose(fileID);
-            
-        end
-        
         function bool = eq(obj1, obj2, tol)
+        % Overload equality.
+        %
+        % Two data objects are equivalent is their headers are equivalent, 
+        % their labels are equivalent, and their values are equivalent to 
+        % some tolerance. 
         
             if nargin < 3
                 tol = obj1.EqualityTolerance;
             end
         
+            bool = false;
             if all(strcmp(obj1.Labels, obj2.Labels)) && ...
                 all(strcmp(obj1.Header, obj2.Header)) && ...
                 all(all(abs(obj1.Values - obj2.Values) < tol))
                 bool = true;
-            else
-                bool = false;
             end
         
-        end
-        
-        function index = getIndex(obj, label)
-        % Get index corresponding to a specific label.
-            index = find(strcmpi(obj.Labels, label));
-        end
-        
-        function indices = getSpatialIndices(obj)
-        
-            time = obj.getIndex('time');
-            indices = (time + 1):obj.NCols;
-        
-        end
-        
-        function values = getSpatialValues(obj)
-        
-            indices = obj.getSpatialIndices();
-            values = obj.Values(:, indices);
-            
-        end
-      
-        function vector = getColumn(obj, parameter)
-        % Get column corresponding to label, index (int) or indices (row vec).
-            if isa(parameter, 'char')
-                vector = obj.Values(1:end, obj.getIndex(parameter));
-            else
-                vector = obj.Values(1:end, parameter);
-            end
-        end
-        
-        function range = getTimeRange(obj)
-            range = [obj.Timesteps(1), obj.Timesteps(end)];
-        end
-        
-        function time = getTotalTime(obj)
-            time = obj.Timesteps(end) - obj.Timesteps(1);
         end
         
         function spline(obj, desired_frequency)
@@ -148,7 +97,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
                 obj.Timesteps, desired_frequency*obj.getTotalTime()+1);
                 
             % Isolate the spatial values (e.g. no time, no frames).
-            values = obj.getSpatialValues();
+            values = obj.getStateData();
             
             % Spline the spatial values.
             splined_values = ...
@@ -167,26 +116,6 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             labels = obj.convertLabels(labels);
             obj.Labels = [obj.Labels labels];
                 
-        end
-        
-        function scaleColumns(obj, indices, multiplier)
-        % Scale a row vector of columns by some multiplier. 
-            if any(indices <= obj.getIndex('time'))
-                error('Attempting to scale non spatial data.');
-            end
-            obj.Values(1:end, indices) = ...
-                multiplier * obj.Values(1:end, indices);
-        end
-        
-        function setColumn(obj, parameter, array)
-        
-            if isa(parameter, 'char')
-                index = obj.getIndex(parameter);
-                obj.Values(:, index) = array;
-            else
-                obj.Values(:, parameter) = array;
-            end
-        
         end
         
         function rotate(obj, xrot, yrot, zrot)
@@ -216,34 +145,95 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         end
         
         function new_obj = slice(obj, frames)
-        % Take a slice of a Data object. Like pizza. 
+        % Take a slice of a Data object. 
         %
-        % Originally this was done by copying the input object, but this
-        % method is more efficient.
+        % More efficient to construct new object rather than creating a copy.
+        
             values = obj.Values(frames,1:end);
             constructor = class(obj);
             new_obj = feval(constructor, values, obj.Header, obj.Labels);
         end
         
-        function new_obj = old_slice(obj, frames)
-            new_obj = copy(obj);
-            new_obj.Values = obj.Values(frames, :);
-            new_obj.update();
+        function writeToFile(obj, filename)
+        % Write Data object with given filename - without extension.
+        
+            % Update header before writing to file.
+            obj.updateHeader();
+            
+            % Open proposed filename.
+            fileID = fopen([filename obj.Filetype], 'w');
+            
+            % Print file.
+            obj.printHeader(fileID);
+            obj.printLabels(fileID);
+            obj.printValues(fileID);
+            
+            % Close file.
+            fclose(fileID);
+            
+        end
+        
+        function vector = getColumn(obj, parameter)
+        % Get column corresponding to label, index (int) or indices (row vec).
+            if isa(parameter, 'char')
+                vector = obj.Values(1:end, obj.getIndex(parameter));
+            else
+                vector = obj.Values(1:end, parameter);
+            end
+        end
+        
+        function setColumn(obj, parameter, array)
+        % Set column corresponding to label, index (int) or indices (row vec).
+        
+            if isa(parameter, 'char')
+                index = obj.getIndex(parameter);
+                obj.Values(:, index) = array;
+            else
+                obj.Values(:, parameter) = array;
+            end
+        
+        end
+        
+        function scaleColumns(obj, indices, multiplier)
+        % Scale state data by some multiplier.
+        %
+        % Input indices can be a cell array of column names or a row vector
+        % of column indices.
+            if any(obj.getNonStateIndices() == indices)
+                error('Attempting to scale non-state data.');
+            end
+            
+            if isa(indices, 'cell')
+                indices = cellfun(@obj.getIndex, indices); 
+            end
+            obj.Values(1:end, indices) = ...
+                multiplier * obj.Values(1:end, indices);
+        end
+        
+        function range = getTimeRange(obj)
+        % Return [start_time, end_time] as row vector.
+            range = [obj.Timesteps(1), obj.Timesteps(end)];
+        end
+        
+        function time = getTotalTime(obj)
+        % Return total time.
+            time = obj.Timesteps(end) - obj.Timesteps(1);
         end
         
     end
     
-    methods (Access = private)  % Checks & update calculations.
+    methods (Access = private)
     
         function parse(obj, filename)
         % Load filename, convert + assign Data properties. 
-        
+            
+            % Load data from filename.
             [vals, lab, head] = obj.load(filename);
             
+            % Convert data in to useable format & assign. Using static methods
+            % within subclasses.
             obj.Header = obj.convertHeader(head);
-            
             obj.Labels = obj.convertLabels(lab);
-            
             obj.Values = obj.convertValues(vals, obj.Labels);
         
         end
@@ -274,7 +264,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
                 
             % Check if the number of labels identified matches the number of
             % columns of spatial data. If so - Cartesian. 
-            if length(obj.getSpatialIndices()) == ...
+            if length(obj.getStateIndices()) == ...
                 length(x_labels) + length(y_labels) + length(z_labels)
                 obj.IsCartesian = true;
             end
@@ -284,8 +274,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         function calculateFrequency(obj)
         % Calculate the frequency of a data object. Note that number of actual
         % steps in time = total time frames - 1.
-            obj.Frequency = round(...
-                (obj.NFrames - 1)/(obj.Timesteps(end) - obj.Timesteps(1)));
+            obj.Frequency = round((obj.NFrames - 1)/(obj.getTotalTime());
         end
         
         function update(obj)
@@ -323,6 +312,35 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             for i=1:length(obj.Header)
                 fprintf(fileID, '%s\n', obj.Header{i});
             end
+            
+        end
+        
+        function index = getIndex(obj, label)
+        % Get index corresponding to a specific label.
+            index = find(strcmpi(obj.Labels, label));
+        end
+        
+        function indices = getNonStateIndices(obj)
+        % Get indices of non state data - frames, if there, & timesteps.
+        
+            time = obj.getIndex('time');
+            indices = 1:time;
+        
+        end
+        
+        function indices = getStateIndices(obj)
+        % Get indices of state data.
+        
+            time = obj.getIndex('time');
+            indices = (time + 1):obj.NCols;
+        
+        end
+        
+        function values = getStateData(obj)
+        % Get state data - values without timesteps/frames.
+        
+            indices = obj.getStateIndices();
+            values = obj.Values(:, indices);
             
         end
         
