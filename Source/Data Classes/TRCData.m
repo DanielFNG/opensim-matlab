@@ -62,8 +62,8 @@ classdef TRCData < OpenSimData
     
     end
     
-    methods (Static, Access = protected)
-    
+    methods (Access = protected)
+        
         function updateHeader(obj)
         % Updates header info to match the data object.
         %
@@ -119,7 +119,11 @@ classdef TRCData < OpenSimData
             obj.Values = [frames, timesteps, values];
         
         end
+        
+    end
     
+    methods (Static, Access = protected)
+  
         function header = convertHeader(input_header)
         % Convert header in to suitable form for Data object.
         
