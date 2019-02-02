@@ -1,27 +1,15 @@
 classdef OpenSimTrial < handle
-    % Class for holding the data relating to a an experimental trial and 
-    % performing various OpenSim operations. Results are printed to file
-    % using the OpenSim tools and also stored as Data or RRAData objects in
-    % Matlab variables. 
-    %
-    % Input files are the model file, kinematics and external force data,
-    % and a desired results directory. 
-    %   
-    % The reason I'm doing this on top of what OpenSim already offers is
-    % that I want to hide a large portion of the functionality which we are
-    % unlikely to use, and more importantly allow simplified access to the 
-    % RRA/ID tools that doesn't involve manually setting input/output files, 
-    % timescales etc.
-    %
-    % This class relies on some default settings files e.g. the
-    % gait2392_actuators file, & default settings files for ID/RRA. These 
-    % are located in the Exopt/Defaults folder.
+% Class for running OpenSim analyses on input motion data.
+%
+% Provides simplified & programmatic access to OpenSim tools. Relies on default
+% settings folder for setup, currently located in opensim-matlab/Defaults. 
+% Currently only supports UoE-PelvisOrthosis setup but more will be added.  
     
     properties (SetAccess = private)
-        model_path % path to model
-        grfs_path % path to external forces data
-        input_coordinates % path to kinematics
-        results_directory % path to high level results directory
+        model_path  
+        grfs_path  
+        input_coordinates  
+        results_directory  
         computed
     end
     
@@ -29,32 +17,46 @@ classdef OpenSimTrial < handle
         defaults
         marker_data 
         best_kinematics
+    end
+    
+    properties (Access = ?OpenSimResults)
         results_paths
     end
     
     methods
+    
+        function obj = OpenSimTrial(model, input, results, grfs)
         % Construct OpenSimTrial.
-        function obj = OpenSimTrial(model, ...
-                                    input, ...
-                                    results, ...
-                                    grfs)
+        %   Input arguments:
+        %       - model: path to model file
+        %       - input: motion data, either markers or ik data
+        %       - results: folder in which results are printed
+        %       - grfs: motion data, external forces, required for some analyses
+        %
             if nargin > 0
+            
+                % Get absolute paths.
                 if nargin > 3
                     obj.grfs_path = rel2abs(grfs);
                 end
                 [obj.model_path, obj.input_coordinates, ...
                     obj.results_directory] = rel2abs(model, input, results);
-                obj.best_kinematics = obj.input_coordinates;
+                
+                % Create results directory.
                 if ~exist(obj.results_directory, 'dir')
                     mkdir(obj.results_directory);
                 end
+                
+                % Setup. 
+                obj.best_kinematics = obj.input_coordinates;
                 obj.loadDefaults();
                 obj.analyseInputCoordinates();
             end
         end
         
-        % Prints a message descriping the computation status of the OST.
         function status(obj)
+        % Print a message describing the computation status of the OST.
+        
             fprintf('\nModel adjustment %scompleted.\n', ...
                 OpenSimTrial.statusMessage(obj.computed.model_adjustment));
             fprintf('\nIK %scomputed.\n', ...
@@ -70,8 +72,8 @@ classdef OpenSimTrial < handle
         end
         
         function assertComputed(obj, analyses)
-            % Assert that an analysis has been computed. 
-            % Also supports taking a cell array of analyses as input. 
+        % Assert that an analysis or set of analyses has been computed. 
+ 
             if length(analyses) == 1
                 obj.computed.(analyses) = true;
             else
@@ -81,50 +83,76 @@ classdef OpenSimTrial < handle
             end
         end
         
-        function run(obj, method, varargin)
-            
-            obj.checkValidity(method);
-            
-            % Parse inputs.
-            options = obj.parseAnalysisArguments(method, varargin{:});
-            
-            % Setup analysis.
-            if strcmp(method, 'ID')
-                [tool, file] = obj.setup(method, options);
-            elseif strcmp(method, 'RRA') || strcmp(method, 'CMC')
-                [tool, file, folder] = obj.setup(method, options);
-            else
-                tool = obj.setup(method, options);
+        function run(obj, analyses, varargin)
+        % Run an analysis or set of analyses.
+        % 
+        % Input arguments:
+        %   - analyses: a char or array of analyses to run e.g. {'IK', 'ID'}
+        %   - varargin: name-value pair of arguments as follows
+        %       - timerange: [start end] for trial
+        %       - results: over-ride default save location
+        %       - settings: over-ride default settings file
+        %       - load: over-ride default load file
+        
+            % Compatability between running one or more analyses.
+            if isa(analyses, 'char')
+                analyses = {analyses};
+            elseif nargin > 2
+                error(['Optional arguments to run() not supported when ' ...
+                    'running multiple analyses.']);
             end
             
-            % Run analysis.
-            tool.run();
-            obj.computed.(method) = true;
+            for i=1:length(analyses)
+                
+                method = analyses{i};
+                
+                % Check method is supported & correct data is available. 
+                obj.checkValidity(method);
             
-            if strcmp(method, 'IK')
-                obj.best_kinematics = [options.results filesep 'ik.mot'];
-            elseif strcmp(method, 'RRA')
-                obj.best_kinematics = ...
-                    [options.results filesep 'RRA_Kinematics_q.sto'];
-            end
+                % Parse inputs.
+                options = obj.parseAnalysisArguments(method, varargin{:});
             
-            if strcmp(method, 'RRA') || strcmp(method, 'CMC')
-                OpenSimTrial.attemptDelete(file);
-                OpenSimTrial.attemptDelete(folder);
-            elseif strcmp(method, 'ID')
-                OpenSimTrial.attemptDelete(file);
+                % Setup analysis.
+                if strcmp(method, 'ID')
+                    [tool, file] = obj.setup(method, options);
+                elseif strcmp(method, 'RRA') || strcmp(method, 'CMC')
+                    [tool, file, folder] = obj.setup(method, options);
+                else
+                    tool = obj.setup(method, options);
+                end
+            
+                % Run analysis.
+                tool.run();
+                obj.computed.(method) = true;
+            
+                % Set best kinematics (used by future analyses).
+                if strcmp(method, 'IK')
+                    obj.best_kinematics = [options.results filesep 'ik.mot'];
+                elseif strcmp(method, 'RRA')
+                    obj.best_kinematics = ...
+                        [options.results filesep 'RRA_Kinematics_q.sto'];
+                end
+            
+                % Temporary file cleanup. 
+                if strcmp(method, 'RRA') || strcmp(method, 'CMC')
+                    OpenSimTrial.attemptDelete(file);
+                    OpenSimTrial.attemptDelete(folder);
+                elseif strcmp(method, 'ID')
+                    OpenSimTrial.attemptDelete(file);
+                end
             end
             
         end
         
         function fullRun(obj, varargin)
-            for i=1:length(obj.defaults.methods)
-                obj.run(obj.defaults.methods{i}, varargin{:});
-            end
+        % Convenience method for running all supported OpenSim analyses.
+        
+            obj.run(obj.defaults.methods, varargin{:});
         end
             
         function performModelAdjustment(...
                 obj, body, new_model, human_model, varargin)
+        % Create a dynamically consistent model file using RRA. 
             
             if ~obj.computed.IK || isempty(obj.grfs_path)
                 error('Require IK and grfs to perform mass adjustment.');
@@ -147,16 +175,13 @@ classdef OpenSimTrial < handle
             obj.computed.model_adjustment = true;
         end
         
-        function paths = getResultsPaths(obj)
-            paths = obj.results_paths;
-        end
-        
     end
     
     methods (Access = private)
         
-        % Load the filenames for default RRA, ID settings etc. 
         function loadDefaults(obj)
+        % Load default settings file paths, assign default directories & status.
+        
             % Get access to the OPENSIM_MATLAB Defaults folder.
             default_folder = [getenv('OPENSIM_MATLAB_HOME') filesep 'Defaults'];
             
@@ -177,9 +202,6 @@ classdef OpenSimTrial < handle
             obj.defaults.settings.loads = ...
                 [default_folder filesep 'loads.xml'];
             
-            % Assign default mass proportions. 
-            obj.defaults.prop = [default_folder filesep 'mass_proportions.txt'];
-            
             % Assign default results files/directories. 
             obj.defaults.results.IK = [obj.results_directory filesep 'IK'];
             obj.defaults.results.ID = [obj.results_directory filesep 'ID'];
@@ -197,6 +219,8 @@ classdef OpenSimTrial < handle
         end
         
         function analyseInputCoordinates(obj)
+        % Set up different treatment of input motion data (markers/IK/RRA).
+        
             [~, ~, ext] = fileparts(obj.input_coordinates);
             
             if strcmp(ext, '.mot')
@@ -214,6 +238,7 @@ classdef OpenSimTrial < handle
         end
         
         function options = parseAnalysisArguments(obj, func, varargin)
+        % Allow user override of default settings parameters.
         
             % Set the default arguments, note timerange handled separately.
             options = struct('timerange', false, ...
@@ -256,6 +281,7 @@ classdef OpenSimTrial < handle
         end
         
         function checkValidity(obj, method)
+        % Check that an analysis can be run with the current data available. 
             
             if ~any(strcmpi(obj.defaults.methods, method))
                 error('Method not recognised.');
@@ -275,6 +301,7 @@ classdef OpenSimTrial < handle
         end
         
         function varargout = setup(obj, method, options)
+        % Handle different number of output arguements for setup functions.
             
             switch method
                 case 'IK'
@@ -300,6 +327,8 @@ classdef OpenSimTrial < handle
         end
         
         function tool = setupIK(obj, timerange, results, settings)
+        % Sets up the IK Tool.
+        
             % Import OpenSim IKTool class and Model class.
             import org.opensim.modeling.InverseKinematicsTool;
             import org.opensim.modeling.Model;
@@ -328,6 +357,8 @@ classdef OpenSimTrial < handle
         end
         
         function bkTool = setupBK(obj, timerange, results, settings)
+        % Sets up the BodyKinematics tool.
+        
             % Import OpenSim AnalyzeTool class and Model class.
             import org.opensim.modeling.AnalyzeTool;
             import org.opensim.modeling.Model;
@@ -347,6 +378,8 @@ classdef OpenSimTrial < handle
         
         function [rraTool, temp, temp_settings] = ...
                 setupRRA(obj, timerange, results, load, settings)
+        % Sets up the RRA tool. 
+        
             % Temporarily copy RRA settings folder to new location.
             [folder, name, ext] = fileparts(settings);
             temp_settings = [results filesep 'temp'];
@@ -381,9 +414,9 @@ classdef OpenSimTrial < handle
             
         end
         
-        % Modify the pelvis COM in the default RRA_actuators file in order
-        % to match the pelvis COM of the input model. 
         function modifyPelvisCOM(obj, settings)
+        % Modify pelvis COM in the copied actuators file to match input model.
+        
             % Import OpenSim libraries & get default actuators file path.
             import org.opensim.modeling.Vec3
             import org.opensim.modeling.Model
@@ -418,6 +451,8 @@ classdef OpenSimTrial < handle
         
         function rraTool = setupAdjustmentRRA(...
                 obj, body, new_model, timerange, results, load,  settings)
+        % Setup RRA - with additional settings for mass adjustment.
+        
             % General RRA settings.
             rraTool = obj.setupRRA(timerange, results, load, settings);
             
@@ -427,8 +462,9 @@ classdef OpenSimTrial < handle
             rraTool.setOutputModelFileName(new_model);
         end
         
-        % Performs the mass adjustments recommended by the RRA algorithm.
         function performMassAdjustment(obj, new_model, human_model, log)
+        % Performs the mass adjustments recommended by the RRA algorithm.
+        
             % Load the models. 
             import org.opensim.modeling.Model;
             overall_model = Model(obj.model_path);
@@ -467,6 +503,8 @@ classdef OpenSimTrial < handle
         
         function [idTool, temp] = ...
                 setupID(obj, timerange, results, load, settings)
+        % Sets up the Inverse Dynamics tool.
+        
             % Import OpenSim IDTool class.
             import org.opensim.modeling.InverseDynamicsTool;
             
@@ -495,6 +533,8 @@ classdef OpenSimTrial < handle
         
         function [cmcTool, temp, temp_settings] = ...
                 setupCMC(obj, timerange, results, load, settings)
+        % Sets up the CMC Tool.
+        
             % Import OpenSim CMCTool class.
             import org.opensim.modeling.CMCTool
             
@@ -532,8 +572,8 @@ classdef OpenSimTrial < handle
     
     methods(Static, Access = private)
         
-        % Find the total mass change suggested by an RRA log file. 
         function mass = getTotalMassChange(log)
+        % Find the total mass change suggested by an RRA log file.
             % Read in log file. 
             text = fileread(log);
             
@@ -552,6 +592,7 @@ classdef OpenSimTrial < handle
         end
         
         function message = statusMessage(bool)
+        % Small convenience method for printing OpenSimTrial completion status.
             if bool
                 message = '';
             else
@@ -560,6 +601,10 @@ classdef OpenSimTrial < handle
         end
         
         function attemptDelete(path)
+        % Attempt to delete the directory or file at a given path.
+        %
+        % If unsuccessful, inform the user that manual deletion is required.
+        
             if ~exist(path, 'dir')
                 lastwarn('');
                 delete(path);
