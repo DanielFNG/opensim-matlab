@@ -1,13 +1,18 @@
-% Run a batch of OpenSim analyses. 
-%
-% - analyses: ordered cell array of OpenSim analyses
-% - model: model file to be used 
-% - motion_folder: folder containing motion data
-% - results_folder: folder to which results are printed 
-% - grf_folder: folder containing external forces
-% - varargin: arguments to OpenSim analyses 
 function results = runBatch(...
     analyses, model, motion_folder, results_folder, grf_folder, varargin)
+% Run a batch of OpenSim analyses.
+%
+%   Input arguments:
+%       - analyses: ordered cell array of OpenSim analyses to be run
+%       - model: model file to be used
+%       - motion_folder: folder containing only motion data
+%       - results_folder: folder to which results are output
+%       - grf_folder: folder containing external force files
+%       - varargin: optional arguments to OpenSim analyses
+%
+%   Output arguments:
+%       - results: optional, cell array containing OpenSimResults objects
+%
 
     % If the desired results folder doesn't exist, create it.
     if ~exist(results_folder, 'dir')
@@ -23,6 +28,7 @@ function results = runBatch(...
         error('Unmatched number of motion/grf files.');
     end
     
+    % Check that there are any files at all. 
     if n_motions == 0
         error('Could not find files.');
     end
@@ -30,14 +36,14 @@ function results = runBatch(...
     % Iterate over the files.
     trials = cell(1, n_motions);
     for i=1:n_motions
+    
         % Create an OpenSimTrial.
         trials{i} = OpenSimTrial(model, motions{i}, ...
             [results_folder filesep num2str(i)], grfs{i});
         
-        % Perform each analysis in turn.
-        for j=1:length(analyses)
-            trials{i}.run(analyses{j}, varargin{:});
-        end
+        % Perform analyses.
+        trials{i}.run(analyses, varargin{:});
+        
     end
 
     % Create OpenSimResults only if required.
