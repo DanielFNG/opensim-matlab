@@ -25,7 +25,7 @@ classdef (Abstract) MOTSTOData < OpenSimData
         
     end
         
-    methods (Static, Access = protected)
+    methods (Access = protected)
         
         function printLabels(obj, fileID)
         % Print labels to file.
@@ -54,6 +54,10 @@ classdef (Abstract) MOTSTOData < OpenSimData
         
             obj.Values = [timesteps', values];
         end
+        
+    end
+        
+    methods (Static, Access = protected)
         
         function header = convertHeader(input_header)
         % Convert header in to suitable form for Data object.
