@@ -6,7 +6,7 @@
 % - results_folder: folder to which results are printed 
 % - grf_folder: folder containing external forces
 % - varargin: arguments to OpenSim analyses 
-function runBatch(...
+function results = runBatch(...
     analyses, model, motion_folder, results_folder, grf_folder, varargin)
 
     % If the desired results folder doesn't exist, create it.
@@ -28,15 +28,24 @@ function runBatch(...
     end
     
     % Iterate over the files.
+    trials = cell(1, n_motions);
     for i=1:n_motions
         % Create an OpenSimTrial.
-        trial = OpenSimTrial(model, motions{i}, ...
+        trials{i} = OpenSimTrial(model, motions{i}, ...
             [results_folder filesep num2str(i)], grfs{i});
         
         % Perform each analysis in turn.
         for j=1:length(analyses)
-            trial.run(analyses{j}, varargin{:});
+            trials{i}.run(analyses{j}, varargin{:});
         end
     end
 
+    % Create OpenSimResults only if required.
+    if nargout > 0
+        results = cell(1, n_motions);
+        for i=1:n_motions
+            results{i} = OpenSimResults(trials{i}, analyses);
+        end
+    end
+    
 end
