@@ -21,6 +21,64 @@ classdef TRCData < OpenSimData
     
     methods (Static)
     
+        function [frames_start, frames_end, trc_data] = missingData(filename)
+        % Deal with data missing from the start or end of a .trc file.
+        %
+        % Note that only start & end behaviour is reported because if data
+        % is missing from the middle of TRCData then this should be 
+        % corrected within Vicon Nexus (or other software) using gap filling.
+        %
+        % Returns number of frames with data missing from start and end, 
+        % and optionally a TRCData object which is corrected for this 
+        % (by deleting the affected frames). 
+        
+            % Load data from file & convert labels.
+            [str_values, labels, header] = TRCData.load(filename);
+            labels = TRCData.convertLabels(labels);
+            
+            % Get TRCData size.
+            n_rows = length(str_values);
+            n_cols = length(labels);
+            
+            % Initialise frame_start & frame_end.
+            frames_start = 0;
+            frames_end = 0;
+            
+            % Count frame_start.
+            for i=1:n_rows
+                if size(str_values{i}, 2) == n_cols
+                    break;
+                else
+                    frames_start = frames_start + 1;
+                end
+            end
+            
+            % Count frame_end.
+            for i=n_rows:-1:1
+                if size(str_values{i}, 2) == n_cols
+                    break;
+                else
+                    frames_end = frames_end + 1;
+                end
+            end
+            
+            % Optionally, create a fixed TRCData object.
+            if nargin > 2
+                
+                % Manually remove affected frames.
+                count = 1;
+                for i=frames_start+1:frames_end-1
+                    fixed_values = str_values{i};
+                end
+            
+                % Convert values & create trc_data object.
+                values = TRCData.convertValues(labels);
+                trc_data = TRCData(values, header, labels);
+                
+            end
+        
+        end
+    
         function [str_values, labels, header] = load(filename)
         % Load data from file. 
         %
