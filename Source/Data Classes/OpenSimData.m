@@ -77,9 +77,8 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         function bool = eq(obj1, obj2, tol)
         % Overload equality.
         %
-        % Two data objects are equivalent is their headers are equivalent, 
-        % their labels are equivalent, and their values are equivalent to 
-        % some tolerance. 
+        % Two data objects are deemed to be equivalent if their labels are
+        % equivalent, and their values are equivalent to some tolerance. 
         
             if nargin < 3
                 tol = obj1.EqualityTolerance;
