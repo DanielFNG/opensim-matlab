@@ -49,7 +49,7 @@ classdef TRCData < OpenSimData
                 if size(str_values{i}, 2) == n_cols
                     break;
                 else
-                    frames_start = frames_start + 1;
+                    frames_start = i;
                 end
             end
             
@@ -58,7 +58,7 @@ classdef TRCData < OpenSimData
                 if size(str_values{i}, 2) == n_cols
                     break;
                 else
-                    frames_end = frames_end + 1;
+                    frames_end = i;
                 end
             end
             
@@ -226,7 +226,12 @@ classdef TRCData < OpenSimData
                     values(i, :) = str2double(input_values{i});
                 else
                     error('Data:Gaps', ...
-                        'Error: gaps in marker data or missing markers.');
+                        ['Error: gaps in marker data or missing '...
+                        'markers.\nUse TRCData.missingFrames to'...
+                        'see which frames are missing.\n'...
+                        'TRCData.removeMissingFrames can also simply '...
+                        'remove problematic timesteps if this is '...
+                        'an acceptable solution.']);
                 end
             end
         
