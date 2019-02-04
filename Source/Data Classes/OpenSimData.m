@@ -118,6 +118,7 @@ classdef (Abstract) OpenSimData < handle
             obj.Values = [obj.Values values];
             labels = obj.convertLabels(labels);
             obj.Labels = [obj.Labels labels];
+            obj.update();
                 
         end
         
@@ -173,6 +174,13 @@ classdef (Abstract) OpenSimData < handle
             
             % Close file.
             fclose(fileID);
+            
+        end
+        
+        function vector = getFrames(obj)
+        % Get the frames of this OpenSimData object.
+           
+                vector = obj.Frames;
             
         end
         
