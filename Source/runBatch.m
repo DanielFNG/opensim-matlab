@@ -12,12 +12,6 @@ function results = runBatch(...
 %
 %   Output arguments:
 %       - results: optional, cell array containing OpenSimResults objects
-%
-
-    % If the desired results folder doesn't exist, create it.
-    if ~exist(results_folder, 'dir')
-        mkdir(results_folder);
-    end
     
     % Obtain the files in the motion and grf folders.
     [n_motions, motions] = dirNoDots(motion_folder);
@@ -31,6 +25,11 @@ function results = runBatch(...
     % Check that there are any files at all. 
     if n_motions == 0
         error('Could not find files.');
+    end
+    
+    % If the desired results folder doesn't exist, create it.
+    if ~exist(results_folder, 'dir')
+        mkdir(results_folder);
     end
     
     % Iterate over the files.
