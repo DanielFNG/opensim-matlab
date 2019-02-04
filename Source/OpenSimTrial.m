@@ -11,16 +11,13 @@ classdef OpenSimTrial < handle
         input_coordinates  
         results_directory  
         computed
+        results_paths
     end
     
     properties (GetAccess = private, SetAccess = private)
         defaults
         marker_data 
         best_kinematics
-    end
-    
-    properties (Access = ?OpenSimResults)
-        results_paths
     end
     
     methods
