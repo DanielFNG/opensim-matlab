@@ -1,4 +1,4 @@
-classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
+classdef (Abstract) OpenSimData < handle
     % Abstract Class for storing & working with OpenSim data.
     % 
     % Holds many methods which are generic to each type of OpenSimData. Specific
