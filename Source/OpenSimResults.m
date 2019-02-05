@@ -90,7 +90,12 @@ classdef OpenSimResults < handle
         function require(obj, analyses)
         % Throw an error if any analyses aren't available in this object.
         
+            if isa(analyses, 'char')
+                analyses = {analyses};
+            end
+        
             for i=1:length(analyses)
+                analysis = analyses{i};
                 if strcmp(obj.(analysis), 'Not Loaded.')
                     error('Required analysis data not available.');
                 end
