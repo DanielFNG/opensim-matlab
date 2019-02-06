@@ -161,11 +161,13 @@ classdef (Abstract) OpenSimData < handle
         function writeToFile(obj, filename)
         % Write Data object with given filename - without extension.
         
+            [~, name, ~] = fileparts(filename);
+        
             % Update header before writing to file.
             obj.updateHeader();
             
             % Open proposed filename.
-            fileID = fopen([filename obj.Filetype], 'w');
+            fileID = fopen([name obj.Filetype], 'w');
             
             % Print file.
             obj.printHeader(fileID);

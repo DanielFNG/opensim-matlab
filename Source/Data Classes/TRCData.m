@@ -41,8 +41,8 @@ classdef TRCData < OpenSimData
             n_cols = length(labels);
             
             % Initialise frame_start & frame_end.
-            frames_start = 0;
-            frames_end = 0;
+            frames_start = 1;
+            frames_end = n_rows;
             
             % Count frame_start.
             for i=1:n_rows
@@ -63,16 +63,17 @@ classdef TRCData < OpenSimData
             end
             
             % Optionally, create a fixed TRCData object.
-            if nargin > 2
+            if nargout > 2
                 
                 % Manually remove affected frames.
                 count = 1;
                 for i=frames_start+1:frames_end-1
-                    fixed_values = str_values{i};
+                    fixed_values{count} = str_values{i};
+                    count = count + 1;
                 end
             
                 % Convert values & create trc_data object.
-                values = TRCData.convertValues(labels);
+                values = TRCData.convertValues(fixed_values, labels);
                 trc_data = TRCData(values, header, labels);
                 
             end
