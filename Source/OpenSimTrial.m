@@ -364,13 +364,21 @@ classdef OpenSimTrial < handle
             bkTool = AnalyzeTool(settings);
             
             % Assign parameters.
-            model = Model(obj.model_path);
-            model.initSystem();
-            bkTool.setModel(model);
+            %model = Model(obj.model_path);
+            %model.initSystem();
+            %bkTool.setModel(model);
             bkTool.setCoordinatesFileName(obj.best_kinematics);
             bkTool.setInitialTime(timerange(1));
             bkTool.setFinalTime(timerange(2));
             bkTool.setResultsDir(results);
+            bkTool.print('oi.xml');
+            oi = xmlread('oi.xml');
+            oi.getElementsByTagName('model_file').item(0).getFirstChild. ...
+                setNodeValue(obj.model_path);
+            xmlwrite('oi2.xml', oi);
+            bkTool = AnalyzeTool('oi2.xml');
+            delete('oi.xml');
+            delete('oi2.xml');
         end
         
         function [rraTool, temp, temp_settings] = ...
