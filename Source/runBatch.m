@@ -47,6 +47,7 @@ function results = runBatch(...
 
     % Create OpenSimResults only if required.
     if nargout > 0
+        analyses{end+1} = 'GRF';
         results = cell(1, n_motions);
         for i=1:n_motions
             results{i} = OpenSimResults(trials{i}, analyses);
