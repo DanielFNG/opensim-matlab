@@ -2,7 +2,7 @@
 <OpenSimDocument Version="20302">
 	<AnalyzeTool name="Analysis">
 		
-		<model_file> </model_file>
+		<model_file>  </model_file>
 		
 		<replace_force_set> false </replace_force_set>
 		

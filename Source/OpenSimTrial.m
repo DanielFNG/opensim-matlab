@@ -373,8 +373,8 @@ classdef OpenSimTrial < handle
             bkTool.setResultsDir(results);
             bkTool.print('oi.xml');
             oi = xmlread('oi.xml');
-            oi.getElementsByTagName('model_file').item(0).getFirstChild. ...
-                setNodeValue(obj.model_path);
+            oi.getElementsByTagName('model_file').item(0).setTextContent(...
+                obj.model_path);
             xmlwrite('oi2.xml', oi);
             bkTool = AnalyzeTool('oi2.xml');
             delete('oi.xml');
@@ -614,9 +614,14 @@ classdef OpenSimTrial < handle
                 lastwarn('');
                 delete(path);
                 if strcmp(lastwarn, 'File not found or permission denied')
-                    w = warning('query','last');
-                    w.identifier
-                    fprintf('%s requires manual deletion.\n', path);
+                    pause(0.5);
+                    lastwarn('');
+                    delete(path);
+                    if strcmp(lastwarn, 'File not found or permission denied')
+                        w = warning('query','last');
+                        w.identifier
+                        fprintf('%s requires manual deletion.\n', path);
+                    end
                 end
             else
                 try
