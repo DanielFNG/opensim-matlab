@@ -13,12 +13,12 @@ classdef (Abstract) OpenSimData < handle
         Frequency
         NFrames
         NCols
+        Labels
         IsCartesian = false
     end
     
     properties (Access = protected)
         Header
-        Labels
         Frames
         Timesteps
         Values
