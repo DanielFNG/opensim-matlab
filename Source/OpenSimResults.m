@@ -77,6 +77,17 @@ classdef OpenSimResults < handle
             end
         end
         
+        function result = calculateCycleTime(obj, ~)
+           
+            % Analsis requirements.
+            obj.require('GRF');
+            
+            % Cycle time calculation.
+            range = obj.GRF.Forces.getTimeRange();
+            result = range(2) - range(1);
+            
+        end
+        
         function result = calculateCoMD(obj, direction)
         % Calculate CoM displacement.
         
