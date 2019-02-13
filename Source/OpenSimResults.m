@@ -15,8 +15,8 @@ classdef OpenSimResults < handle
         ResultsPaths
         StanceCutoff = 10
         CoM = 'center_of_mass_'
-        RightFoot = '    ground_force1'
-        LeftFoot = '    ground_force2'
+        RightFoot = 'ground_force1' 
+        LeftFoot = 'ground_force2'
         Torque = '_moment'
     end
         
@@ -77,7 +77,7 @@ classdef OpenSimResults < handle
             end
         end
         
-        function result = calculateCoMD(obj)
+        function result = calculateCoMD(obj, direction)
         % Calculate CoM displacement.
         
             % Analysis requirements.
@@ -90,9 +90,14 @@ classdef OpenSimResults < handle
                 data = obj.BK.Positions.getColumn(label);
                 result.(directions{i}) = peak2peak(data);
             end
+            
+            % Optionally, return only one direction.
+            if nargin == 2
+                result = result.(direction);
+            end
         end
         
-        function result = calculateCoPD(obj)
+        function result = calculateCoPD(obj, direction)
         % Calculate CoP displacement at the leading foot. 
         
             % Analysis requirements.
@@ -104,9 +109,14 @@ classdef OpenSimResults < handle
             stance = obj.isolateStancePhase(foot);
             for i=1:length(directions)
                 label = directions{i};
-                cp = ['p' label];
+                cp = ['_p' label];
                 cop = obj.GRF.Forces.getColumn([foot cp]);
-                result.(label) = peak2peak(cop(stance));
+                result.(directions{i}) = peak2peak(cop(stance));
+            end
+            
+            % Optionally, return only one direction.
+            if nargin == 2
+                result = result.(direction);
             end
         end
         
@@ -188,8 +198,9 @@ classdef OpenSimResults < handle
         function indices = isolateStancePhase(obj, label)
         % Get the indices corresponding to stance phase.
         
-            vert = 'vy';
-            indices = find(grfs.getColumn([label vert]) > obj.StanceCutoff);
+            vert = '_vy';
+            indices = find(obj.GRF.Forces. ...
+                getColumn([label vert]) > obj.StanceCutoff);
         end
         
         function mass = getModelMass(obj)
@@ -202,7 +213,7 @@ classdef OpenSimResults < handle
             
             % Sum the mass of every body in the model apart from ground.
             for i=0:bodies.getSize()-1
-                if ~strcmp(name, 'ground')
+                if ~strcmp(bodies.get(i).getName(), 'ground')
                     masses(min(masses == 0)) = bodies.get(i).getMass();
                 end
             end
