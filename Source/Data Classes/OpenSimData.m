@@ -330,7 +330,7 @@ classdef (Abstract) OpenSimData < handle
         
         function index = getIndex(obj, label)
         % Get index corresponding to a specific label.
-            index = find(strcmpi(obj.Labels, label));
+            index = find(strcmpi(strtrim(obj.Labels), strtrim(label)));
         end
         
         function indices = getNonStateIndices(obj)
