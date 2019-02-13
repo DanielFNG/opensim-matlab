@@ -614,6 +614,7 @@ classdef OpenSimTrial < handle
                 lastwarn('');
                 delete(path);
                 if strcmp(lastwarn, 'File not found or permission denied')
+                    w.identifier
                     pause(0.5);
                     lastwarn('');
                     delete(path);
