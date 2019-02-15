@@ -1,13 +1,14 @@
 classdef Motion < handle
 % Class for using OpenSim analysis data to perform calculations.
 
-    properties(SetAccess = private)
+    properties (SetAccess = private)
         Trial
     end
     
     % Model-specific properties; should be modified if alternative models
     % are used e.g. not gait2392.
-    properties (GetAccess = private, SetAccess = private)
+    properties (Access = protected)
+        Gravity = 9.80665;
         CoM = 'center_of_mass_'
         Torque = '_moment'
     end

@@ -148,10 +148,17 @@ classdef (Abstract) OpenSimData < handle
             
         end
         
-        function new_obj = slice(obj, frames)
+        function new_obj = slice(obj, varargin)
         % Take a slice of a Data object. 
         %
         % More efficient to construct new object rather than creating a copy.
+        % If nargin == 2, input is a vector of frames at which to slice. If 
+        % nargin == 3, inputs are start and end times at which to slice.
+        
+            if nargin == 3
+                timesteps = obj.getColumn('time');
+                frames = timesteps > varargin{1} & timesteps < varargin{2};
+            end
         
             values = obj.Values(frames,1:end);
             constructor = class(obj);
