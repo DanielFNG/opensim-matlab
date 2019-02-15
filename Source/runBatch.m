@@ -1,4 +1,4 @@
-function results = runBatch(...
+function trials = runBatch(...
     analyses, model, motion_folder, results_folder, grf_folder, varargin)
 % Run a batch of OpenSim analyses.
 %
@@ -43,15 +43,6 @@ function results = runBatch(...
         % Perform analyses.
         trials{i}.run(analyses, varargin{:});
         
-    end
-
-    % Create OpenSimResults only if required.
-    if nargout > 0
-        analyses{end+1} = 'GRF';
-        results = cell(1, n_motions);
-        for i=1:n_motions
-            results{i} = OpenSimResults(trials{i}, analyses);
-        end
     end
     
 end
