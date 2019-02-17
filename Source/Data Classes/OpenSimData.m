@@ -193,6 +193,19 @@ classdef (Abstract) OpenSimData < handle
             
         end
         
+        function index = getFrame(obj, time)
+           
+            % Check that the time is in our timerange.
+            range = obj.getTimeRange();
+            if time >= range(1) && time <= range(2)
+                timesteps = obj.getColumn('time');
+                [~, index] = min(abs(timesteps - time));
+            else
+                error('Time outwith timerange of data object.');
+            end
+            
+        end
+        
         function vector = getColumn(obj, parameter)
         % Get column corresponding to label, index (int) or indices (row vec).
             if isa(parameter, 'char')
