@@ -1,4 +1,4 @@
-classdef (Abstract) OpenSimData < handle
+classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
     % Abstract Class for storing & working with OpenSim data.
     % 
     % Holds many methods which are generic to each type of OpenSimData. Specific
@@ -174,7 +174,12 @@ classdef (Abstract) OpenSimData < handle
             obj.updateHeader();
             
             % Open proposed filename.
-            fileID = fopen([path filesep name obj.Filetype], 'w');
+            if isempty(path)
+                str = [name obj.Filetype];
+            else
+                str = [path filesep name obj.Filetype];
+            end
+            fileID = fopen(str, 'w');
             
             % Print file.
             obj.printHeader(fileID);
@@ -227,18 +232,24 @@ classdef (Abstract) OpenSimData < handle
         
         end
         
-        function scaleColumns(obj, indices, multiplier)
+        function scaleColumns(obj, multiplier, indices)
         % Scale state data by some multiplier.
         %
         % Input indices can be a cell array of column names or a row vector
-        % of column indices.
-            if any(obj.getNonStateIndices() == indices)
+        % of column indices. Use only 2 arguments to scale all state
+        % values.
+            if nargin < 3
+                indices = obj.getStateIndices();
+            end
+            
+            if ~isempty(intersect(obj.getNonStateIndices(), indices))
                 error('Attempting to scale non-state data.');
             end
             
             if isa(indices, 'cell')
                 indices = cellfun(@obj.getIndex, indices); 
             end
+            
             obj.Values(1:end, indices) = ...
                 multiplier * obj.Values(1:end, indices);
         end
