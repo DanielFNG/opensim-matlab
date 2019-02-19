@@ -158,11 +158,26 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             if nargin == 3
                 timesteps = obj.getColumn('time');
                 frames = timesteps > varargin{1} & timesteps < varargin{2};
+            else
+                frames = varargin{1};
             end
         
             values = obj.Values(frames,1:end);
             constructor = class(obj);
             new_obj = feval(constructor, values, obj.Header, obj.Labels);
+        end
+        
+        function new_obj = computeGradients(obj)
+            
+            new_obj = copy(obj);
+            indices = new_obj.getStateIndices();
+            time = new_obj.getColumn('time');
+            for i=indices
+                current_val = new_obj.getColumn(i);
+                diff = gradient(current_val, time);
+                new_obj.setColumn(i, diff);
+            end
+            
         end
         
         function writeToFile(obj, filename)
