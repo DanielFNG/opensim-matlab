@@ -23,7 +23,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         Timesteps
         Values
         OrigNumFrames
-        OrigFrequency
+        OrigFrequency = 'Not defined for one-frame Data objects';
         EqualityTolerance = 1e-6
     end
     
@@ -333,7 +333,11 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         function calculateFrequency(obj)
         % Calculate the frequency of a data object. Note that number of actual
         % steps in time = total time frames - 1.
-            obj.Frequency = round((obj.NFrames - 1)/(obj.getTotalTime()));
+            if obj.getTotalTime ~= 0
+                obj.Frequency = round((obj.NFrames - 1)/(obj.getTotalTime()));
+            else
+                obj.Frequency = obj.OrigFrequency;
+            end
         end
         
         function update(obj)
