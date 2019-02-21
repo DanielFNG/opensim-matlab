@@ -9,20 +9,18 @@ classdef OpenSimTrial < handle
         model_path  
         grfs_path  
         input_coordinates  
-        results_directory
+        results_paths
     end
     
     properties (GetAccess = private, SetAccess = private)
         defaults
         marker_data 
         best_kinematics
-        results_paths
-        computed
+        results_directory
     end
     
     properties (Access = {?Motion, ?GaitCycle})
-        loaded
-        data
+       computed 
     end
     
     methods
@@ -73,32 +71,17 @@ classdef OpenSimTrial < handle
                 OpenSimTrial.statusMessage(obj.computed.CMC));
         end
         
-        function loadedStatus(obj)
-            
-            fprintf('\nGRF %sloaded.\n', ...
-                OpenSimTrial.statusMessage(obj.loaded.GRF));
-            fprintf('IK %sloaded.\n', ...
-                OpenSimTrial.statusMessage(obj.loaded.IK));
-            fprintf('RRA %sloaded.\n', ...
-                OpenSimTrial.statusMessage(obj.loaded.RRA));
-            fprintf('BK %sloaded.\n', ...
-                OpenSimTrial.statusMessage(obj.loaded.BK));
-            fprintf('ID %sloaded.\n', ...
-                OpenSimTrial.statusMessage(obj.loaded.ID));
-            fprintf('CMC %sloaded.\n\n', ...
-                OpenSimTrial.statusMessage(obj.loaded.CMC));
-            
-        end
-        
         function assertComputed(obj, analyses)
-        % Assert that an analysis or set of analyses has been computed. 
- 
-            if length(analyses) == 1
-                obj.computed.(analyses) = true;
-            else
-                for i=1:length(analyses)
-                    obj.computed.(analyses{i}) = true;
-                end
+            % Assert that an analysis or set of analyses has been computed.
+            
+            if isa(analyses, 'char')
+                analyses = {analyses};
+            end
+            
+            for i=1:length(analyses)
+                obj.computed.(analyses{i}) = true;
+                obj.results_paths.(analyses{i}) = ...
+                    obj.defaults.results.(analyses{i});
             end
         end
         
@@ -200,60 +183,6 @@ classdef OpenSimTrial < handle
             
         end
         
-        function load(obj, analyses)
-        % Load the data from each analysis in turn.
-        
-            % Support for a single analysis input as a string. 
-            if isa(analyses, 'char')
-                analyses = {analyses};
-            end
-            
-            for i=1:length(analyses)
-            
-                % Check analysis is computed - if so get results folder.
-                analysis = analyses{i};
-                folder = obj.preload(analysis);
-                obj.data.(analysis) = {};
-            
-                % Load analysis Data. 
-                switch analysis
-                    case 'GRF'
-                        obj.data.GRF.Forces = Data(obj.grfs_path);
-                    case 'IK'
-                        obj.data.IK.Kinematics = ...
-                            Data([folder filesep 'ik.mot']);
-                        obj.data.IK.InputMarkers = ...
-                            Data(obj.input_coordinates);
-                        obj.data.IK.OutputMarkers = Data(...
-                            [folder filesep 'ik_model_marker_locations.sto']);
-                    case 'RRA'
-                        obj.data.RRA.Kinematics = ...
-                            Data([folder filesep 'RRA_Kinematics_q.sto']);
-                        obj.data.RRA.Forces = ...
-                            Data([folder filesep 'RRA_Actuation_force.sto']);
-                        obj.data.RRA.TrackingErrors = ...
-                            Data([folder filesep 'RRA_Kinematics_q.sto']);
-                    case 'BK'
-                        obj.data.BK.Positions = Data([folder filesep ...
-                            'Analysis_BodyKinematics_pos_global.sto']);
-                        obj.data.BK.Velocities = Data([folder filesep ...
-                            'Analysis_BodyKinematics_vel_global.sto']);
-                        obj.data.BK.Accelerations = Data([folder filesep ...
-                            'Analysis_BodyKinematics_acc_global.sto']);
-                    case 'ID'
-                        obj.data.ID.JointTorques = ...
-                            Data([folder filesep 'id.sto']);
-                    case 'CMC'
-                        % Not yet implemented - need to see which files need to
-                        % be read in. Will wait until more CMC-based analysis
-                        % is required.
-                end
-                
-                % Note loaded status.
-                obj.loaded.(analysis) = true;
-            end
-        end
-        
     end
     
     methods (Access = private)
@@ -295,14 +224,6 @@ classdef OpenSimTrial < handle
             obj.computed.BK = false;
             obj.computed.ID = false;
             obj.computed.CMC = false;
-            
-            % Set load statuses.
-            obj.loaded.GRF = false;
-            obj.loaded.IK = false;
-            obj.loaded.RRA = false;
-            obj.loaded.BK = false;
-            obj.loaded.ID = false;
-            obj.loaded.CMC = false;
         end
         
         function analyseInputCoordinates(obj)
@@ -649,20 +570,7 @@ classdef OpenSimTrial < handle
             xmlwrite(temp, external_loads);
             cmcTool.createExternalLoads(temp, cmcTool.getModel());
         end
-        
-        function folder = preload(obj, analysis)
-        % Return path to folder containing analysis Data.
-        %
-        % Throws an error if the analysis data has not been computed.
-            folder = [];
-            if ~strcmp(analysis, 'GRF')
-                if ~obj.computed.(analysis)
-                    error([analysis ' not computed.']);
-                end
-                folder = obj.results_paths.(analysis);
-            end
-            
-        end
+
     end
     
     methods (Static)
@@ -728,7 +636,6 @@ classdef OpenSimTrial < handle
                 lastwarn('');
                 delete(path);
                 if strcmp(lastwarn, 'File not found or permission denied')
-                    w.identifier
                     pause(0.5);
                     lastwarn('');
                     delete(path);
