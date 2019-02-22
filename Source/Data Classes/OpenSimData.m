@@ -112,6 +112,30 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
 
         end
         
+        function extrapolate(obj, n)
+        % Extrapolate forward by n timesteps.
+        %
+        % Tested using both spline and pchip. Pchip seemed to perform
+        % better for lower values of n.
+        
+            % Construct the new time array.
+            timestep = 1/obj.Frequency;
+            range = obj.getTimeRange();
+            new_timesteps = range(1):timestep:range(2) + n*timestep;
+            
+            % Isolate the spatial values.
+            values = obj.getStateData();
+            
+            % Spline these values.
+            splined_values = ...
+                interp1(obj.Timesteps, values, new_timesteps, 'pchip');
+            
+            % Assign the splines values and update.
+            obj.assignSpline(new_timesteps, splined_values);
+            obj.update();
+            
+        end
+        
         function extend(obj, labels, values)
         % Append labels and values to a Data object. 
         

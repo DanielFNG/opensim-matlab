@@ -130,6 +130,7 @@ classdef OpenSimTrial < handle
                 % Set best kinematics (used by future analyses).
                 if strcmp(method, 'IK')
                     obj.best_kinematics = [options.results filesep 'ik.mot'];
+                    obj.correctIKFrameBug();
                 elseif strcmp(method, 'RRA')
                     obj.best_kinematics = ...
                         [options.results filesep 'RRA_Kinematics_q.sto'];
@@ -569,6 +570,23 @@ classdef OpenSimTrial < handle
             temp = [results filesep 'temp.xml'];
             xmlwrite(temp, external_loads);
             cmcTool.createExternalLoads(temp, cmcTool.getModel());
+        end
+        
+        function correctIKFrameBug(obj)
+        % IK bug correction - extrapolate by 1 frame.
+            
+            % Get IK & output marker filenames.
+            files = {[obj.results_paths.IK filesep 'ik.mot'], ...
+                [obj.results_paths.IK filesep 'ik_model_marker_locations.sto']};
+            
+            % Load, extrapolate and reprint each.
+            for i=1:2
+                data_object = Data(files{i});
+                data_object.extrapolate(1);
+                data_object.writeToFile(files{i});
+                delete(data_object);
+            end
+            
         end
 
     end
