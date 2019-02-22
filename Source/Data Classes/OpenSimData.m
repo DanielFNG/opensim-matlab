@@ -23,7 +23,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         Timesteps
         Values
         OrigNumFrames
-        OrigFrequency = 'Not defined for one-frame Data objects';
+        OrigFrequency = 'Not defined';
         EqualityTolerance = 1e-6
     end
     

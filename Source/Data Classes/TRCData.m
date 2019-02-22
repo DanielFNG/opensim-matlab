@@ -5,9 +5,10 @@ classdef TRCData < OpenSimData
         Filetype = '.trc' 
     end
     
-    properties (Access = protected)
-        CameraRate = 100; % Fixed camera rate for Vicon cameras.
-        CameraUnits = 'mm'; % Fixed camera units for Vicon cameras.
+    properties %(Access = protected)
+        OrigDataStartFrame
+        CameraRate
+        Units
     end
     
     methods
@@ -15,6 +16,30 @@ classdef TRCData < OpenSimData
         function obj = TRCData(varargin)
         % Construct TRCData from (file) or from (values, header, labels). 
             obj@OpenSimData(varargin{:});
+            info = strsplit(obj.Header{3});
+            obj.OrigDataStartFrame = str2double(info{7});
+            obj.CameraRate = str2double(info{2});
+            obj.Units = info{5};
+        end
+        
+        function convertUnits(obj, new_units)
+        % Convert units of TRCData.
+        %
+        % Currently only supports conversion from/to m/mm and vice versa.
+        
+            if ~strcmp(obj.Units, new_units)
+                switch obj.Units
+                    case 'mm'
+                        multiplier = 0.001;
+                    case 'm'
+                        multiplier = 1000;
+                end
+            end
+        
+            % Convert the state data only.
+            obj.scaleColumns(multiplier);
+            obj.Units = new_units;
+            
         end
         
     end
@@ -128,9 +153,9 @@ classdef TRCData < OpenSimData
         %
         % Should only be called by the writeToFile function. 
             obj.Header{3} = [sprintf('%i\t', obj.Frequency, ...
-                obj.CameraRate, obj.NFrames, (size(obj.Values, 2) - 2)/3)...
-                sprintf('%s\t', obj.CameraUnits), sprintf('%i\t', ...
-                obj.CameraRate), sprintf('%i\t', obj.Values(1,1)), ...
+                obj.CameraRate, obj.NFrames, (obj.NCols - 2)/3)...
+                sprintf('%s\t', obj.Units), sprintf('%i\t', ...
+                obj.OrigFrequency), sprintf('%i\t', obj.Values(1,1)), ...
                 sprintf('%i', obj.OrigNumFrames)];
       
         end
