@@ -19,7 +19,7 @@ classdef OpenSimTrial < handle
         results_directory
     end
     
-    properties (Access = {?Motion, ?GaitCycle})
+    properties (Access = {?MotionData})
        computed 
     end
     

@@ -5,7 +5,7 @@ classdef TRCData < OpenSimData
         Filetype = '.trc' 
     end
     
-    properties %(Access = protected)
+    properties (Access = protected)
         OrigDataStartFrame
         CameraRate
         Units
@@ -200,7 +200,7 @@ classdef TRCData < OpenSimData
         % Create values array from splined data & timesteps. 
         
             frames = 1:length(timesteps);
-            obj.Values = [frames, timesteps, values];
+            obj.Values = [frames', timesteps, values];
         
         end
         

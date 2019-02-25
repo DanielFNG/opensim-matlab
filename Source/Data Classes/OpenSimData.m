@@ -92,12 +92,22 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         
         end
         
-        function spline(obj, desired_frequency)
+        function spline(obj, input)
         % Fit data to desired frequency using spline interpolation.
+        %
+        % If input is of length 1, it is assumed to be a desired frequency
+        % at which to use linear interpolation to produce timesteps between
+        % the object start and end frames. If it is of length > 1, it is
+        % assumed to be an array of timesteps to use. 
         
-            % Use linear interpolation to create new timesteps.
-            timesteps = stretchVector(...
-                obj.Timesteps, desired_frequency*obj.getTotalTime()+1);
+            switch length(input)
+                case 1
+                    % Use linear interpolation to create new timesteps.
+                    timesteps = transpose(stretchVector(...
+                        obj.Timesteps, input*obj.getTotalTime()+1));
+                otherwise
+                    timesteps = input;
+            end
                 
             % Isolate the spatial values (e.g. no time, no frames).
             values = obj.getStateData();

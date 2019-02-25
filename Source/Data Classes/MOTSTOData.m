@@ -52,7 +52,7 @@ classdef (Abstract) MOTSTOData < OpenSimData
         function assignSpline(obj, timesteps, values)
         % Create values array from splined data & timesteps. 
         
-            obj.Values = [timesteps', values];
+            obj.Values = [timesteps, values];
         end
         
     end
