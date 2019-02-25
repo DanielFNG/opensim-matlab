@@ -143,7 +143,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             % Construct the new time array.
             timestep = 1/obj.Frequency;
             range = obj.getTimeRange();
-            new_timesteps = range(1):timestep:range(2) + n*timestep;
+            new_timesteps = transpose(range(1):timestep:range(2) + n*timestep);
             
             % Isolate the spatial values.
             values = obj.getStateData();
