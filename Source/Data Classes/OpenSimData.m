@@ -122,6 +122,18 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
 
         end
         
+        function filter4LP(obj, frequency)
+            
+            dt = 1/obj.Frequency;
+            indices = obj.getStateIndices();
+            for index = indices
+                input = obj.getColumn(index);
+                obj.setColumn(index, ...
+                    ZeroLagButtFiltfilt(dt, frequency, 4, 'lp', input));
+            end
+            
+        end
+        
         function extrapolate(obj, n)
         % Extrapolate forward by n timesteps.
         %
