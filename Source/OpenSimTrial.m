@@ -130,7 +130,7 @@ classdef OpenSimTrial < handle
                 % Set best kinematics (used by future analyses).
                 if strcmp(method, 'IK')
                     obj.best_kinematics = [options.results filesep 'ik.mot'];
-                    obj.correctIK();
+                    obj.correctIK(options.timerange(2));
                 elseif strcmp(method, 'RRA')
                     obj.best_kinematics = ...
                         [options.results filesep 'RRA_Kinematics_q.sto'];
@@ -572,7 +572,7 @@ classdef OpenSimTrial < handle
             cmcTool.createExternalLoads(temp, cmcTool.getModel());
         end
         
-        function correctIK(obj)
+        function correctIK(obj, end_time)
         % IK bug correction - extrapolate by 1 frame - and filtering.
             
             % Get IK & output marker filenames.
@@ -582,7 +582,15 @@ classdef OpenSimTrial < handle
             % Load, extrapolate, filter and reprint each.
             for i=1:2
                 data_object = Data(files{i});
-                data_object.extrapolate(1);
+                
+                % Sometimes the IK tool doesn't print the last frame. 
+                % Account for this.
+                timerange = data_object.getTimeRange();
+                if timerange(2) ~= end_time  
+                    data_object.extrapolate(1);
+                end
+                
+                % Filter and rewrite.
                 data_object.filter4LP(6);  % 6 Hz
                 data_object.writeToFile(files{i});
                 delete(data_object);
