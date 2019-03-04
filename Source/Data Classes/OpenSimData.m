@@ -272,6 +272,19 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             
         end
         
+        function value = getValue(obj, row_parameter, col_parameter)
+        % Get value corresponding to a certain row and column.
+        %
+        % The column may be referred to either by a label or an index. The
+        % row must be referred to via an integer frame number.
+        
+            if isa(col_parameter, 'char')
+                col_parameter = obj.getIndex(col_parameter);
+            end
+            value = obj.Values(row_parameter, col_parameter);
+            
+        end
+        
         function vector = getColumn(obj, parameter)
         % Get column corresponding to label, index (int) or indices (row vec).
             if isa(parameter, 'char')
