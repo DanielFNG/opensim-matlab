@@ -19,7 +19,7 @@ classdef OpenSimTrial < handle
         results_directory
     end
     
-    properties (Access = {?MotionData})
+    properties (Access = {?MotionData, ?DatasetElement})
        computed 
     end
     
@@ -168,18 +168,22 @@ classdef OpenSimTrial < handle
             options = obj.parseAnalysisArguments('RRA', varargin{:});
             
             % Setup adjustment RRA.
-            rraTool = obj.setupAdjustmentRRA(body, new_model, ...
+            [tool, file, folder] = obj.setupAdjustmentRRA(body, new_model, ...
                 options.timerange, options.results, options.load, ...
                 options.settings);
             
             % Run RRA.
-            rraTool.run();
+            tool.run();
             
             % Perform mass adjustments.
             obj.performMassAdjustment(...
                 new_model, human_model, getenv('OPENSIM_MATLAB_OUT')); 
             
             obj.computed.model_adjustment = true;
+            
+            % Temporary file cleanup.
+            OpenSimTrial.attemptDelete(file);
+            OpenSimTrial.attemptDelete(folder);
         end
         
         function mass = getInputModelMass(obj)
@@ -470,17 +474,18 @@ classdef OpenSimTrial < handle
             xmlwrite(actuators_path, actuators);
         end
         
-        function rraTool = setupAdjustmentRRA(...
+        function [tool, file, folder] = setupAdjustmentRRA(...
                 obj, body, new_model, timerange, results, load,  settings)
         % Setup RRA - with additional settings for mass adjustment.
         
             % General RRA settings.
-            rraTool = obj.setupRRA(timerange, results, load, settings);
+            [tool, file, folder] = ...
+                obj.setupRRA(timerange, results, load, settings);
             
             % Adjustment specific settings.
-            rraTool.setAdjustCOMToReduceResiduals(true);
-            rraTool.setAdjustedCOMBody(body);
-            rraTool.setOutputModelFileName(new_model);
+            tool.setAdjustCOMToReduceResiduals(true);
+            tool.setAdjustedCOMBody(body);
+            tool.setOutputModelFileName(new_model);
         end
         
         function performMassAdjustment(obj, new_model, human_model, log)
