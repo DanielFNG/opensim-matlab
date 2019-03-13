@@ -123,15 +123,7 @@ classdef OpenSimTrial < handle
                 
                 % Update computed status.
                 obj.computed.(method) = true;
-            
-                % Update best kinematics (used by future analyses).
-                if strcmp(method, 'IK')
-                    obj.best_kinematics = [options.results filesep 'ik.mot'];
-                    obj.correctIK(options.timerange(2));
-                elseif strcmp(method, 'RRA')
-                    obj.best_kinematics = ...
-                        [options.results filesep 'RRA_Kinematics_q.sto'];
-                end
+                
             end
             
         end
