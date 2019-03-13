@@ -103,8 +103,8 @@ classdef OpenSimTrial < handle
             % Compatability between running one or more analyses.
             if isa(analyses, 'char')
                 analyses = {analyses};
-            elseif nargin > 2
-                error(['Optional arguments to run() not supported when ' ...
+            elseif any(strcmpi(varargin, 'settings'))
+                error(['Optional ''settings'' argument not supported when ' ...
                     'running multiple analyses.']);
             end
             
