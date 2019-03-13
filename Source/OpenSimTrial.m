@@ -118,34 +118,19 @@ classdef OpenSimTrial < handle
                 % Parse inputs.
                 options = obj.parseAnalysisArguments(method, varargin{:});
             
-                % Setup analysis.
-                if strcmp(method, 'ID')
-                    [tool, file] = obj.setup(method, options);
-                elseif strcmp(method, 'RRA') || strcmp(method, 'CMC')
-                    [tool, file, folder] = obj.setup(method, options);
-                else
-                    tool = obj.setup(method, options);
-                end
-            
                 % Run analysis.
-                tool.run();
+                obj.runTool(method, options);
+                
+                % Update computed status.
                 obj.computed.(method) = true;
             
-                % Set best kinematics (used by future analyses).
+                % Update best kinematics (used by future analyses).
                 if strcmp(method, 'IK')
                     obj.best_kinematics = [options.results filesep 'ik.mot'];
                     obj.correctIK(options.timerange(2));
                 elseif strcmp(method, 'RRA')
                     obj.best_kinematics = ...
                         [options.results filesep 'RRA_Kinematics_q.sto'];
-                end
-            
-                % Temporary file cleanup. 
-                if strcmp(method, 'RRA') || strcmp(method, 'CMC')
-                    OpenSimTrial.attemptDelete(file);
-                    OpenSimTrial.attemptDelete(folder);
-                elseif strcmp(method, 'ID')
-                    OpenSimTrial.attemptDelete(file);
                 end
             end
             
@@ -168,22 +153,16 @@ classdef OpenSimTrial < handle
             options = obj.parseAnalysisArguments('RRA', varargin{:});
             
             % Setup adjustment RRA.
-            [tool, file, folder] = obj.setupAdjustmentRRA(body, new_model, ...
+            obj.runAdjustmentRRA(body, new_model, ...
                 options.timerange, options.results, options.load, ...
                 options.settings);
-            
-            % Run RRA.
-            tool.run();
             
             % Perform mass adjustments.
             obj.performMassAdjustment(...
                 new_model, human_model, getenv('OPENSIM_MATLAB_OUT')); 
             
+            % Update computed status.
             obj.computed.model_adjustment = true;
-            
-            % Temporary file cleanup.
-            OpenSimTrial.attemptDelete(file);
-            OpenSimTrial.attemptDelete(folder);
         end
         
         function mass = getInputModelMass(obj)
@@ -317,33 +296,52 @@ classdef OpenSimTrial < handle
             
         end
         
-        function varargout = setup(obj, method, options)
-        % Handle different number of output arguements for setup functions.
+        function runTool(obj, method, options)
             
             switch method
+                
                 case 'IK'
-                    varargout{1} = obj.setupIK(...
-                        options.timerange, options.results, options.settings);
-                case 'BK'
-                    varargout{1} = obj.setupBK(options.timerange, ...
-                        options.results, options.settings);
-                case 'ID'
-                    [varargout{1}, varargout{2}] = obj.setupID(...
-                        options.timerange, options.results, options.load, ...
+                    
+                    obj.runIK(options.timerange, options.results, ...
                         options.settings);
+                    
+                    % Filter & extrapolate missing IK frame.
+                    obj.correctIK(options.timerange(2));
+                    
+                    % Update best kinematics - unless RRA available. 
+                    if ~obj.computed.RRA
+                        obj.best_kinematics = ...
+                            [options.results filesep 'ik.mot'];
+                    end
+                    
+                case 'BK'
+                    
+                    obj.runBK(options.timerange, options.results, ...
+                        options.settings);
+                    
+                case 'ID'
+                    
+                    obj.runID(options.timerange, options.results, ...
+                        options.load, options.settings);
+                    
                 case 'RRA'
-                    [varargout{1}, varargout{2}, varargout{3}] = ...
-                        obj.setupRRA(options.timerange, ...
-                        options.results, options.load, options.settings);
+                    
+                    obj.runRRA(options.timerange, options.results, ...
+                        options.load, options.settings);
+                    
+                    % Update best kinematics.
+                    obj.best_kinematics = ...
+                        [options.results filesep 'RRA_Kinematics_q.sto'];
+                    
                 case 'CMC'
-                    [varargout{1}, varargout{2}, varargout{3}] = ...
-                        obj.setupCMC(options.timerange, ...
-                        options.results, options.load, options.settings);
+                    
+                    obj.runCMC(options.timerange, options.results, ...
+                        options.load, options.settings);
             end
             
         end
         
-        function tool = setupIK(obj, timerange, results, settings)
+        function runIK(obj, timerange, results, settings)
         % Sets up the IK Tool.
         
             % Import OpenSim IKTool class and Model class.
@@ -352,6 +350,11 @@ classdef OpenSimTrial < handle
             
             % Load IKTool.
             ikTool = InverseKinematicsTool(settings);
+            
+            % Load & assign model.
+            model = Model(obj.model_path);
+            model.initSystem();
+            ikTool.setModel(model);
             
             % Assign parameters.
             ikTool.setStartTime(timerange(1));
@@ -363,17 +366,11 @@ classdef OpenSimTrial < handle
             ikTool.setResultsDir(results);
             ikTool.setOutputMotionFileName([results filesep 'ik.mot']);
             
-            ikTool.print('oi.xml');
-            oi = xmlread('oi.xml');
-            oi.getElementsByTagName('model_file').item(0).getFirstChild. ...
-                setNodeValue(obj.model_path);
-            xmlwrite('oi2.xml', oi);
-            tool = InverseKinematicsTool('oi2.xml');
-            delete('oi.xml');
-            delete('oi2.xml');
+            % Run tool.
+            ikTool.run();
         end
         
-        function bkTool = setupBK(obj, timerange, results, settings)
+        function runBK(obj, timerange, results, settings)
         % Sets up the BodyKinematics tool.
         
             % Import OpenSim AnalyzeTool class and Model class.
@@ -383,26 +380,22 @@ classdef OpenSimTrial < handle
             % Load bkTool.
             bkTool = AnalyzeTool(settings);
             
-            % Assign parameters.
-            %model = Model(obj.model_path);
-            %model.initSystem();
-            %bkTool.setModel(model);
+            % Load & assign model.
+            model = Model(obj.model_path);
+            model.initSystem();
+            bkTool.setModel(model);
+            
+            % Assign parameters. 
             bkTool.setCoordinatesFileName(obj.best_kinematics);
             bkTool.setInitialTime(timerange(1));
             bkTool.setFinalTime(timerange(2));
             bkTool.setResultsDir(results);
-            bkTool.print('oi.xml');
-            oi = xmlread('oi.xml');
-            oi.getElementsByTagName('model_file').item(0).setTextContent(...
-                obj.model_path);
-            xmlwrite('oi2.xml', oi);
-            bkTool = AnalyzeTool('oi2.xml');
-            delete('oi.xml');
-            delete('oi2.xml');
+            
+            % Run tool.
+            bkTool.run();
         end
         
-        function [rraTool, temp, temp_settings] = ...
-                setupRRA(obj, timerange, results, load, settings)
+        function runRRA(obj, timerange, results, load, settings)
         % Sets up the RRA tool. 
         
             % Temporarily copy RRA settings folder to new location.
@@ -437,6 +430,142 @@ classdef OpenSimTrial < handle
             xmlwrite(temp, ext);
             rraTool.createExternalLoads(temp, rraTool.getModel());
             
+            % Run tool.
+            rraTool.run();
+            
+            % File cleanup.
+            OpenSimTrial.attemptDelete(temp);
+            OpenSimTrial.attemptDelete(temp_settings);
+            
+        end
+        
+        function runAdjustmentRRA(...
+                obj, body, new_model, timerange, results, load,  settings)
+        % Setup RRA - with additional settings for mass adjustment.
+        
+            % Temporarily copy RRA settings folder to new location.
+            [folder, name, ext] = fileparts(settings);
+            temp_settings = [results filesep 'temp'];
+            copyfile(folder, temp_settings);
+            settings = [temp_settings filesep name ext];
+            
+            % Modify pelvis COM in actuators file.
+            obj.modifyPelvisCOM(settings);
+            
+            % Import OpenSim RRATool class.
+            import org.opensim.modeling.RRATool;
+            
+            % Load RRATool.
+            rraTool = RRATool(settings);
+            
+            % Assign parameters.
+            rraTool.setModelFilename(obj.model_path);
+            rraTool.loadModel(settings);
+            rraTool.updateModelForces(rraTool.getModel(), settings);
+            rraTool.setInitialTime(timerange(1));
+            rraTool.setFinalTime(timerange(2));
+            rraTool.setDesiredKinematicsFileName(obj.best_kinematics);
+            rraTool.setResultsDir(results);
+            
+            % Set external loads.
+            ext = xmlread(load);
+            ext.getElementsByTagName('datafile').item(0).getFirstChild. ...
+                setNodeValue(obj.grfs_path);
+            temp = [results filesep 'temp.xml'];
+            xmlwrite(temp, ext);
+            rraTool.createExternalLoads(temp, rraTool.getModel());
+            
+            % Adjustment specific settings.
+            rraTool.setAdjustCOMToReduceResiduals(true);
+            rraTool.setAdjustedCOMBody(body);
+            rraTool.setOutputModelFileName(new_model);
+            
+            % Run tool.
+            rraTool.run();
+            
+            % File cleanup.
+            OpenSimTrial.attemptDelete(temp);
+            OpenSimTrial.attemptDelete(temp_settings);
+            
+        end
+        
+        function runID(obj, timerange, results, load, settings)
+        % Sets up the Inverse Dynamics tool.
+        
+            % Import OpenSim IDTool class.
+            import org.opensim.modeling.InverseDynamicsTool;
+            
+            % Load IDTool.
+            idTool = InverseDynamicsTool(settings);
+            
+            % Assign parameters. 
+            idTool.setModelFileName(obj.model_path);
+            if ~exist(results, 'dir')
+                mkdir(results)
+            end
+            idTool.setResultsDir(results);
+            idTool.setOutputGenForceFileName('id.sto');
+            idTool.setStartTime(timerange(1));
+            idTool.setEndTime(timerange(2));
+            idTool.setCoordinatesFileName(obj.best_kinematics);
+            
+            % Set external loads.
+            ext = xmlread(load);
+            ext.getElementsByTagName('datafile').item(0).getFirstChild. ...
+                setNodeValue(obj.grfs_path);
+            temp = [obj.results_directory filesep 'temp.xml'];
+            xmlwrite(temp, ext);
+            idTool.setExternalLoadsFileName(temp);
+            
+            % Run tool.
+            idTool.run();
+            
+            % File cleanup.
+            OpenSimTrial.attemptDelete(temp);
+        end
+        
+        function runCMC(obj, timerange, results, load, settings)
+        % Sets up the CMC Tool.
+        
+            % Import OpenSim CMCTool class.
+            import org.opensim.modeling.CMCTool
+            
+            % Temporarily copy CMC settings folder to new location.
+            [folder, name, ext] = fileparts(settings);
+            temp_settings = [results filesep 'temp'];
+            copyfile(folder, temp_settings);
+            settings = [temp_settings filesep name ext];
+            
+            % Modify pelvis COM in actuators file.
+            obj.modifyPelvisCOM(settings);
+            
+            % Load default CMCTool.
+            cmcTool = CMCTool(settings);
+            
+            % Assign parameters.
+            cmcTool.setModelFilename(obj.model_path);
+            cmcTool.loadModel(settings);
+            cmcTool.addAnalysisSetToModel();
+            cmcTool.updateModelForces(cmcTool.getModel(), settings);
+            cmcTool.setResultsDir(results);
+            cmcTool.setInitialTime(timerange(1));
+            cmcTool.setFinalTime(timerange(2));
+            cmcTool.setDesiredKinematicsFileName(obj.best_kinematics);
+            
+            % Setup external loads.
+            external_loads = xmlread(load);
+            external_loads.getElementsByTagName('datafile').item(0). ...
+                getFirstChild.setNodeValue(obj.grfs_path);
+            temp = [results filesep 'temp.xml'];
+            xmlwrite(temp, external_loads);
+            cmcTool.createExternalLoads(temp, cmcTool.getModel());
+            
+            % Run tool.
+            cmcTool.run();
+            
+            % File cleanup.
+            OpenSimTrial.attemptDelete(temp);
+            OpenSimTrial.attemptDelete(temp_settings);
         end
         
         function modifyPelvisCOM(obj, settings)
@@ -474,20 +603,6 @@ classdef OpenSimTrial < handle
             xmlwrite(actuators_path, actuators);
         end
         
-        function [tool, file, folder] = setupAdjustmentRRA(...
-                obj, body, new_model, timerange, results, load,  settings)
-        % Setup RRA - with additional settings for mass adjustment.
-        
-            % General RRA settings.
-            [tool, file, folder] = ...
-                obj.setupRRA(timerange, results, load, settings);
-            
-            % Adjustment specific settings.
-            tool.setAdjustCOMToReduceResiduals(true);
-            tool.setAdjustedCOMBody(body);
-            tool.setOutputModelFileName(new_model);
-        end
-        
         function performMassAdjustment(obj, new_model, human_model, log)
         % Performs the mass adjustments recommended by the RRA algorithm.
             
@@ -511,74 +626,6 @@ classdef OpenSimTrial < handle
             
             % Produce the adjusted model file.
             overall_model.print(new_model);
-        end
-        
-        function [idTool, temp] = ...
-                setupID(obj, timerange, results, load, settings)
-        % Sets up the Inverse Dynamics tool.
-        
-            % Import OpenSim IDTool class.
-            import org.opensim.modeling.InverseDynamicsTool;
-            
-            % Load IDTool.
-            idTool = InverseDynamicsTool(settings);
-            
-            % Assign parameters. 
-            idTool.setModelFileName(obj.model_path);
-            if ~exist(results, 'dir')
-                mkdir(results)
-            end
-            idTool.setResultsDir(results);
-            idTool.setOutputGenForceFileName('id.sto');
-            idTool.setStartTime(timerange(1));
-            idTool.setEndTime(timerange(2));
-            idTool.setCoordinatesFileName(obj.best_kinematics);
-            
-            % Set external loads.
-            ext = xmlread(load);
-            ext.getElementsByTagName('datafile').item(0).getFirstChild. ...
-                setNodeValue(obj.grfs_path);
-            temp = [obj.results_directory filesep 'temp.xml'];
-            xmlwrite(temp, ext);
-            idTool.setExternalLoadsFileName(temp);
-        end
-        
-        function [cmcTool, temp, temp_settings] = ...
-                setupCMC(obj, timerange, results, load, settings)
-        % Sets up the CMC Tool.
-        
-            % Import OpenSim CMCTool class.
-            import org.opensim.modeling.CMCTool
-            
-            % Temporarily copy CMC settings folder to new location.
-            [folder, name, ext] = fileparts(settings);
-            temp_settings = [results filesep 'temp'];
-            copyfile(folder, temp_settings);
-            settings = [temp_settings filesep name ext];
-            
-            % Modify pelvis COM in actuators file.
-            obj.modifyPelvisCOM(settings);
-            
-            % Load default CMCTool.
-            cmcTool = CMCTool(settings);
-            
-            % Assign parameters.
-            cmcTool.setModelFilename(obj.model_path);
-            cmcTool.loadModel(settings);
-            cmcTool.addAnalysisSetToModel();
-            cmcTool.updateModelForces(cmcTool.getModel(), settings);
-            cmcTool.setResultsDir(results);
-            cmcTool.setInitialTime(timerange(1));
-            cmcTool.setFinalTime(timerange(2));
-            cmcTool.setDesiredKinematicsFileName(obj.best_kinematics);
-            
-            % Setup external loads.
-            external_loads = xmlread(load);
-            external_loads.getElementsByTagName('datafile').item(0). ...
-                getFirstChild.setNodeValue(obj.grfs_path);
-            temp = [results filesep 'temp.xml'];
-            xmlwrite(temp, external_loads);
-            cmcTool.createExternalLoads(temp, cmcTool.getModel());
         end
         
         function correctIK(obj, end_time)
@@ -672,12 +719,12 @@ classdef OpenSimTrial < handle
                 lastwarn('');
                 delete(path);
                 if strcmp(lastwarn, 'File not found or permission denied')
+                    w = warning('query','last');
+                    w.identifier
                     pause(0.5);
                     lastwarn('');
                     delete(path);
                     if strcmp(lastwarn, 'File not found or permission denied')
-                        w = warning('query','last');
-                        w.identifier
                         fprintf('%s requires manual deletion.\n', path);
                     end
                 end
