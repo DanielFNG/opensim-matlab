@@ -34,19 +34,13 @@ classdef OpenSimTrial < handle
         %       - grfs: motion data, external forces, required for some analyses
         %
             if nargin > 0
-            
+                
                 % Get absolute paths.
                 if nargin > 3
                     obj.grfs_path = rel2abs(grfs);
                 end
                 [obj.model_path, obj.results_directory] = ...
                     rel2abs(model, results);
-                
-                if ~isempty(input)
-                    obj.input_coordinates = rel2abs(input);
-                    obj.analyseInputCoordinates();
-                    obj.best_kinematics = obj.input_coordinates;
-                end
                 
                 % Create results directory.
                 if ~exist(obj.results_directory, 'dir')
@@ -55,6 +49,14 @@ classdef OpenSimTrial < handle
                 
                 % Load defaults. 
                 obj.loadDefaults();
+                
+                if ~isempty(input)
+                    obj.input_coordinates = rel2abs(input);
+                    obj.analyseInputCoordinates();
+                    obj.best_kinematics = obj.input_coordinates;
+                end
+                
+                
             end
         end
         
