@@ -243,10 +243,6 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             fileID = fopen(str, 'w');
             
             % Print file.
-            str
-            if fileID == -1
-                str
-            end
             obj.printHeader(fileID);
             obj.printLabels(fileID);
             obj.printValues(fileID);

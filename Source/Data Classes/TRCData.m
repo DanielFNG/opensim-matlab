@@ -34,11 +34,11 @@ classdef TRCData < OpenSimData
                     case 'm'
                         multiplier = 1000;
                 end
+
+                % Convert the state data only.
+                obj.scaleColumns(multiplier);
+                obj.Units = new_units;
             end
-        
-            % Convert the state data only.
-            obj.scaleColumns(multiplier);
-            obj.Units = new_units;
             
         end
         

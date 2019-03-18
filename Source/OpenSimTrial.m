@@ -299,6 +299,9 @@ classdef OpenSimTrial < handle
                     obj.runIK(options.timerange, options.results, ...
                         options.settings);
                     
+                    % Allow time for IK files to become writable.
+                    pause(0.1);
+                    
                     % Filter & extrapolate missing IK frame.
                     obj.correctIK(options.timerange(2));
                     
