@@ -299,9 +299,6 @@ classdef OpenSimTrial < handle
                     obj.runIK(options.timerange, options.results, ...
                         options.settings);
                     
-                    % Allow time for IK files to become writable.
-                    pause(0.1);
-                    
                     % Filter & extrapolate missing IK frame.
                     obj.correctIK(options.timerange(2));
                     
@@ -645,7 +642,12 @@ classdef OpenSimTrial < handle
                 
                 % Filter and rewrite.
                 data_object.filter4LP(6);  % 6 Hz
-                data_object.writeToFile(files{i});
+                try
+                    data_object.writeToFile(files{i});
+                catch
+                    pause(5);
+                    data_object.writeToFile(files{i});
+                end
                 delete(data_object);
             end
             
