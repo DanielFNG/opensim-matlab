@@ -56,7 +56,6 @@ classdef OpenSimTrial < handle
                     obj.best_kinematics = obj.input_coordinates;
                 end
                 
-                
             end
         end
         
