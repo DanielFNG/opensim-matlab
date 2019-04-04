@@ -92,13 +92,17 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         
         end
         
-        function spline(obj, input)
+        function spline(obj, input, method)
         % Fit data to desired frequency using spline interpolation.
         %
         % If input is of length 1, it is assumed to be a desired frequency
         % at which to use linear interpolation to produce timesteps between
         % the object start and end frames. If it is of length > 1, it is
         % assumed to be an array of timesteps to use. 
+        
+            if nargin < 3
+                method = 'spline';
+            end
         
             switch length(input)
                 case 1
@@ -114,7 +118,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             
             % Spline the spatial values.
             splined_values = ...
-                interp1(obj.Timesteps, values, timesteps, 'spline');
+                interp1(obj.Timesteps, values, timesteps, method);
                 
             % Create the new, splined Data object & update. 
             obj.assignSpline(timesteps, splined_values);
