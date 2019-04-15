@@ -172,15 +172,23 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
                 
         end
         
-        function rotate(obj, xrot, yrot, zrot)
+        function rotate(obj, xrot, yrot, zrot, left_handed)
         % Rotate the spatial data in a Cartesian data object. 
         
             if ~obj.IsCartesian
                 error('Rotate only supported for Cartesian data.')
             end
             
+            if nargin < 5
+                left_handed = false;
+            end
+            
             % Construct the rotation matrix.
             R = rotz(zrot)*roty(yrot)*rotx(xrot);
+            
+            if left_handed
+                R = transpose(R);
+            end
             
             % Get the labels with the X axis data.
             x_labels = ...
