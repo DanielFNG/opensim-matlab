@@ -296,6 +296,17 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         end
         
         function rotate(obj, rotations, left_handed)
+        function append(obj, another_obj)
+            
+            if obj.NCols ~= another_obj.NCols
+                error('Data objects wrong size for appending.');
+            else
+                obj.Values = [obj.Values; another_obj.Values];
+                obj.update();
+            end
+        end
+        
+        function rotate(obj, xrot, yrot, zrot, left_handed)
         % Rotate the spatial data in a Cartesian data object. 
         
             if ~obj.IsCartesian
