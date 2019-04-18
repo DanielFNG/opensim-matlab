@@ -183,8 +183,11 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
                 left_handed = false;
             end
             
-            % Construct the rotation matrix.
-            R = rotz(zrot)*roty(yrot)*rotx(xrot);
+            % Construct the rotation matrix. Note: we take the transpose
+            % here since we are rotating the axes (i.e. clockwise rotation
+            % of vectors) rather than the points themselves (which would be
+            % anticlockwise rotation). 
+            R = transpose(rotz(zrot)*roty(yrot)*rotx(xrot));
             
             if left_handed
                 R = transpose(R);
