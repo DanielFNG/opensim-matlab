@@ -2,7 +2,7 @@ classdef TRCData < OpenSimData
 % Class for storing and working with OpenSim data in .trc format. 
 
     properties (SetAccess = protected)
-        Filetype = '.trc' 
+        Filetype = '.trc'
     end
     
     properties (Access = protected)
@@ -38,6 +38,9 @@ classdef TRCData < OpenSimData
                 % Convert the state data only.
                 obj.scaleColumns(multiplier);
                 obj.Units = new_units;
+                
+                % Update the header to store the new units.
+                obj.updateHeader();
             end
             
         end
