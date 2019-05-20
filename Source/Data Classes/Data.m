@@ -14,6 +14,8 @@ elseif strcmpi(ext, '.mot')
     data_object = MOTData(varargin{:});
 elseif strcmpi(ext, '.sto')
     data_object = STOData(varargin{:});
+elseif strcmpi(ext, '.txt')
+    data_object = TXTData(varargin{:});
 else
     error('Filetype not recognised.');
 end

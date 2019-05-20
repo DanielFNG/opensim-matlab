@@ -1,4 +1,4 @@
-classdef MOTData < MOTSTOData
+classdef MOTData < MOTSTOTXTData
 % Class for storing & working with OpenSim Data in .mot format.
     
     properties (SetAccess = protected)
@@ -9,7 +9,7 @@ classdef MOTData < MOTSTOData
     
         function obj = MOTData(varargin)
         % Construct MOTData from (file) or from (values, header, labels). 
-            obj@MOTSTOData(varargin{:});
+            obj@MOTSTOTXTData(varargin{:});
         end
         
     end

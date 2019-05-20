@@ -1,4 +1,4 @@
-classdef STOData < MOTSTOData
+classdef STOData < MOTSTOTXTData
 % Class for storing & working with OpenSim data in .sto format.
     
     properties (SetAccess = protected)
@@ -9,7 +9,7 @@ classdef STOData < MOTSTOData
     
         function obj = STOData(varargin)
         % Construct STOData from (file) or from (values, header, labels). 
-            obj@MOTSTOData(varargin{:});
+            obj@MOTSTOTXTData(varargin{:});
         end
         
     end

@@ -1,10 +1,10 @@
-classdef (Abstract) MOTSTOData < OpenSimData
+classdef (Abstract) MOTSTOTXTData < OpenSimData
 % Abstract class for storing & working with OpenSim data in .mot or .sto format.
     
     methods
     
-        function obj = MOTSTOData(varargin)
-        % Construct MOTSTOData from (file) or from (values, header, labels). 
+        function obj = MOTSTOTXTData(varargin)
+        % Construct MOTSTOTXTData from (file) or from (values, header, labels). 
             obj@OpenSimData(varargin{:});
         end
         
