@@ -27,8 +27,14 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         EqualityTolerance = 1e-6
     end
     
-    methods (Abstract, Access = protected)
+    methods (Abstract)
+       
+        getTimesteps(obj)
+        
+    end
     
+    methods (Abstract, Access = protected)
+        
         updateHeader(obj)
         printLabels(obj, fileID)
         printValues(obj, fileID)
@@ -217,7 +223,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         % nargin == 3, inputs are start and end times at which to slice.
         
             if nargin == 3
-                timesteps = obj.getColumn('time');
+                timesteps = obj.getTimesteps();
                 frames = timesteps > varargin{1} & timesteps < varargin{2};
             else
                 frames = varargin{1};
@@ -232,7 +238,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             
             new_obj = copy(obj);
             indices = new_obj.getStateIndices();
-            time = new_obj.getColumn('time');
+            time = new_obj.getTimesteps();
             for i=indices
                 current_val = new_obj.getColumn(i);
                 diff = gradient(current_val, time);
@@ -279,8 +285,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             % Check that the time is in our timerange.
             range = obj.getTimeRange();
             if time >= range(1) && time <= range(2)
-                timesteps = obj.getColumn('time');
-                [~, index] = min(abs(timesteps - time));
+                [~, index] = min(abs(obj.getTimesteps() - time));
             else
                 error('Time outwith timerange of data object.');
             end
@@ -420,7 +425,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         % Updates imesteps, number of frames & frame array, number of columns
         % and data frequency.
         
-            obj.Timesteps = obj.getColumn('time');
+            obj.Timesteps = obj.getTimesteps();
             obj.NFrames = length(obj.Timesteps);
             obj.NCols = length(obj.Labels);
             obj.Frames = 1:obj.NFrames;

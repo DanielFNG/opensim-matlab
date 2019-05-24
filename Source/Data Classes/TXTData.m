@@ -12,6 +12,16 @@ classdef TXTData < MOTSTOTXTData
             obj@MOTSTOTXTData(varargin{:});
         end
         
+        function timesteps = getTimesteps(obj)
+           
+            timesteps = obj.getColumn('time');
+            
+            if size(timesteps, 2) == 0
+                timesteps = obj.getColumn('timestamp');
+            end
+            
+        end
+        
     end
     
     methods (Access = protected)

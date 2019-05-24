@@ -12,6 +12,12 @@ classdef MOTData < MOTSTOTXTData
             obj@MOTSTOTXTData(varargin{:});
         end
         
+        function timesteps = getTimesteps(obj)
+            
+            timesteps = obj.getColumn('time');
+            
+        end
+        
     end
     
     methods (Access = protected)

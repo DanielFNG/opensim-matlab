@@ -22,6 +22,12 @@ classdef TRCData < OpenSimData
             obj.Units = info{5};
         end
         
+        function timesteps = getTimesteps(obj)
+           
+            timesteps = obj.getColumn('time');
+            
+        end
+        
         function convertUnits(obj, new_units)
         % Convert units of TRCData.
         %
@@ -69,8 +75,8 @@ classdef TRCData < OpenSimData
             n_cols = length(labels);
             
             % Initialise frame_start & frame_end.
-            frames_start = 1;
-            frames_end = n_rows;
+            frames_start = 0;
+            frames_end = n_rows + 1;
             
             % Count frame_start.
             for i=1:n_rows
@@ -88,6 +94,11 @@ classdef TRCData < OpenSimData
                 else
                     frames_end = i;
                 end
+            end
+            
+            % Error if no start/end frames found.
+            if frames_start == 0 && frames_end == n_rows + 1
+                error('No missing frames at start or end.');
             end
             
             % Optionally, create a fixed TRCData object.
