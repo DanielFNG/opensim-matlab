@@ -13,6 +13,7 @@ classdef TXTData < MOTSTOTXTData
         end
         
         function timesteps = getTimesteps(obj)
+        % Get the timesteps column.
            
             timesteps = obj.getColumn('time');
             
