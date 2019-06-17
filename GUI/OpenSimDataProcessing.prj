@@ -1,0 +1,134 @@
+<deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
+  <configuration file="C:\Users\danie\Documents\GitHub\opensim-matlab\GUI\OpenSimDataProcessing.prj" location="C:\Users\danie\Documents\GitHub\opensim-matlab\GUI" name="OpenSimDataProcessing" target="target.ezdeploy.standalone" target-name="Application Compiler">
+    <param.appname>OpenSimDataProcessing</param.appname>
+    <param.icon />
+    <param.icons />
+    <param.version>0.1</param.version>
+    <param.authnamewatermark>Daniel Gordon</param.authnamewatermark>
+    <param.email>daniel.gordon@ed.ac.uk</param.email>
+    <param.company>University of Edinburgh</param.company>
+    <param.summary>Application for running OpenSim analyses (inverse kinematics, body kinematics, etc) on motion data.</param.summary>
+    <param.description />
+    <param.screenshot />
+    <param.guid />
+    <param.installpath.string>\University of Edinburgh\OpenSimDataProcessing\</param.installpath.string>
+    <param.installpath.combo>option.installpath.programfiles</param.installpath.combo>
+    <param.logo />
+    <param.install.notes />
+    <param.target.install.notes />
+    <param.intermediate>${PROJECT_ROOT}\OpenSimDataProcessing\for_testing</param.intermediate>
+    <param.files.only>${PROJECT_ROOT}\OpenSimDataProcessing\for_redistribution_files_only</param.files.only>
+    <param.output>${PROJECT_ROOT}\OpenSimDataProcessing\for_redistribution</param.output>
+    <param.logdir>${PROJECT_ROOT}\OpenSimDataProcessing</param.logdir>
+    <param.enable.clean.build>false</param.enable.clean.build>
+    <param.user.defined.mcr.options />
+    <param.target.type>subtarget.standalone</param.target.type>
+    <param.support.packages />
+    <param.web.mcr>true</param.web.mcr>
+    <param.package.mcr>false</param.package.mcr>
+    <param.no.mcr>false</param.no.mcr>
+    <param.web.mcr.name>MyAppInstaller_web</param.web.mcr.name>
+    <param.package.mcr.name>MyAppInstaller_mcr</param.package.mcr.name>
+    <param.no.mcr.name>MyAppInstaller_app</param.no.mcr.name>
+    <param.windows.command.prompt>false</param.windows.command.prompt>
+    <param.create.log>true</param.create.log>
+    <param.log.file>odp_log.txt</param.log.file>
+    <param.native.matlab>false</param.native.matlab>
+    <param.checkbox>false</param.checkbox>
+    <param.example />
+    <param.help.text />
+    <unset>
+      <param.icon />
+      <param.icons />
+      <param.description />
+      <param.screenshot />
+      <param.guid />
+      <param.installpath.string />
+      <param.installpath.combo />
+      <param.logo />
+      <param.install.notes />
+      <param.target.install.notes />
+      <param.intermediate />
+      <param.files.only />
+      <param.output />
+      <param.logdir />
+      <param.enable.clean.build />
+      <param.user.defined.mcr.options />
+      <param.target.type />
+      <param.support.packages />
+      <param.web.mcr />
+      <param.package.mcr />
+      <param.no.mcr />
+      <param.web.mcr.name />
+      <param.package.mcr.name />
+      <param.no.mcr.name />
+      <param.native.matlab />
+      <param.checkbox />
+      <param.example />
+      <param.help.text />
+    </unset>
+    <fileset.main>
+      <file>${PROJECT_ROOT}\AnalyseMotionData.mlapp</file>
+    </fileset.main>
+    <fileset.resources />
+    <fileset.package />
+    <fileset.depfun>
+      <file>C:\Users\danie\Documents\GitHub\dram\Source\Classes\Dataset.m</file>
+      <file>C:\Users\danie\Documents\GitHub\dram\Source\Classes\DatasetElement.m</file>
+      <file>C:\Users\danie\Documents\GitHub\motion-analysis\Source\calculateUMax.m</file>
+      <file>C:\Users\danie\Documents\GitHub\motion-analysis\Source\extrapolatePendulum.m</file>
+      <file>C:\Users\danie\Documents\GitHub\motion-analysis\Source\Gait.m</file>
+      <file>C:\Users\danie\Documents\GitHub\motion-analysis\Source\GaitCycle.m</file>
+      <file>C:\Users\danie\Documents\GitHub\motion-analysis\Source\Geometry\Line.m</file>
+      <file>C:\Users\danie\Documents\GitHub\motion-analysis\Source\Geometry\LineSet.m</file>
+      <file>C:\Users\danie\Documents\GitHub\motion-analysis\Source\Geometry\PointSet.m</file>
+      <file>C:\Users\danie\Documents\GitHub\motion-analysis\Source\Geometry\Polygon.m</file>
+      <file>C:\Users\danie\Documents\GitHub\motion-analysis\Source\Motion.m</file>
+      <file>C:\Users\danie\Documents\GitHub\motion-analysis\Source\MotionData.m</file>
+      <file>C:\Users\danie\Documents\GitHub\opensim-matlab\Source\Data Classes\Data.m</file>
+      <file>C:\Users\danie\Documents\GitHub\opensim-matlab\Source\Data Classes\MOTData.m</file>
+      <file>C:\Users\danie\Documents\GitHub\opensim-matlab\Source\Data Classes\MOTSTOTXTData.m</file>
+      <file>C:\Users\danie\Documents\GitHub\opensim-matlab\Source\Data Classes\OpenSimData.m</file>
+      <file>C:\Users\danie\Documents\GitHub\opensim-matlab\Source\Data Classes\STOData.m</file>
+      <file>C:\Users\danie\Documents\GitHub\opensim-matlab\Source\Data Classes\TRCData.m</file>
+      <file>C:\Users\danie\Documents\GitHub\opensim-matlab\Source\Data Classes\TXTData.m</file>
+      <file>C:\Users\danie\Documents\GitHub\opensim-matlab\Source\OpenSimTrial.m</file>
+      <file>C:\Users\danie\Documents\GitHub\opensim-matlab\Source\runBatch.m</file>
+      <file>C:\Users\danie\Documents\GitHub\utils\Source\dirNoDots.m</file>
+      <file>C:\Users\danie\Documents\GitHub\utils\Source\rel2abs.m</file>
+      <file>C:\Users\danie\Documents\GitHub\utils\Source\rotx.m</file>
+      <file>C:\Users\danie\Documents\GitHub\utils\Source\roty.m</file>
+      <file>C:\Users\danie\Documents\GitHub\utils\Source\rotz.m</file>
+      <file>C:\Users\danie\Documents\GitHub\utils\Source\stretchVector.m</file>
+      <file>C:\Users\danie\Documents\GitHub\utils\Source\ZeroLagButtFiltfilt.m</file>
+      <file>D:\Dropbox\PhD\Testing MOtoNMS\src\shared\MissingFramesCounter.m</file>
+      <file>D:\Dropbox\PhD\Testing MOtoNMS\src\shared\piecewiseFiltering.m</file>
+      <file>D:\Dropbox\PhD\Testing MOtoNMS\src\shared\waitbar.m</file>
+    </fileset.depfun>
+    <build-deliverables>
+      <file location="${PROJECT_ROOT}\OpenSimDataProcessing\for_testing" name="readme.txt" optional="true">C:\Users\danie\Documents\GitHub\opensim-matlab\GUI\OpenSimDataProcessing\for_testing\readme.txt</file>
+      <file location="${PROJECT_ROOT}\OpenSimDataProcessing\for_testing" name="splash.png" optional="false">C:\Users\danie\Documents\GitHub\opensim-matlab\GUI\OpenSimDataProcessing\for_testing\splash.png</file>
+      <file location="${PROJECT_ROOT}\OpenSimDataProcessing\for_testing" name="OpenSimDataProcessing.exe" optional="false">C:\Users\danie\Documents\GitHub\opensim-matlab\GUI\OpenSimDataProcessing\for_testing\OpenSimDataProcessing.exe</file>
+    </build-deliverables>
+    <workflow />
+    <matlab>
+      <root>C:\Program Files\MATLAB\R2018a</root>
+      <toolboxes />
+    </matlab>
+    <platform>
+      <unix>false</unix>
+      <mac>false</mac>
+      <windows>true</windows>
+      <win2k>false</win2k>
+      <winxp>false</winxp>
+      <vista>false</vista>
+      <linux>false</linux>
+      <solaris>false</solaris>
+      <osver>10.0</osver>
+      <os32>false</os32>
+      <os64>true</os64>
+      <arch>win64</arch>
+      <matlab>true</matlab>
+    </platform>
+  </configuration>
+</deployment-project>

@@ -60,3 +60,6 @@ Defaults/RRA/actuators.xml
 
 # Ignore testing files.
 Testing/*
+
+# Ignore subdirectories of the GUI folder. 
+GUI/*/
