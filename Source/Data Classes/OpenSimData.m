@@ -224,7 +224,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         
             if nargin == 3
                 timesteps = obj.getTimesteps();
-                frames = timesteps > varargin{1} & timesteps < varargin{2};
+                frames = timesteps >= varargin{1} & timesteps <= varargin{2};
             else
                 frames = varargin{1};
             end
@@ -358,6 +358,14 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             time = obj.Timesteps(end) - obj.Timesteps(1);
         end
         
+        function indices = getStateIndices(obj)
+        % Get indices of state data.
+        
+            time = obj.getIndex('time');
+            indices = (time + 1):obj.NCols;
+        
+        end
+        
     end
     
     methods (Access = private)
@@ -467,14 +475,6 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         
             time = obj.getIndex('time');
             indices = 1:time;
-        
-        end
-        
-        function indices = getStateIndices(obj)
-        % Get indices of state data.
-        
-            time = obj.getIndex('time');
-            indices = (time + 1):obj.NCols;
         
         end
         
