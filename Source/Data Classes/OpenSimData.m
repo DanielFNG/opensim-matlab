@@ -178,7 +178,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
                 
         end
         
-        function convertSystem(obj, system)
+        function convert(obj, system)
            
             if ~obj.IsCartesian
                 error('Can only perform system conversion on Cartesian data.');
@@ -195,7 +195,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
                 coordinates = transpose([obj.getColumn([label 'X']), ...
                     obj.getColumn([label 'Y']), obj.getColumn([label 'Z'])]);
                 coordinates = convertSystem(coordinates, system); 
-                obj.Values(:, x_index:x_index+2) = coordinates;
+                obj.Values(:, x_index:x_index+2) = transpose(coordinates);
             end
             
             
