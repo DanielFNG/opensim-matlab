@@ -179,23 +179,31 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         end
         
         function convert(obj, system)
+        % Converts Cartesian data in to OpenSim co-ordinates. 
+        %
+        % See the convertSystem function for a fuller explanation and
+        % description of the system input parameter. 
            
             if ~obj.IsCartesian
                 error('Can only perform system conversion on Cartesian data.');
             end
             
-            % Get the labels with the X axis data.
+            % Get the X, Y & Z labels.
             x_labels = ...
                 obj.Labels(cellfun(@(x) strcmpi(x(end), 'x'), obj.Labels));
+            y_labels = ...
+                obj.Labels(cellfun(@(x) strcmpi(x(end), 'y'), obj.Labels));
+            z_labels = ...
+                obj.Labels(cellfun(@(x) strcmpi(x(end), 'z'), obj.Labels));
             
             % Step through the labels rotating the data. 
             for i=1:length(x_labels)
-                label = x_labels{i}(1:end-1);
-                x_index = obj.getIndex(x_labels{i});
-                coordinates = transpose([obj.getColumn([label 'X']), ...
-                    obj.getColumn([label 'Y']), obj.getColumn([label 'Z'])]);
+                coordinates = transpose([obj.getColumn(x_labels{i}), ...
+                    obj.getColumn(y_labels{i}), obj.getColumn(z_labels{i})]);
                 coordinates = convertSystem(coordinates, system); 
-                obj.Values(:, x_index:x_index+2) = transpose(coordinates);
+                indices = [obj.getIndex(x_labels{i}); ...
+                    obj.getIndex(y_labels{i}); obj.getIndex(z_labels{i})];
+                obj.Values(:, indices) = transpose(coordinates);
             end
             
             
