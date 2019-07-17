@@ -23,6 +23,8 @@ function data_out = convertSystem(data_in, system)
     if size(data_in, 1) ~= 3
         data_in = transpose(data_in);
         transp = true;
+    else
+        transp = false;
     end
         
     % Create output arrays.
