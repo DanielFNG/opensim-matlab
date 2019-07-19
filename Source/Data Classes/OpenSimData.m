@@ -134,12 +134,16 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         
         function filter4LP(obj, frequency)
             
-            dt = 1/obj.Frequency;
-            indices = obj.getStateIndices();
-            for index = indices
-                input = obj.getColumn(index);
-                obj.setColumn(index, ...
-                    ZeroLagButtFiltfilt(dt, frequency, 4, 'lp', input));
+            if isa(obj.Frequency, 'char')
+                error('Frequency undefined - cannot filter.\n');
+            else
+                dt = 1/obj.Frequency;
+                indices = obj.getStateIndices();
+                for index = indices
+                    input = obj.getColumn(index);
+                    obj.setColumn(index, ...
+                        ZeroLagButtFiltfilt(dt, frequency, 4, 'lp', input));
+                end
             end
             
         end
@@ -150,21 +154,25 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         % Tested using both spline and pchip. Pchip seemed to perform
         % better for lower values of n.
         
-            % Construct the new time array.
-            timestep = 1/obj.Frequency;
-            range = obj.getTimeRange();
-            new_timesteps = transpose(range(1):timestep:range(2) + n*timestep);
-            
-            % Isolate the spatial values.
-            values = obj.getStateData();
-            
-            % Spline these values.
-            splined_values = ...
-                interp1(obj.Timesteps, values, new_timesteps, 'pchip');
-            
-            % Assign the splines values and update.
-            obj.assignSpline(new_timesteps, splined_values);
-            obj.update();
+            if isa(obj.Frequency, 'char')
+                error('Frequency undefined - cannot extrapolate.\n');
+            else
+                % Construct the new time array.
+                timestep = 1/obj.Frequency;
+                range = obj.getTimeRange();
+                new_timesteps = transpose(range(1):timestep:range(2) + n*timestep);
+
+                % Isolate the spatial values.
+                values = obj.getStateData();
+
+                % Spline these values.
+                splined_values = ...
+                    interp1(obj.Timesteps, values, new_timesteps, 'pchip');
+
+                % Assign the splines values and update.
+                obj.assignSpline(new_timesteps, splined_values);
+                obj.update();
+            end
             
         end
         
