@@ -119,8 +119,16 @@ classdef OpenSimTrial < handle
                 % Parse inputs.
                 options = obj.parseAnalysisArguments(method, varargin{:});
             
+                if strcmp(method, 'CMC')
+                    tic;
+                end
+                
                 % Run analysis.
                 obj.runTool(method, options);
+                
+                if strcmp(method, 'CMC')
+                    disp(['CMC took ' toc ' seconds.']);
+                end
                 
                 % Update computed status.
                 obj.computed.(method) = true;
