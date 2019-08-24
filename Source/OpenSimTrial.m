@@ -128,7 +128,7 @@ classdef OpenSimTrial < handle
                 
                 if strcmp(method, 'CMC')
                     t = toc;
-                    disp(['CMC took ' t ' seconds.']);
+                    disp(['CMC took ' num2str(t) ' seconds.']);
                 end
                 
                 % Update computed status.
