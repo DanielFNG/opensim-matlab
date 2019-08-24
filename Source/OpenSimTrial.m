@@ -127,7 +127,8 @@ classdef OpenSimTrial < handle
                 obj.runTool(method, options);
                 
                 if strcmp(method, 'CMC')
-                    disp(['CMC took ' toc ' seconds.']);
+                    t = toc;
+                    disp(['CMC took ' t ' seconds.']);
                 end
                 
                 % Update computed status.
