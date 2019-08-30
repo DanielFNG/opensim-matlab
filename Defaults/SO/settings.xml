@@ -28,15 +28,13 @@
 		<!--Set of analyses to be run during the investigation.-->
 		<AnalysisSet name="Analyses">
 			<objects>
-				<ProbeReporter name="MetabolicsReporter">
-				</ProbeReporter>
 				<StaticOptimization name="StaticOptimization">
 					<!--Flag (true or false) specifying whether whether on. True by default.-->
 					<on>true</on>
 					<!--Start time.-->
-					<start_time>1.34</start_time>
+					<start_time> 0 </start_time>
 					<!--End time.-->
-					<end_time>2.4</end_time>
+					<end_time> 0 </end_time>
 					<!--Specifies how often to store results during a simulation. More specifically, the interval (a positive integer) specifies how many successful integration steps should be taken before results are recorded again.-->
 					<step_interval>1</step_interval>
 					<!--Flag (true or false) indicating whether the results are in degrees or not.-->
@@ -52,6 +50,9 @@
 					<!--An integer for setting the maximum number of iterations the optimizer can use at each time.  -->
 					<optimizer_max_iterations>100</optimizer_max_iterations>
 				</StaticOptimization>
+				<ProbeReporter name="MetabolicsReporter">
+					<!--All properties of this object have their default values.-->
+				</ProbeReporter>
 			</objects>
 			<groups />
 		</AnalysisSet>

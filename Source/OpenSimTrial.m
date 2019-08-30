@@ -72,6 +72,8 @@ classdef OpenSimTrial < handle
                 OpenSimTrial.statusMessage(obj.computed.BK));
             fprintf('ID %scomputed.\n', ...
                 OpenSimTrial.statusMessage(obj.computed.ID));
+            fprintf('SO %computed.\n', ...
+                OpenSimTrial.statusMessage(obj.computed.SO));
             fprintf('CMC %scomputed.\n\n', ...
                 OpenSimTrial.statusMessage(obj.computed.CMC));
         end
@@ -175,7 +177,7 @@ classdef OpenSimTrial < handle
             default_folder = [getenv('OPENSIM_MATLAB_HOME') filesep 'Defaults'];
             
             % Allowable methods.
-            obj.defaults.methods = {'IK', 'RRA', 'BK', 'ID', 'CMC'};
+            obj.defaults.methods = {'IK', 'RRA', 'BK', 'ID', 'SO', 'CMC'};
             
             % Assign default settings paths. 
             obj.defaults.settings.IK = ...
@@ -186,6 +188,8 @@ classdef OpenSimTrial < handle
                 [default_folder filesep 'RRA' filesep 'settings.xml'];
             obj.defaults.settings.ID = ...
                 [default_folder filesep 'ID' filesep 'id.xml'];
+            obj.defaults.settings.SO = ...
+                [default_folder filesep 'SO' filesep 'settings.xml'];
             obj.defaults.settings.CMC = ...
                 [default_folder filesep 'CMC' filesep 'settings.xml'];
             obj.defaults.settings.loads = ...
@@ -196,6 +200,7 @@ classdef OpenSimTrial < handle
             obj.defaults.results.ID = [obj.results_directory filesep 'ID'];
             obj.defaults.results.RRA = [obj.results_directory filesep 'RRA'];
             obj.defaults.results.BK = [obj.results_directory filesep 'BK'];
+            obj.defaults.results.SO = [obj.results_directory filesep 'SO'];
             obj.defaults.results.CMC = [obj.results_directory filesep 'CMC'];
             
             % Set statuses to 0.
@@ -204,6 +209,7 @@ classdef OpenSimTrial < handle
             obj.computed.RRA = false;
             obj.computed.BK = false;
             obj.computed.ID = false;
+            obj.computed.SO = false;
             obj.computed.CMC = false;
         end
         
@@ -325,6 +331,10 @@ classdef OpenSimTrial < handle
                     % Update best kinematics.
                     obj.best_kinematics = ...
                         [options.results filesep 'RRA_Kinematics_q.sto'];
+                    
+                case 'SO'
+                    obj.runSO(options.timerange, options.results, ...
+                        options.load, options.settings);
                     
                 case 'CMC'
                     
@@ -515,6 +525,57 @@ classdef OpenSimTrial < handle
             
             % File cleanup.
             OpenSimTrial.attemptDelete(temp);
+        end
+        
+        function runSO(obj, timerange, results, load, settings)
+        % Sets up the SO Tool.
+        
+            % Import OpenSim Analyze Tool.
+            import org.opensim.modeling.AnalyzeTool;
+            import org.opensim.modeling.Model;
+            
+            % Temporarily copy SO settings folder to new location.
+            [folder, name, ext] = fileparts(settings);
+            temp_settings = [results filesep 'temp'];
+            copyfile(folder, temp_settings);
+            settings = [temp_settings filesep name ext];
+            
+            % Modify pelvis COM in actuators file.
+            obj.modifyPelvisCOM(settings);
+            
+            % Load tool.
+            soTool = AnalyzeTool(settings);
+            
+            % Setup external loads.
+            external_loads = xmlread(load);
+            external_loads.getElementsByTagName('datafile').item(0). ...
+                getFirstChild.setNodeValue(obj.grfs_path);
+            temp = [results filesep 'temp.xml'];
+            xmlwrite(temp, external_loads);
+            soTool.setExternalLoadsFileName(temp);
+            
+            % Load and assign model.
+            soTool.setModelFilename(obj.model_path);
+            
+            % Assign parameters.
+            soTool.setCoordinatesFileName(obj.best_kinematics);
+            soTool.setInitialTime(timerange(1));
+            soTool.setFinalTime(timerange(2));
+            soTool.setResultsDir(results);
+            
+            % Print new temp settings file.
+            soTool.print(settings);
+            
+            % Reload tool from these settings.
+            soTool = AnalyzeTool(settings);
+            
+            % Run tool.
+            soTool.run();
+            
+            % File cleanup.
+            OpenSimTrial.attemptDelete(temp);
+            OpenSimTrial.attemptDelete(temp_settings);
+            
         end
         
         function runCMC(obj, timerange, results, load, settings)
