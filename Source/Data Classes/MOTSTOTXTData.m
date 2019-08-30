@@ -17,7 +17,16 @@ classdef (Abstract) MOTSTOTXTData < OpenSimData
         
             data_array = importdata(filename);
             values = data_array.data;
-            labels = data_array.colheaders;
+            if isfield(data_array, 'colheaders')
+                labels = data_array.colheaders;
+            else
+                potential_labels = strsplit(data_array.textdata{end});
+                if length(potential_labels) > 1
+                    labels = potential_labels;
+                else
+                    error('Couldn''t find or parse labels.');
+                end
+            end
             header = data_array.textdata(1:end - 1, 1);
         
         end
