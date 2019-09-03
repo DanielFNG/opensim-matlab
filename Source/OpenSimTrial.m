@@ -126,11 +126,21 @@ classdef OpenSimTrial < handle
                 end
                 
                 % Run analysis.
-                obj.runTool(method, options);
+                success = obj.runTool(method, options);
                 
                 if strcmp(method, 'CMC')
                     t = toc;
-                    disp(['CMC took ' num2str(t) ' seconds.']);
+                    if success
+                        id = 1;
+                        pre = 'GOOD';
+                        suf = '';
+                    else
+                        id = 2;
+                        pre = 'FAIL';
+                        suf = [' - ' obj.grfs_path];
+                    end
+                    fprintf(id, '%s\n', ...
+                        [pre ' CMC took ' num2str(t) ' seconds' suf]);
                 end
                 
                 % Update computed status.
@@ -304,13 +314,13 @@ classdef OpenSimTrial < handle
             
         end
         
-        function runTool(obj, method, options)
+        function success = runTool(obj, method, options)
             
             switch method
                 
                 case 'IK'
                     
-                    obj.runIK(options.timerange, options.results, ...
+                    success = obj.runIK(options.timerange, options.results, ...
                         options.settings);
                     
                     % Filter & extrapolate missing IK frame.
@@ -324,17 +334,17 @@ classdef OpenSimTrial < handle
                     
                 case 'BK'
                     
-                    obj.runBK(options.timerange, options.results, ...
+                    success = obj.runBK(options.timerange, options.results, ...
                         options.settings);
                     
                 case 'ID'
                     
-                    obj.runID(options.timerange, options.results, ...
+                    success = obj.runID(options.timerange, options.results, ...
                         options.load, options.settings);
                     
                 case 'RRA'
                     
-                    obj.runRRA(options.timerange, options.results, ...
+                    success = obj.runRRA(options.timerange, options.results, ...
                         options.load, options.settings);
                     
                     % Update best kinematics.
@@ -342,18 +352,18 @@ classdef OpenSimTrial < handle
                         [options.results filesep 'RRA_Kinematics_q.sto'];
                     
                 case 'SO'
-                    obj.runSO(options.timerange, options.results, ...
+                    success = obj.runSO(options.timerange, options.results, ...
                         options.load, options.settings);
                     
                 case 'CMC'
                     
-                    obj.runCMC(options.timerange, options.results, ...
+                    success = obj.runCMC(options.timerange, options.results, ...
                         options.load, options.settings);
             end
             
         end
         
-        function runIK(obj, timerange, results, settings)
+        function success = runIK(obj, timerange, results, settings)
         % Sets up the IK Tool.
         
             % Import OpenSim IKTool class and Model class.
@@ -379,10 +389,10 @@ classdef OpenSimTrial < handle
             ikTool.setOutputMotionFileName([results filesep 'ik.mot']);
             
             % Run tool.
-            ikTool.run();
+            success = ikTool.run();
         end
         
-        function runBK(obj, timerange, results, settings)
+        function success = runBK(obj, timerange, results, settings)
         % Sets up the BodyKinematics tool.
         
             % Import OpenSim AnalyzeTool class and Model class.
@@ -404,10 +414,10 @@ classdef OpenSimTrial < handle
             bkTool.setResultsDir(results);
             
             % Run tool.
-            bkTool.run();
+            success = bkTool.run();
         end
         
-        function runRRA(obj, timerange, results, load, settings)
+        function success = runRRA(obj, timerange, results, load, settings)
         % Sets up the RRA tool. 
         
             % Temporarily copy RRA settings folder to new location.
@@ -443,7 +453,7 @@ classdef OpenSimTrial < handle
             rraTool.createExternalLoads(temp, rraTool.getModel());
             
             % Run tool.
-            rraTool.run();
+            success = rraTool.run();
             
             % File cleanup.
             OpenSimTrial.attemptDelete(temp);
@@ -451,7 +461,7 @@ classdef OpenSimTrial < handle
             
         end
         
-        function runAdjustmentRRA(...
+        function success = runAdjustmentRRA(...
                 obj, body, new_model, timerange, results, load,  settings)
         % Setup RRA - with additional settings for mass adjustment.
         
@@ -493,7 +503,7 @@ classdef OpenSimTrial < handle
             rraTool.setOutputModelFileName(new_model);
             
             % Run tool.
-            rraTool.run();
+            success = rraTool.run();
             
             % File cleanup.
             OpenSimTrial.attemptDelete(temp);
@@ -501,7 +511,7 @@ classdef OpenSimTrial < handle
             
         end
         
-        function runID(obj, timerange, results, load, settings)
+        function success = runID(obj, timerange, results, load, settings)
         % Sets up the Inverse Dynamics tool.
         
             % Import OpenSim IDTool class.
@@ -530,13 +540,13 @@ classdef OpenSimTrial < handle
             idTool.setExternalLoadsFileName(temp);
             
             % Run tool.
-            idTool.run();
+            success = idTool.run();
             
             % File cleanup.
             OpenSimTrial.attemptDelete(temp);
         end
         
-        function runSO(obj, timerange, results, load, settings)
+        function success = runSO(obj, timerange, results, load, settings)
         % Sets up the SO Tool.
         
             % Import OpenSim Analyze Tool.
@@ -579,7 +589,7 @@ classdef OpenSimTrial < handle
             soTool = AnalyzeTool(settings);
             
             % Run tool.
-            soTool.run();
+            success = soTool.run();
             
             % File cleanup.
             OpenSimTrial.attemptDelete(temp);
@@ -587,7 +597,7 @@ classdef OpenSimTrial < handle
             
         end
         
-        function runCMC(obj, timerange, results, load, settings)
+        function success = runCMC(obj, timerange, results, load, settings)
         % Sets up the CMC Tool.
         
             % Import OpenSim CMCTool class.
@@ -624,7 +634,7 @@ classdef OpenSimTrial < handle
             cmcTool.createExternalLoads(temp, cmcTool.getModel());
             
             % Run tool.
-            cmcTool.run();
+            success = cmcTool.run();
             
             % File cleanup.
             OpenSimTrial.attemptDelete(temp);
@@ -797,10 +807,16 @@ classdef OpenSimTrial < handle
                     end
                 end
             else
+                lastwarn('');
                 try
                     rmdir(path, 's');
                 catch
-                    fprintf('%s requires manual deletion.', path);
+                    try
+                        pause(0.5);
+                        rmdir(path, 's');
+                    catch
+                        fprintf('%s requires manual deletion.\n', path);
+                    end
                 end
             end
         end

@@ -50,9 +50,6 @@
 					<!--An integer for setting the maximum number of iterations the optimizer can use at each time.  -->
 					<optimizer_max_iterations>100</optimizer_max_iterations>
 				</StaticOptimization>
-				<ProbeReporter name="MetabolicsReporter">
-					<!--All properties of this object have their default values.-->
-				</ProbeReporter>
 			</objects>
 			<groups />
 		</AnalysisSet>

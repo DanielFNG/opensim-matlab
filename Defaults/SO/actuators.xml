@@ -89,61 +89,6 @@
 				<axis>      -0.00000000      -0.00000000       1.00000000 </axis>
 			<optimal_force> 80.00000000 </optimal_force>
 			</TorqueActuator>
-			<CoordinateActuator name="hip_flexion_r_reserve">
-				<isDisabled> false </isDisabled>
-				<!--Minimum allowed value for control signal. Used primarily when solving
-				    for control values-->
-				<min_control> -infinity </min_control>
-				<!--Maximum allowed value for control signal. Used primarily when solving
-				    for control values-->
-				<max_control> infinity </max_control>
-			<coordinate> hip_flexion_r </coordinate>
-				<optimal_force>       1.00000000 </optimal_force>
-			</CoordinateActuator>
-			<CoordinateActuator name="hip_adduction_r_reserve">
-				<isDisabled> false </isDisabled>
-				<!--Minimum allowed value for control signal. Used primarily when solving
-				    for control values-->
-				<min_control> -infinity </min_control>
-				<!--Maximum allowed value for control signal. Used primarily when solving
-				    for control values-->
-				<max_control> infinity </max_control>
-			<coordinate> hip_adduction_r </coordinate>
-				<optimal_force>       1.00000000 </optimal_force>
-			</CoordinateActuator>
-			<CoordinateActuator name="hip_rotation_r_reserve">
-				<isDisabled> false </isDisabled>
-				<!--Minimum allowed value for control signal. Used primarily when solving
-				    for control values-->
-				<min_control> -infinity </min_control>
-				<!--Maximum allowed value for control signal. Used primarily when solving
-				    for control values-->
-				<max_control> infinity </max_control>
-			<coordinate> hip_rotation_r </coordinate>
-				<optimal_force>       1.00000000 </optimal_force>
-			</CoordinateActuator>
-			<CoordinateActuator name="knee_angle_r_reserve">
-				<isDisabled> false </isDisabled>
-				<!--Minimum allowed value for control signal. Used primarily when solving
-				    for control values-->
-				<min_control> -infinity </min_control>
-				<!--Maximum allowed value for control signal. Used primarily when solving
-				    for control values-->
-				<max_control> infinity </max_control>
-			<coordinate> knee_angle_r </coordinate>
-				<optimal_force>       1.00000000 </optimal_force>
-			</CoordinateActuator>
-			<CoordinateActuator name="ankle_angle_r_reserve">
-				<isDisabled> false </isDisabled>
-				<!--Minimum allowed value for control signal. Used primarily when solving
-				    for control values-->
-				<min_control> -infinity </min_control>
-				<!--Maximum allowed value for control signal. Used primarily when solving
-				    for control values-->
-				<max_control> infinity </max_control>
-			<coordinate> ankle_angle_r </coordinate>
-				<optimal_force>       1.00000000 </optimal_force>
-			</CoordinateActuator>
 			<CoordinateActuator name="subtalar_angle_r_reserve">
 				<isDisabled> false </isDisabled>
 				<!--Minimum allowed value for control signal. Used primarily when solving
@@ -165,61 +110,6 @@
 				<max_control> infinity </max_control>
 			<coordinate> mtp_angle_r </coordinate>
 				<optimal_force>     100.00000000 </optimal_force>
-			</CoordinateActuator>
-			<CoordinateActuator name="hip_flexion_l_reserve">
-				<isDisabled> false </isDisabled>
-				<!--Minimum allowed value for control signal. Used primarily when solving
-				    for control values-->
-				<min_control> -infinity </min_control>
-				<!--Maximum allowed value for control signal. Used primarily when solving
-				    for control values-->
-				<max_control> infinity </max_control>
-			<coordinate> hip_flexion_l </coordinate>
-				<optimal_force>       1.00000000 </optimal_force>
-			</CoordinateActuator>
-			<CoordinateActuator name="hip_adduction_l_reserve">
-				<isDisabled> false </isDisabled>
-				<!--Minimum allowed value for control signal. Used primarily when solving
-				    for control values-->
-				<min_control> -infinity </min_control>
-				<!--Maximum allowed value for control signal. Used primarily when solving
-				    for control values-->
-				<max_control> infinity </max_control>
-			<coordinate> hip_adduction_l </coordinate>
-				<optimal_force>       1.00000000 </optimal_force>
-			</CoordinateActuator>
-			<CoordinateActuator name="hip_rotation_l_reserve">
-				<isDisabled> false </isDisabled>
-				<!--Minimum allowed value for control signal. Used primarily when solving
-				    for control values-->
-				<min_control> -infinity </min_control>
-				<!--Maximum allowed value for control signal. Used primarily when solving
-				    for control values-->
-				<max_control> infinity </max_control>
-			<coordinate> hip_rotation_l </coordinate>
-				<optimal_force>       1.00000000 </optimal_force>
-			</CoordinateActuator>
-			<CoordinateActuator name="knee_angle_l_reserve">
-				<isDisabled> false </isDisabled>
-				<!--Minimum allowed value for control signal. Used primarily when solving
-				    for control values-->
-				<min_control> -infinity </min_control>
-				<!--Maximum allowed value for control signal. Used primarily when solving
-				    for control values-->
-				<max_control> infinity </max_control>
-			<coordinate> knee_angle_l </coordinate>
-				<optimal_force>       1.00000000 </optimal_force>
-			</CoordinateActuator>
-			<CoordinateActuator name="ankle_angle_l_reserve">
-				<isDisabled> false </isDisabled>
-				<!--Minimum allowed value for control signal. Used primarily when solving
-				    for control values-->
-				<min_control> -infinity </min_control>
-				<!--Maximum allowed value for control signal. Used primarily when solving
-				    for control values-->
-				<max_control> infinity </max_control>
-			<coordinate> ankle_angle_l </coordinate>
-				<optimal_force>       1.00000000 </optimal_force>
 			</CoordinateActuator>
 			<CoordinateActuator name="subtalar_angle_l_reserve">
 				<isDisabled> false </isDisabled>
