@@ -45,7 +45,7 @@
 			<ExternalForce name="apo_right">
 				<isDisabled> false </isDisabled>
 				<!--Name of the body the force is applied to.-->
-				<applied_to_body> APO_r_link </applied_to_body>
+				<applied_to_body> femur_r </applied_to_body>
 				<!--Name of the body the force is expressed in (default is ground).-->
 				<force_expressed_in_body> ground </force_expressed_in_body>
 				<!--Name of the body the point is expressed in (default is ground).-->
@@ -57,12 +57,13 @@
 				    source.-->
 				<point_identifier> apo_force_p </point_identifier>
 				<!--Name of the data source (Storage) that will supply the force data.-->
+				<torque_identifier> apo_torque_ </torque_identifier>
 				<data_source_name> Unassigned </data_source_name>
 			</ExternalForce>
 			<ExternalForce name="apo_left">
 				<isDisabled> false </isDisabled>
 				<!--Name of the body the force is applied to.-->
-				<applied_to_body> APO_l_link </applied_to_body>
+				<applied_to_body> femur_l </applied_to_body>
 				<!--Name of the body the force is expressed in (default is ground).-->
 				<force_expressed_in_body> ground </force_expressed_in_body>
 				<!--Name of the body the point is expressed in (default is ground).-->
@@ -74,12 +75,13 @@
 				    source.-->
 				<point_identifier> 1_apo_force_p </point_identifier>
 				<!--Name of the data source (Storage) that will supply the force data.-->
+				<torque_identifier> 1_apo_torque_ </torque_identifier>
 				<data_source_name> Unassigned </data_source_name>
 			</ExternalForce>
             <ExternalForce name="apo_group_right">
 				<isDisabled> false </isDisabled>
 				<!--Name of the body the force is applied to.-->
-				<applied_to_body> APO_group_r </applied_to_body>
+				<applied_to_body> torso </applied_to_body>
 				<!--Name of the body the force is expressed in (default is ground).-->
 				<force_expressed_in_body> ground </force_expressed_in_body>
 				<!--Name of the body the point is expressed in (default is ground).-->
@@ -91,12 +93,13 @@
 				    source.-->
 				<point_identifier> apo_group_force_p </point_identifier>
 				<!--Name of the data source (Storage) that will supply the force data.-->
+				<torque_identifier> apo_group_torque_ </torque_identifier>
 				<data_source_name> Unassigned </data_source_name>
 			</ExternalForce>
             <ExternalForce name="apo_group_left">
 				<isDisabled> false </isDisabled>
 				<!--Name of the body the force is applied to.-->
-				<applied_to_body> APO_group_l </applied_to_body>
+				<applied_to_body> torso </applied_to_body>
 				<!--Name of the body the force is expressed in (default is ground).-->
 				<force_expressed_in_body> ground </force_expressed_in_body>
 				<!--Name of the body the point is expressed in (default is ground).-->
@@ -108,6 +111,7 @@
 				    source.-->
 				<point_identifier> 1_apo_group_force_p </point_identifier>
 				<!--Name of the data source (Storage) that will supply the force data.-->
+				<torque_identifier> 1_apo_group_torque_ </torque_identifier>
 				<data_source_name> Unassigned </data_source_name>
 			</ExternalForce>
 		</objects>

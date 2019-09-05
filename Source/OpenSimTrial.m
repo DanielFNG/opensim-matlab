@@ -211,6 +211,8 @@ classdef OpenSimTrial < handle
                 [default_folder filesep 'SO' filesep 'settings.xml'];
             obj.defaults.settings.CMC = ...
                 [default_folder filesep 'CMC' filesep 'settings.xml'];
+            obj.defaults.settings.Analyse = ...
+                [default_folder filesep 'Analyse' filesep 'settings.xml'];
             obj.defaults.settings.loads = ...
                 [default_folder filesep 'loads.xml'];
             
@@ -589,7 +591,55 @@ classdef OpenSimTrial < handle
             soTool = AnalyzeTool(settings);
             
             % Run tool.
-            success = soTool.run();
+            success1 = soTool.run();
+            
+            % File cleanup.
+            OpenSimTrial.attemptDelete(temp);
+            OpenSimTrial.attemptDelete(temp_settings);
+
+            % Separately do metabolic analyses - quite hardcoded for now. 
+            settings = 'C:\Users\danie\Documents\GitHub\opensim-matlab\Defaults\Analyse\settings.xml';
+            
+            % Temporarily copy Analyse settings folder to new location.
+            [folder, name, ext] = fileparts(settings);
+            temp_settings = [results filesep 'temp'];
+            copyfile(folder, temp_settings);
+            settings = [temp_settings filesep name ext];
+            
+            % Modify pelvis COM in actuators file.
+            obj.modifyPelvisCOM(settings);
+            
+            % Load tool.
+            soTool = AnalyzeTool(settings);
+            
+            % Setup external loads.
+            external_loads = xmlread(load);
+            external_loads.getElementsByTagName('datafile').item(0). ...
+                getFirstChild.setNodeValue(obj.grfs_path);
+            temp = [results filesep 'temp.xml'];
+            xmlwrite(temp, external_loads);
+            soTool.setExternalLoadsFileName(temp);
+            
+            % Load and assign model.
+            soTool.setModelFilename(obj.model_path);
+            
+            % Assign parameters.
+            soTool.setCoordinatesFileName(obj.best_kinematics);
+            soTool.setInitialTime(timerange(1));
+            soTool.setFinalTime(timerange(2));
+            soTool.setResultsDir(results);
+            soTool.setControlsFileName([results filesep 'model_scaled_StaticOptimization_controls.xml']);
+            
+            % Print new temp settings file.
+            soTool.print(settings);
+            
+            % Reload tool from these settings.
+            soTool = AnalyzeTool(settings);
+            
+            % Run tool.
+            success2 = soTool.run();
+            
+            success = success1 && success2;
             
             % File cleanup.
             OpenSimTrial.attemptDelete(temp);
