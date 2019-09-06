@@ -46,10 +46,6 @@
 		<!--Controller objects in the model.-->
 		<ControllerSet name="Controllers">
 			<objects>
-				<ControlSetController>
-					<!--A Storage (.sto) or an XML control nodes file containing the controls for this controlSet.-->
-					<controls_file>testing_so/Results/SO/model_scaled_StaticOptimization_controls.xml</controls_file>
-				</ControlSetController>
 			</objects>
 			<groups />
 		</ControllerSet>

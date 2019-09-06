@@ -585,39 +585,35 @@ classdef OpenSimTrial < handle
             soTool.setResultsDir(results);
             
             % Print new temp settings file.
-            soTool.print(settings);
+            try
+                soTool.print(settings);
+            catch 
+                pause(0.5);
+                soTool.print(settings);
+            end
             
             % Reload tool from these settings.
             soTool = AnalyzeTool(settings);
             
             % Run tool.
             success1 = soTool.run();
-            
-            % File cleanup.
-            OpenSimTrial.attemptDelete(temp);
-            OpenSimTrial.attemptDelete(temp_settings);
 
             % Separately do metabolic analyses - quite hardcoded for now. 
-            settings = 'C:\Users\danie\Documents\GitHub\opensim-matlab\Defaults\Analyse\settings.xml';
+            settings2 = 'C:\Users\danie\Documents\GitHub\opensim-matlab\Defaults\Analyse\settings.xml';
             
             % Temporarily copy Analyse settings folder to new location.
-            [folder, name, ext] = fileparts(settings);
-            temp_settings = [results filesep 'temp'];
-            copyfile(folder, temp_settings);
-            settings = [temp_settings filesep name ext];
+            [folder, name, ext] = fileparts(settings2);
+            temp_settings2 = [results filesep 'temp2'];
+            copyfile(folder, temp_settings2);
+            settings2 = [temp_settings2 filesep name ext];
             
             % Modify pelvis COM in actuators file.
-            obj.modifyPelvisCOM(settings);
+            obj.modifyPelvisCOM(settings2);
             
             % Load tool.
-            soTool = AnalyzeTool(settings);
+            soTool = AnalyzeTool(settings2);
             
             % Setup external loads.
-            external_loads = xmlread(load);
-            external_loads.getElementsByTagName('datafile').item(0). ...
-                getFirstChild.setNodeValue(obj.grfs_path);
-            temp = [results filesep 'temp.xml'];
-            xmlwrite(temp, external_loads);
             soTool.setExternalLoadsFileName(temp);
             
             % Load and assign model.
@@ -631,10 +627,15 @@ classdef OpenSimTrial < handle
             soTool.setControlsFileName([results filesep 'model_scaled_StaticOptimization_controls.xml']);
             
             % Print new temp settings file.
-            soTool.print(settings);
+            try
+                soTool.print(settings2);
+            catch 
+                pause(0.5);
+                soTool.print(settings2);
+            end
             
             % Reload tool from these settings.
-            soTool = AnalyzeTool(settings);
+            soTool = AnalyzeTool(settings2);
             
             % Run tool.
             success2 = soTool.run();
@@ -644,6 +645,7 @@ classdef OpenSimTrial < handle
             % File cleanup.
             OpenSimTrial.attemptDelete(temp);
             OpenSimTrial.attemptDelete(temp_settings);
+            OpenSimTrial.attemptDelete(temp_settings2);
             
         end
         
@@ -723,7 +725,13 @@ classdef OpenSimTrial < handle
             end
             
             % Rewrite the actuators file with the changes. 
-            xmlwrite(actuators_path, actuators);
+            try
+                xmlwrite(actuators_path, actuators);
+            catch
+                pause(0.5);  % Sometimes we need to wait a bit... 
+                xmlwrite(actuators_path, actuators); 
+            end
+                
         end
         
         function performMassAdjustment(obj, new_model, human_model, log)
