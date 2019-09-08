@@ -624,7 +624,7 @@ classdef OpenSimTrial < handle
             soTool.setInitialTime(timerange(1));
             soTool.setFinalTime(timerange(2));
             soTool.setResultsDir(results);
-            soTool.setControlsFileName([results filesep 'model_scaled_StaticOptimization_controls.xml']);
+            soTool.setControlsFileName([results filesep 'SO_StaticOptimization_controls.xml']);
             
             % Print new temp settings file.
             try
