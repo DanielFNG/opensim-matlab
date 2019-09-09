@@ -1,4 +1,4 @@
-function trials = runBatchParallel(analyses, trials, varargin)
+function runBatchParallel(analyses, trials, varargin)
 % A parallelised version of runBatch. See runBatch for documentation. 
     
     % Iterate over the trials.

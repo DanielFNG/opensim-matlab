@@ -120,27 +120,12 @@ classdef OpenSimTrial < handle
             
                 % Parse inputs.
                 options = obj.parseAnalysisArguments(method, varargin{:});
-            
-                if strcmp(method, 'CMC')
-                    tic;
-                end
                 
                 % Run analysis.
                 success = obj.runTool(method, options);
-                
-                if strcmp(method, 'CMC')
-                    t = toc;
-                    if success
-                        id = 1;
-                        pre = 'GOOD';
-                        suf = '';
-                    else
-                        id = 2;
-                        pre = 'FAIL';
-                        suf = [' - ' obj.grfs_path];
-                    end
-                    fprintf(id, '%s\n', ...
-                        [pre ' CMC took ' num2str(t) ' seconds' suf]);
+                if ~success
+                    fprintf(2, '%s\n', ['FAIL ' analyses{i} ' took ' ...
+                        num2str(t) ' seconds - ' obj.input_coordinates]);
                 end
                 
                 % Update computed status.
