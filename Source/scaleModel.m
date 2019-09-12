@@ -51,7 +51,12 @@ function scaleModel(...
     
     % Run model scaler.
     model_scaler.setPrintResultFiles(true);
-    model_scaler.processModel(state, osim, '', mass);
+    try
+        model_scaler.processModel(state, osim, '', mass);
+    catch
+        pause(0.5);
+        model_scaler.processModel(state, osim, '', mass);
+    end
     
     % Load the newly scaled model.
     osim_scaled = Model(output);
