@@ -1,4 +1,4 @@
-function runBatch(analyses, trials, varargin)
+function trials = runBatch(analyses, trials, varargin)
 % Run a batch of OpenSim analyses.
 %
 %   Input arguments:
