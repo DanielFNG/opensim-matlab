@@ -52,7 +52,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
        
         convertHeader(input_header)
         convertLabels(input_labels)
-        convertValues(input_values, input_labels)
+        convertValues(input_values)
         
     end
     
@@ -419,7 +419,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             % within subclasses.
             obj.Header = obj.convertHeader(head);
             obj.Labels = obj.convertLabels(lab);
-            obj.Values = obj.convertValues(vals, obj.Labels);
+            obj.Values = obj.convertValues(vals);
         
         end
         
@@ -498,9 +498,8 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         function printHeader(obj, fileID)
         % Print header information to a given fileID. 
             
-            for i=1:length(obj.Header)
-                fprintf(fileID, '%s\n', obj.Header{i});
-            end
+            spec = repmat('%s\n', 1, length(obj.Header));
+            fprintf(fileID, spec, obj.Header{:});
             
         end
         

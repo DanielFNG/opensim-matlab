@@ -39,22 +39,16 @@ classdef (Abstract) MOTSTOTXTData < OpenSimData
         function printLabels(obj, fileID)
         % Print labels to file.
         
-            for i=1:obj.NCols
-                fprintf(fileID, '%s\t', obj.Labels{i});
-            end
-            fprintf(fileID, '\n');
+            spec = [repmat('%s\t', 1, length(obj.Labels) - 1) '%s\n'];
+            fprintf(fileID, spec, obj.Labels{:});
         
         end
         
         function printValues(obj, fileID)
         % Print values to file.
-        
-            for i=1:obj.NFrames
-                for j=1:obj.NCols
-                    fprintf(fileID,'%.10g\t', obj.Values(i,j));
-                end
-                fprintf(fileID,'\n');
-            end
+            
+            spec = [repmat('%.10g\t', 1, size(obj.Values, 2) - 1) '%.10g\n'];
+            fprintf(fileID, spec, transpose(obj.Values));
         
         end
         
@@ -82,7 +76,7 @@ classdef (Abstract) MOTSTOTXTData < OpenSimData
             
         end
         
-        function values = convertValues(input_values, ~)
+        function values = convertValues(input_values)
         % Convert values in to suitable form for Data object. 
         
             values = input_values;
