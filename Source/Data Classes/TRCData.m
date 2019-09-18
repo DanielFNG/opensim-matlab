@@ -79,7 +79,7 @@ classdef TRCData < OpenSimData
             % Now get the values.
             fgetl(id);  % The X/Y/Z line.
             n = (length(labels) - 2)*3;
-            spec = ['%f\t' repmat('%.10f\t', 1, n) '%.10f'];
+            spec = ['%f\t' repmat('%f\t', 1, n) '%f'];
             values = cell2mat(textscan(id, spec));
             
             fclose(id);
@@ -163,7 +163,7 @@ classdef TRCData < OpenSimData
                 labels{1} = input_labels{1};
                 labels{2} = input_labels{2};
                 start_index = 3;
-                end_index = length(input_labels) - 1;
+                end_index = length(input_labels);
             else
                 start_index = 1;
                 end_index = length(input_labels);
