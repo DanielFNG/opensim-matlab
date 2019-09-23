@@ -7370,7 +7370,7 @@
 					<!--Body segment in the model on which the marker resides.-->
 					<body>calcn_r</body>
 					<!--Location of a marker on the body segment.-->
-					<location> -0.0279294 0.0202744 -0.00311468</location>
+					<location> -0.0279294 0.0185677 -0.00311468</location>
 					<!--Flag (true or false) specifying whether or not a marker should be kept fixed in the marker placement step.  i.e. If false, the marker is allowed to move.-->
 					<fixed>false</fixed>
 				</Marker>
@@ -7378,7 +7378,7 @@
 					<!--Body segment in the model on which the marker resides.-->
 					<body>calcn_r</body>
 					<!--Location of a marker on the body segment.-->
-					<location> 0.154212 0.0176153 0.0387482</location>
+					<location> 0.154212 0.0185677 0.0387482</location>
 					<!--Flag (true or false) specifying whether or not a marker should be kept fixed in the marker placement step.  i.e. If false, the marker is allowed to move.-->
 					<fixed>false</fixed>
 				</Marker>
@@ -7426,7 +7426,7 @@
 					<!--Body segment in the model on which the marker resides.-->
 					<body>calcn_l</body>
 					<!--Location of a marker on the body segment.-->
-					<location> -0.0302888 0.0234419 0.000742137</location>
+					<location> -0.0302888 0.0185677 0.000742137</location>
 					<!--Flag (true or false) specifying whether or not a marker should be kept fixed in the marker placement step.  i.e. If false, the marker is allowed to move.-->
 					<fixed>false</fixed>
 				</Marker>
@@ -7434,7 +7434,7 @@
 					<!--Body segment in the model on which the marker resides.-->
 					<body>calcn_l</body>
 					<!--Location of a marker on the body segment.-->
-					<location> 0.161112 0.0149121 -0.0502676</location>
+					<location> 0.161112 0.0185677 -0.0502676</location>
 					<!--Flag (true or false) specifying whether or not a marker should be kept fixed in the marker placement step.  i.e. If false, the marker is allowed to move.-->
 					<fixed>false</fixed>
 				</Marker>
@@ -7442,7 +7442,7 @@
 					<!--Body segment in the model on which the marker resides.-->
 					<body>calcn_l</body>
 					<!--Location of a marker on the body segment.-->
-					<location> 0.194628 0.0242937 0.0295249</location>
+					<location> 0.194628 0.0185677 0.0295249</location>
 					<!--Flag (true or false) specifying whether or not a marker should be kept fixed in the marker placement step.  i.e. If false, the marker is allowed to move.-->
 					<fixed>false</fixed>
 				</Marker>
