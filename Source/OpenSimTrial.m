@@ -329,6 +329,9 @@ classdef OpenSimTrial < handle
                     success = obj.runID(options.timerange, options.results, ...
                         options.load, options.settings);
                     
+                    % Filter ID data.
+                    obj.filterID();
+                    
                 case 'RRA'
                     
                     success = obj.runRRA(options.timerange, options.results, ...
@@ -772,6 +775,24 @@ classdef OpenSimTrial < handle
                 end
                 delete(data_object);
             end
+            
+        end
+        
+        function filterID(obj)
+            
+            % Get ID filename.
+            file = [obj.results_paths.ID filesep 'id.sto'];
+            
+            % Load, filter & reprint.
+            data_object = Data(file);
+            data_object.filter4LP(4);
+            try
+                data_object.writeToFile(file);
+            catch
+                pause(5);
+                data_object.writeToFile(file);
+            end
+            delete(data_object);
             
         end
 
