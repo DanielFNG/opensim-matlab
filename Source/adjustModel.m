@@ -11,9 +11,14 @@ function adjustModel(input, output, human, markers, grf, results, n)
     
     % Run adjustment 2 further times on the produced model.
     for i=1:n
-        adjustment = OpenSimTrial(output, markers, results, grf);
+        % Create temporary copy of output.
+        [folder, ~, ~] = fileparts(output);
+        temp = [folder filesep 'temp.osim'];
+        copyfile(output, temp);
+        adjustment = OpenSimTrial(temp, markers, results, grf);
         adjustment.run('IK');
         adjustment.performModelAdjustment('torso', output, human);
+        delete(temp);
     end
     
     % Finally, ensure that the metabolics probe is still switched on.
