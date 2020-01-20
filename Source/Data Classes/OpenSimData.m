@@ -98,6 +98,36 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         
         end
         
+        function new_obj = subsample(obj, increment)
+        % Subsample data at timesteps from the beginning to end in even
+        % steps of size increment. 
+        %
+        % This can be useful when dealing with RRA data which is at high
+        % frequency and contains intermediate timesteps, without changing
+        % the data by fitting it to a spline. 
+            
+            timesteps = obj.getTimesteps();
+            desired_timesteps = ...
+                round(timesteps(1), 2):increment:round(timesteps(end), 2);
+            
+            if desired_timesteps(end) > timesteps(end)
+                desired_timesteps(end) = [];
+            end
+            
+            if desired_timesteps(1) < timesteps(1)
+                desired_timesteps(1) = [];
+            end
+            
+            desired_frames = zeros(size(desired_timesteps));
+            for i=1:length(desired_timesteps)
+                [~, loc] = min(abs(timesteps - desired_timesteps(i)));
+                desired_frames(i) = loc;
+            end
+            
+            new_obj = obj.slice(desired_frames);
+            
+        end
+        
         function spline(obj, input, method)
         % Fit data to desired frequency using spline interpolation.
         %
