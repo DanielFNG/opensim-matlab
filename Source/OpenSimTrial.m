@@ -576,7 +576,7 @@ classdef OpenSimTrial < handle
             try
                 soTool.print(settings);
             catch 
-                pause(0.5);
+                pause(1.0);
                 soTool.print(settings);
             end
             
@@ -618,7 +618,7 @@ classdef OpenSimTrial < handle
             try
                 soTool.print(settings2);
             catch 
-                pause(0.5);
+                pause(1.0);
                 soTool.print(settings2);
             end
             
