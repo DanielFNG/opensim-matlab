@@ -20,6 +20,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
     
     properties (Access = protected)
         Header
+        TimeLabel
         Frames
         Timesteps
         Values
@@ -28,15 +29,10 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         EqualityTolerance = 1e-6
     end
     
-    methods (Abstract)
-       
-        getTimesteps(obj)
-        
-    end
-    
     methods (Abstract, Access = protected)
         
         updateHeader(obj)
+        setTimeLabel(obj)
         printLabels(obj, fileID)
         printValues(obj, fileID)
         splined_obj = assignSpline(obj, timesteps, values)
@@ -80,7 +76,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
                 else
                     error('Incorrect number of arguments.');
                 end
-                obj.update();
+                obj.setTimeLabel();
                 obj.initialise();
             end
         end
@@ -103,6 +99,28 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         
         end
         
+        function [obj, another_obj] = synchronise(obj, another_obj, delay)
+            
+            % Access & adjust object timesteps.
+            reference_times = obj.Timesteps;
+            adjusted_times = another_obj.Timesteps + delay;
+            
+            % Zero each object.
+            reference_times = reference_times - reference_times(1);
+            obj.setTimesteps(reference_times);
+            adjusted_times = adjusted_times - adjusted_times(1);
+            another_obj.setTimesteps(adjusted_times);
+            
+            % Compute earliest start & latest finish.
+            earliest_start = max(reference_times(1), adjusted_times(1));
+            latest_finish = min(reference_times(end), adjusted_times(end));
+            
+            % Slice the objects to the synchronised times.
+            obj = obj.slice(earliest_start, latest_finish);
+            another_obj = another_obj.slice(earliest_start, latest_finish);
+            
+        end
+        
         function new_obj = subsample(obj, increment)
         % Subsample data at timesteps from the beginning to end in even
         % steps of size increment. 
@@ -111,7 +129,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         % frequency and contains intermediate timesteps, without changing
         % the data by fitting it to a spline. 
             
-            timesteps = obj.getTimesteps();
+            timesteps = obj.Timesteps;
             desired_timesteps = ...
                 round(timesteps(1), 2):increment:round(timesteps(end), 2);
             
@@ -297,7 +315,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         % nargin == 3, inputs are start and end times at which to slice.
         
             if nargin == 3
-                timesteps = obj.getTimesteps();
+                timesteps = obj.Timesteps;
                 frames = timesteps >= varargin{1} & timesteps <= varargin{2};
             else
                 frames = varargin{1};
@@ -312,7 +330,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             
             new_obj = copy(obj);
             indices = new_obj.getStateIndices();
-            time = new_obj.getTimesteps();
+            time = new_obj.Timesteps;
             for i=indices
                 current_val = new_obj.getColumn(i);
                 diff = gradient(current_val, time);
@@ -364,7 +382,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             % Check that the time is in our timerange.
             range = obj.getTimeRange();
             if time >= range(1) && time <= range(2)
-                [~, index] = min(abs(obj.getTimesteps() - time));
+                [~, index] = min(abs(obj.Timesteps - time));
             else
                 error('Time outwith timerange of data object.');
             end
@@ -397,12 +415,29 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         % Set column corresponding to label, index (int) or indices (row vec).
         
             if isa(parameter, 'char')
-                index = obj.getIndex(parameter);
-                obj.Values(:, index) = array;
-            else
-                obj.Values(:, parameter) = array;
+                parameter = obj.getIndex(parameter);
             end
+            
+            time_index = obj.getIndex(obj.TimeLabel);
+            if time_index == parameter
+                error(['Attempting to set timesteps column - use ' ...
+                    'setTimesteps instead.']);
+            end
+            
+            obj.Values(:, parameter) = array;
         
+        end
+        
+        function setTimesteps(obj, array)
+            
+            index = obj.getIndex(obj.TimeLabel);
+            obj.Values(:, index) = array;
+            obj.update();
+            if obj.Frequency ~= obj.OrigFrequency
+                fprintf(['Warning: setting new timesteps has caused ' ...
+                    'changed in data frequency.\n']);
+            end
+            
         end
         
         function scaleColumns(obj, multiplier, indices)
@@ -516,7 +551,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         % Updates imesteps, number of frames & frame array, number of columns
         % and data frequency.
         
-            obj.Timesteps = obj.getTimesteps();
+            obj.Timesteps = obj.getColumn(obj.TimeLabel);
             obj.NFrames = length(obj.Timesteps);
             obj.NCols = length(obj.Labels);
             obj.Frames = 1:obj.NFrames;

@@ -12,12 +12,6 @@ classdef STOData < MOTSTOTXTData
             obj@MOTSTOTXTData(varargin{:});
         end
         
-        function timesteps = getTimesteps(obj)
-           
-            timesteps = obj.getColumn('time');
-            
-        end
-        
     end
     
     methods (Access = protected)
@@ -26,6 +20,10 @@ classdef STOData < MOTSTOTXTData
         % Update header info to match Data object. 
             obj.Header{3} = ['nRows=' num2str(obj.NFrames)];
             obj.Header{4} = ['nColumns=' num2str(length(obj.Labels))];
+        end
+        
+        function setTimeLabel(obj)
+            obj.TimeLabel = 'time';
         end
         
     end

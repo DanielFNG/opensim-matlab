@@ -12,23 +12,23 @@ classdef TXTData < MOTSTOTXTData
             obj@MOTSTOTXTData(varargin{:});
         end
         
-        function timesteps = getTimesteps(obj)
-        % Get the timesteps column.
-           
-            timesteps = obj.getColumn('time');
-            
-            if size(timesteps, 2) == 0
-                timesteps = obj.getColumn('timestamp');
-            end
-            
-        end
-        
     end
     
     methods (Access = protected)
         
         function updateHeader(obj)
         % Update header info to match Data object.
+            
+        end
+        
+        function setTimeLabel(obj)
+            
+            test = obj.getColumn('time');
+            if size(test, 2) == 0
+                obj.TimeLabel = 'timestamp';
+            else
+                obj.TimeLabel = 'time';
+            end
             
         end
     

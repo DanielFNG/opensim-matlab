@@ -22,12 +22,6 @@ classdef TRCData < OpenSimData
             obj.Units = info{5};
         end
         
-        function timesteps = getTimesteps(obj)
-           
-            timesteps = obj.getColumn('time');
-            
-        end
-        
         function convertUnits(obj, new_units)
         % Convert units of TRCData.
         %
@@ -99,6 +93,10 @@ classdef TRCData < OpenSimData
                 obj.OrigFrequency), sprintf('%i\t', obj.Values(1,1)), ...
                 sprintf('%i', obj.OrigNumFrames)];
       
+        end
+        
+        function setTimeLabel(obj)
+            obj.TimeLabel = 'time';
         end
         
         function printLabels(obj, fileID)

@@ -23,7 +23,7 @@ function scaleModel(...
     
     % Create the time range array.
     static_data = Data(static);
-    timesteps = static_data.getTimesteps();
+    timesteps = static_data.Timesteps;
     time_array = ArrayDouble();
     time_array.set(0, timesteps(1));
     time_array.set(1, timesteps(end));

@@ -12,12 +12,6 @@ classdef MOTData < MOTSTOTXTData
             obj@MOTSTOTXTData(varargin{:});
         end
         
-        function timesteps = getTimesteps(obj)
-            
-            timesteps = obj.getColumn('time');
-            
-        end
-        
     end
     
     methods (Access = protected)
@@ -28,6 +22,10 @@ classdef MOTData < MOTSTOTXTData
             obj.Header{3} = ['datarows ' num2str(size(obj.Values, 1))];
             obj.Header{4} = ['range ' num2str(obj.Timesteps(1)) ' ' ...
                 num2str(obj.Timesteps(end))];
+        end
+        
+        function setTimeLabel(obj)
+            obj.TimeLabel = 'time';
         end
         
     end
