@@ -10,7 +10,6 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
     end
     
     properties (SetAccess = protected)
-        Name = 'None'
         Frequency
         NFrames
         NCols
@@ -66,13 +65,10 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
                         fprintf('Data loading failed.\n')
                         rethrow(err);
                     end
-                elseif nargin > 2
+                elseif nargin == 3
                     obj.Values = varargin{1};
                     obj.Header = varargin{2};
                     obj.Labels = varargin{3};
-                    if nargin == 4
-                        obj.Name = varargin{4};
-                    end
                 else
                     error('Incorrect number of arguments.');
                 end
@@ -342,12 +338,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         function writeToFile(obj, filename)
         % Write Data object with given filename - without extension.
         
-            if nargin > 1
-                [path, name, ~] = fileparts(filename);
-            else
-                path = [];
-                name = obj.Name;
-            end
+            [path, name, ~] = fileparts(filename);
         
             % Update header before writing to file.
             obj.updateHeader();
@@ -495,10 +486,6 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             obj.Header = obj.convertHeader(head);
             obj.Labels = obj.convertLabels(lab);
             obj.Values = obj.convertValues(vals);
-            
-            % Store the name of the input data.
-            [~, name, ~] = fileparts(filename);
-            obj.Name = name;
         
         end
         
