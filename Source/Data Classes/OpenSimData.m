@@ -419,6 +419,13 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         
         end
         
+        function timesteps = getTimesteps(obj)
+           
+            index = obj.getIndex(obj.TimeLabel);
+            timesteps = obj.getColumn(index);
+            
+        end
+        
         function setTimesteps(obj, array)
             
             index = obj.getIndex(obj.TimeLabel);
