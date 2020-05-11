@@ -59,7 +59,9 @@ Logs/*.log
 Defaults/RRA/actuators.xml
 
 # Ignore testing files.
-Testing/*
+Tests/Test Data*
+Tests/adjusted_model.osim
+Tests/testOsimTools.m
 
 # Ignore subdirectories of the GUI folder. 
 GUI/*/
