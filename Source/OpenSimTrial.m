@@ -587,19 +587,19 @@ classdef OpenSimTrial < handle
             success1 = soTool.run();
 
             % Separately do metabolic analyses - quite hardcoded for now. 
-            settings2 = 'C:\Users\danie\Documents\GitHub\opensim-matlab\Defaults\Analyse\settings.xml';
+            metabolics_settings = obj.defaults.settings.Analyse;
             
             % Temporarily copy Analyse settings folder to new location.
-            [folder, name, ext] = fileparts(settings2);
-            temp_settings2 = [results filesep 'temp2'];
-            copyfile(folder, temp_settings2);
-            settings2 = [temp_settings2 filesep name ext];
+            [folder, name, ext] = fileparts(metabolics_settings);
+            temp_metabolics_settings = [results filesep 'temp2'];
+            copyfile(folder, temp_metabolics_settings);
+            metabolics_settings = [temp_metabolics_settings filesep name ext];
             
             % Modify pelvis COM in actuators file.
-            obj.modifyPelvisCOM(settings2);
+            obj.modifyPelvisCOM(metabolics_settings);
             
             % Load tool.
-            soTool = AnalyzeTool(settings2);
+            soTool = AnalyzeTool(metabolics_settings);
             
             % Setup external loads.
             soTool.setExternalLoadsFileName(temp);
@@ -612,18 +612,19 @@ classdef OpenSimTrial < handle
             soTool.setInitialTime(timerange(1));
             soTool.setFinalTime(timerange(2));
             soTool.setResultsDir(results);
-            soTool.setControlsFileName([results filesep 'SO_StaticOptimization_controls.xml']);
+            soTool.setControlsFileName([results filesep ...
+                'SO_StaticOptimization_controls.xml']);
             
             % Print new temp settings file.
             try
-                soTool.print(settings2);
+                soTool.print(metabolics_settings);
             catch 
                 pause(1.0);
-                soTool.print(settings2);
+                soTool.print(metabolics_settings);
             end
             
             % Reload tool from these settings.
-            soTool = AnalyzeTool(settings2);
+            soTool = AnalyzeTool(metabolics_settings);
             
             % Run tool.
             success2 = soTool.run();
@@ -633,7 +634,7 @@ classdef OpenSimTrial < handle
             % File cleanup.
             OpenSimTrial.attemptDelete(temp);
             OpenSimTrial.attemptDelete(temp_settings);
-            OpenSimTrial.attemptDelete(temp_settings2);
+            OpenSimTrial.attemptDelete(temp_metabolics_settings);
             
         end
         
