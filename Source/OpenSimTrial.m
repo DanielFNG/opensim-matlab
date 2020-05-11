@@ -19,7 +19,7 @@ classdef OpenSimTrial < handle
         results_directory
     end
     
-    properties (Access = {?MotionData, ?DatasetElement})
+    properties (Access = {?SimData, ?DatasetElement})
        computed 
     end
     
