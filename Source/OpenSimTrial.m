@@ -814,10 +814,8 @@ classdef OpenSimTrial < handle
             
             % Sum the mass of every body in the model apart from ground.
             for i=0:n_bodies
-                if ~strcmp(bodies.get(i).getName(), 'ground')
-                    body_names{i} = bodies.get(i).getName();
-                    body_masses(i) = bodies.get(i).getMass();
-                end
+                body_names{i + 1} = bodies.get(i).getName();
+                body_masses(i + 1) = bodies.get(i).getMass();
             end
             mass = sum(body_masses);
         end
