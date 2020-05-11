@@ -696,8 +696,7 @@ classdef OpenSimTrial < handle
             
             % Store the pelvis COM from the model file. 
             model = Model(obj.model_path);
-            com = Vec3();
-            model.getBodySet.get('pelvis').getMassCenter(com);
+            com = model.getBodySet.get('pelvis').getMassCenter();
             
             % Convert the pelvis COM to a string. 
             com_string = sprintf('%s\t', num2str(com.get(0)), ...
