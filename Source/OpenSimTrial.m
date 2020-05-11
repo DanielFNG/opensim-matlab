@@ -122,8 +122,10 @@ classdef OpenSimTrial < handle
                 options = obj.parseAnalysisArguments(method, varargin{:});
                 
                 % Run analysis.
+                tic;
                 success = obj.runTool(method, options);
                 if ~success
+                    t = toc;
                     fprintf(2, '%s\n', ['FAIL ' analyses{i} ' took ' ...
                         num2str(t) ' seconds - ' obj.input_coordinates]);
                 end
