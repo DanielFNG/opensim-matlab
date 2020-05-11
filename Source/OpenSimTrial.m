@@ -392,7 +392,7 @@ classdef OpenSimTrial < handle
             import org.opensim.modeling.Model;
             
             % Load bkTool.
-            bkTool = AnalyzeTool(settings);
+            bkTool = AnalyzeTool(settings, false);
             
             % Load & assign model.
             model = Model(obj.model_path);
@@ -404,6 +404,7 @@ classdef OpenSimTrial < handle
             bkTool.setInitialTime(timerange(1));
             bkTool.setFinalTime(timerange(2));
             bkTool.setResultsDir(results);
+            bkTool.setLoadModelAndInput(true);
             
             % Run tool.
             success = bkTool.run();
