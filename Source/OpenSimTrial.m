@@ -312,6 +312,9 @@ classdef OpenSimTrial < handle
                     success = obj.runIK(options.timerange, options.results, ...
                         options.settings);
                     
+                    % Filter IK data.
+                    obj.filterIK();
+                    
                     % Update best kinematics - unless RRA available. 
                     if ~obj.computed.RRA
                         obj.best_kinematics = ...
@@ -745,6 +748,24 @@ classdef OpenSimTrial < handle
             
             % Produce the adjusted model file.
             overall_model.print(new_model);
+        end
+        
+        function filterIK(obj)
+           
+            % Get IK filename
+            file = [obj.results_paths.IK filesep 'ik.mot'];
+            
+            % Load, filter & reprint.
+            data_object = Data(file);
+            data_object.filter4LP(6);
+            try
+                data_object.writeToFile(file);
+            catch
+                pause(5);
+                data_object.writeToFile(file);
+            end
+            delete(data_object);
+            
         end
         
         function filterID(obj)
