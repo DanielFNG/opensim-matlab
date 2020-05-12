@@ -12,10 +12,10 @@ file_types = {'.trc', '.mot', '.sto'};
 [~, true_dirs] = dirNoDots(true);
 
 % Loop over every test file
-for i = 1:length(test_dirs)
+for i = 1:length(true_dirs)
     [~, test_files] = dirNoDots(test_dirs{i});
     [~, true_files] = dirNoDots(true_dirs{i});
-    for j = 1:length(test_files)
+    for j = 1:length(true_files)
         [~, ~, ext] = fileparts(test_files{j});
         if any(strcmp(ext, file_types))
             % Create an entry in the test script for each individual test
