@@ -312,9 +312,6 @@ classdef OpenSimTrial < handle
                     success = obj.runIK(options.timerange, options.results, ...
                         options.settings);
                     
-                    % Filter & extrapolate missing IK frame.
-                    obj.correctIK(options.timerange(2));
-                    
                     % Update best kinematics - unless RRA available. 
                     if ~obj.computed.RRA
                         obj.best_kinematics = ...
@@ -748,37 +745,6 @@ classdef OpenSimTrial < handle
             
             % Produce the adjusted model file.
             overall_model.print(new_model);
-        end
-        
-        function correctIK(obj, end_time)
-        % IK bug correction - extrapolate by 1 frame - and filtering.
-            
-            % Get IK & output marker filenames.
-            files = {[obj.results_paths.IK filesep 'ik.mot'], ...
-                [obj.results_paths.IK filesep 'ik_model_marker_locations.sto']};
-            
-            % Load, extrapolate, filter and reprint each.
-            for i=1:2
-                data_object = Data(files{i});
-                
-                % Sometimes the IK tool doesn't print the last frame. 
-                % Account for this.
-                timerange = data_object.getTimeRange();
-                if timerange(2) ~= end_time  
-                    data_object.extrapolate(1);
-                end
-                
-                % Filter and rewrite.
-                data_object.filter4LP(6);  % 6 Hz
-                try
-                    data_object.writeToFile(files{i});
-                catch
-                    pause(5);
-                    data_object.writeToFile(files{i});
-                end
-                delete(data_object);
-            end
-            
         end
         
         function filterID(obj)
