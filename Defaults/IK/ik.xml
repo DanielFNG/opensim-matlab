@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <OpenSimDocument Version="30000">
-	<InverseKinematicsTool name="subject01">
+	<InverseKinematicsTool name="default">
 		<!--Directory used for writing results.-->
 		<results_directory>./</results_directory>
 		<!--Directory for input files-->
