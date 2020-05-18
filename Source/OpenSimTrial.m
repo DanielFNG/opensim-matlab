@@ -312,8 +312,8 @@ classdef OpenSimTrial < handle
                     success = obj.runIK(options.timerange, options.results, ...
                         options.settings);
                     
-                    % Filter & extrapolate missing IK frame.
-                    obj.correctIK(options.timerange(2));
+                    % Filter IK data.
+                    obj.filterIK();
                     
                     % Update best kinematics - unless RRA available. 
                     if ~obj.computed.RRA
@@ -392,7 +392,7 @@ classdef OpenSimTrial < handle
             import org.opensim.modeling.Model;
             
             % Load bkTool.
-            bkTool = AnalyzeTool(settings);
+            bkTool = AnalyzeTool(settings, false);
             
             % Load & assign model.
             model = Model(obj.model_path);
@@ -404,6 +404,7 @@ classdef OpenSimTrial < handle
             bkTool.setInitialTime(timerange(1));
             bkTool.setFinalTime(timerange(2));
             bkTool.setResultsDir(results);
+            bkTool.setLoadModelAndInput(true);
             
             % Run tool.
             success = bkTool.run();
@@ -696,8 +697,7 @@ classdef OpenSimTrial < handle
             
             % Store the pelvis COM from the model file. 
             model = Model(obj.model_path);
-            com = Vec3();
-            model.getBodySet.get('pelvis').getMassCenter(com);
+            com = model.getBodySet.get('pelvis').getMassCenter();
             
             % Convert the pelvis COM to a string. 
             com_string = sprintf('%s\t', num2str(com.get(0)), ...
@@ -750,34 +750,21 @@ classdef OpenSimTrial < handle
             overall_model.print(new_model);
         end
         
-        function correctIK(obj, end_time)
-        % IK bug correction - extrapolate by 1 frame - and filtering.
+        function filterIK(obj)
+           
+            % Get IK filename
+            file = [obj.results_paths.IK filesep 'ik.mot'];
             
-            % Get IK & output marker filenames.
-            files = {[obj.results_paths.IK filesep 'ik.mot'], ...
-                [obj.results_paths.IK filesep 'ik_model_marker_locations.sto']};
-            
-            % Load, extrapolate, filter and reprint each.
-            for i=1:2
-                data_object = Data(files{i});
-                
-                % Sometimes the IK tool doesn't print the last frame. 
-                % Account for this.
-                timerange = data_object.getTimeRange();
-                if timerange(2) ~= end_time  
-                    data_object.extrapolate(1);
-                end
-                
-                % Filter and rewrite.
-                data_object.filter4LP(6);  % 6 Hz
-                try
-                    data_object.writeToFile(files{i});
-                catch
-                    pause(5);
-                    data_object.writeToFile(files{i});
-                end
-                delete(data_object);
+            % Load, filter & reprint.
+            data_object = Data(file);
+            data_object.filter4LP(6);
+            try
+                data_object.writeToFile(file);
+            catch
+                pause(5);
+                data_object.writeToFile(file);
             end
+            delete(data_object);
             
         end
         
@@ -815,10 +802,8 @@ classdef OpenSimTrial < handle
             
             % Sum the mass of every body in the model apart from ground.
             for i=0:n_bodies
-                if ~strcmp(bodies.get(i).getName(), 'ground')
-                    body_names{i} = bodies.get(i).getName();
-                    body_masses(i) = bodies.get(i).getMass();
-                end
+                body_names{i + 1} = bodies.get(i).getName();
+                body_masses(i + 1) = bodies.get(i).getMass();
             end
             mass = sum(body_masses);
         end
