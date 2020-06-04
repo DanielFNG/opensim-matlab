@@ -1,6 +1,10 @@
 classdef (Abstract) MOTSTOTXTData < OpenSimData
 % Abstract class for storing & working with OpenSim data in .mot or .sto format.
     
+    properties (Access = protected)
+        NonStateLabels = {'Time'};
+    end
+
     methods
     
         function obj = MOTSTOTXTData(varargin)

@@ -6,6 +6,7 @@ classdef TRCData < OpenSimData
     end
     
     properties (Access = protected)
+        NonStateLabels = {'Frame#', 'Time'}
         OrigDataStartFrame
         CameraRate
         Units

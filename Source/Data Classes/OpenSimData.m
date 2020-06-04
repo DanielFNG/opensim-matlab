@@ -9,7 +9,11 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         Filetype
     end
     
-    properties (SetAccess = protected)
+    properties (Abstract, Access = protected)
+        NonStateLabels
+    end
+    
+    properties %(SetAccess = protected)
         Frequency
         NFrames
         NCols
@@ -17,7 +21,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         IsCartesian = false
     end
     
-    properties (Access = protected)
+    properties %(Access = protected)
         Header
         TimeLabel
         Frames
@@ -266,7 +270,32 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             
         end
         
-        function rotate(obj, xrot, yrot, zrot, left_handed)
+        function translate(obj, offsets)
+           
+            if ~obj.IsCartesian
+                error('Rotate only supported for Cartesian data.');
+            end
+            
+            % Get the labels with the data for each axis.
+            checkLastChar = @(c) @(t) strcmpi(t(end), c);  
+            x_labels = obj.Labels(cellfun(checkLastChar('x'), obj.Labels));
+            y_labels = obj.Labels(cellfun(checkLastChar('y'), obj.Labels));
+            z_labels = obj.Labels(cellfun(checkLastChar('z'), obj.Labels));
+            
+            % Step through the labels translating the data 
+            unit_col = ones(obj.NFrames, 1);
+            labels = {x_labels, y_labels, z_labels};
+            for i = 1:3
+                for j = 1:length(x_labels)
+                    index = obj.getIndex(labels{i}{j});
+                    obj.Values(:, index) = obj.Values(:, index) + ...
+                        unit_col*offsets(i);              
+                end
+            end
+            
+        end
+        
+        function rotate(obj, rotations, left_handed)
         % Rotate the spatial data in a Cartesian data object. 
         
             if ~obj.IsCartesian
@@ -281,24 +310,27 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             % here since we are rotating the axes (i.e. clockwise rotation
             % of vectors) rather than the points themselves (which would be
             % anticlockwise rotation). 
-            R = transpose(rotz(zrot)*roty(yrot)*rotx(xrot));
+            R = transpose(...
+                rotz(rotations(3))*roty(rotations(2))*rotx(rotations(1)));
             
             if left_handed
                 R = transpose(R);
             end
             
-            % Get the labels with the X axis data.
-            x_labels = ...
-                obj.Labels(cellfun(@(x) strcmpi(x(end), 'x'), obj.Labels));
-            
+            % Get the labels with the data for each axis.
+            checkLastChar = @(c) @(t) strcmpi(t(end), c);
+            x_labels = obj.Labels(cellfun(checkLastChar('x'), obj.Labels));
+            y_labels = obj.Labels(cellfun(checkLastChar('y'), obj.Labels));
+            z_labels = obj.Labels(cellfun(checkLastChar('z'), obj.Labels));
+           
             % Step through the labels rotating the data. 
             for i=1:length(x_labels)
-                label = x_labels{i}(1:end-1);
-                x_index = obj.getIndex(x_labels{i});
-                coordinates = transpose([obj.getColumn([label 'X']), ...
-                    obj.getColumn([label 'Y']), obj.getColumn([label 'Z'])]);
+                indices = [obj.getIndex(x_labels{i}), ...
+                    obj.getIndex(y_labels{i}), obj.getIndex(z_labels{i})];
+                coordinates = transpose([obj.getColumn(indices(1)), ...
+                    obj.getColumn(indices(2)), obj.getColumn(indices(3))]);
                 rotation = transpose(R*coordinates);
-                obj.Values(:, x_index:x_index+2) = rotation;
+                obj.Values(:, indices) = rotation;
             end
             
         end
@@ -470,11 +502,12 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             time = obj.Timesteps(end) - obj.Timesteps(1);
         end
         
-        function indices = getStateIndices(obj)
+        function state_indices = getStateIndices(obj)
         % Get indices of state data.
         
-            time = obj.getIndex('time');
-            indices = (time + 1):obj.NCols;
+            indices = 1:obj.NCols;
+            non_state_indices = obj.getNonStateIndices();
+            state_indices = setdiff(indices, non_state_indices);
         
         end
         
@@ -582,11 +615,13 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         end
         
         function indices = getNonStateIndices(obj)
-        % Get indices of non state data - frames, if there, & timesteps.
-        
-            time = obj.getIndex('time');
-            indices = 1:time;
-        
+            
+            n_indices = length(obj.NonStateLabels);
+            indices = zeros(1, n_indices);
+            for i = 1:n_indices
+                indices(i) = obj.getIndex(obj.NonStateLabels{i});
+            end
+            
         end
         
         function values = getStateData(obj)
