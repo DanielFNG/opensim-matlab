@@ -31,9 +31,9 @@ function data_out = convertSystem(data_in, system)
     data_out = zeros(size(data_in));
 
     % Identify system parameters.
-    [mx, ix] = convertSystemIdentifier(system.forward);
-    [my, iy] = convertSystemIdentifier(system.up);
-    [mz, iz] = convertSystemIdentifier(system.right);
+    [mx, ix] = convertSystemIdentifier(system.Forward);
+    [my, iy] = convertSystemIdentifier(system.Up);
+    [mz, iz] = convertSystemIdentifier(system.Right);
 
     % Convert coordinate systems.
     data_out(1, :) = mx*data_in(ix, :);
