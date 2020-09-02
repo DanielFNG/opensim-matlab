@@ -302,7 +302,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
                 error('Rotate only supported for Cartesian data.')
             end
             
-            if nargin < 5
+            if nargin < 3
                 left_handed = false;
             end
             
