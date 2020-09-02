@@ -52,10 +52,10 @@ function scaleModel(...
     % Run model scaler.
     model_scaler.setPrintResultFiles(true);
     try
-        model_scaler.processModel(state, osim, '', mass);
+        model_scaler.processModel(osim, '', mass);
     catch
         pause(0.5);
-        model_scaler.processModel(state, osim, '', mass);
+        model_scaler.processModel(osim, '', mass);
     end
     
     % Load the newly scaled model.
@@ -72,10 +72,10 @@ function scaleModel(...
     
     % Run marker placer.
     try
-        marker_placer.processModel(state, osim_scaled);
+        marker_placer.processModel(osim_scaled);
     catch
         pause(0.5);
-        marker_placer.processModel(state, osim_scaled);
+        marker_placer.processModel(osim_scaled);
     end
 
 end

@@ -26,7 +26,9 @@ function adjustModel(input, output, human, markers, grf, results, n)
     osim = Model(output);
     probes = osim.getProbeSet();
     probe = probes.get(0);
-    probe.setDisabled(false);
+    if ~probe.isEnabled()
+        probe.setEnabled(true);
+    end
     osim.print(output);
 
 end
