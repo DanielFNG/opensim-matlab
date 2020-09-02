@@ -44,7 +44,7 @@
 					<!--A double indicating the exponent to raise activations to when solving static optimization.  -->
 					<activation_exponent>2</activation_exponent>
 					<!--If true muscle force-length curve is observed while running optimization.-->
-					<use_muscle_physiology>true</use_muscle_physiology>
+					<use_muscle_physiology>false</use_muscle_physiology>
 					<!--Value used to determine when the optimization solution has converged-->
 					<optimizer_convergence_criterion>0.0001</optimizer_convergence_criterion>
 					<!--An integer for setting the maximum number of iterations the optimizer can use at each time.  -->
