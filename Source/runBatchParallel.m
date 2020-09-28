@@ -15,9 +15,11 @@ function trials = runBatchParallel(analyses, trials, varargin)
 
             % Assign back to trials array.
             trials{i} = trial;
-        catch
+        catch err
             % A message 
             trials{i} = 0;
+            
+            fprintf('%s\n', err.message);
         end
         
         % Note: the above strategy of setting a local trial{i}, then
