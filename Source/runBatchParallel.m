@@ -1,6 +1,9 @@
-function trials = runBatchParallel(analyses, trials, varargin)
+function [trials, outputs] = runBatchParallel(analyses, trials, varargin)
 % A parallelised version of runBatch. See runBatch for documentation. 
-    
+
+    % Create array to store output
+    outputs = cell(size(trials));
+
     % Iterate over the trials.
     parfor i=1:length(trials)
         
@@ -11,10 +14,11 @@ function trials = runBatchParallel(analyses, trials, varargin)
         % array.
         try
             % Perform analyses.
-            trial.run(analyses, varargin{:});  %#ok<PFBNS>
+            [trial, output] = suppressRun(trial, analyses, varargin{:});  %#ok<PFBNS>
 
             % Assign back to trials array.
             trials{i} = trial;
+            outputs{i} = output;
         catch err
             % A message 
             trials{i} = 0;
