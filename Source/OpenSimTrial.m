@@ -5,14 +5,14 @@ classdef OpenSimTrial < handle
 % settings folder for setup, currently located in opensim-matlab/Defaults. 
 % Currently only supports UoE-PelvisOrthosis setup but more will be added.  
     
-    properties (SetAccess = private)
+    properties %(SetAccess = private)
         model_path  
         grfs_path  
         input_coordinates  
         results_paths
     end
     
-    properties (GetAccess = private, SetAccess = private)
+    properties %(GetAccess = private, SetAccess = private)
         defaults
         marker_data 
         best_kinematics
