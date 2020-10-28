@@ -1,3 +1,3 @@
-function [trial, output] = suppressRun(trial, analyses, varargin)
-    output = evalc('trial.run(analyses, varargin{:})');
+function [trial, output] = suppressRun(trial, analyses, args)
+    output = evalc('trial.run(analyses, args{:})');
 end

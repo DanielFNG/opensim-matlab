@@ -14,7 +14,7 @@ function [trials, outputs] = runBatchParallel(analyses, trials, varargin)
         % array.
         try
             % Perform analyses.
-            [trial, output] = suppressRun(trial, analyses, varargin{:});  %#ok<PFBNS>
+            [trial, output] = suppressRun(trial, analyses, varargin);  
 
             % Assign back to trials array.
             trials{i} = trial;
