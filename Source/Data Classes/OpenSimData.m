@@ -370,10 +370,11 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         function removeOutliers(obj, parameter, varargin)
            
             index = obj.getIndex(parameter);
-            while any(isoutlier(obj.Values(:, index), varargin{:}))
-                outliers = isoutlier(obj.Values(:, index), varargin{:});
-                obj.Values(outliers, :) = [];
-            end
+            outliers = isoutlier(obj.Values(:, index), varargin{:});
+            state_indices = obj.getStateIndices();
+            obj.Values(:, state_indices) = filloutliers(...
+                obj.Values(:, state_indices), 'linear', ...
+                'OutlierLocations', repmat(outliers, 1, length(state_indices)));
             
             obj.update();
             
