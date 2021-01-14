@@ -9,7 +9,7 @@ function adjustModel(input, output, human, markers, grf, results, n)
     initial.run('IK');
     initial.performModelAdjustment('torso', output, human);
     
-    % Run adjustment 2 further times on the produced model.
+    % Run adjustment n further times on the produced model.
     for i=1:n
         % Create temporary copy of output.
         [folder, ~, ~] = fileparts(output);
@@ -21,14 +21,22 @@ function adjustModel(input, output, human, markers, grf, results, n)
         delete(temp);
     end
     
-    % Finally, ensure that the metabolics probe is still switched on.
+    % Open up the produced model
     import org.opensim.modeling.Model
     osim = Model(output);
+    
+    % Ensure any metabolics probes are still switched on
     probes = osim.getProbeSet();
-    probe = probes.get(0);
-    if ~probe.isEnabled()
-        probe.setEnabled(true);
+    n_probes = probes.getSize();
+    for i = 1:n_probes
+        probe = probes.get(i - 1);
+        if ~probe.isEnabled()
+            probe.setEnabled(true);
+        end
+        osim.print(output);
     end
+    
+    % Print the resultant model
     osim.print(output);
 
 end
