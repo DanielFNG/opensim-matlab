@@ -507,10 +507,10 @@
 			<active> true false false </active>
 				<!--Position error feedback gain (stiffness). To achieve critical damping
 				    of errors, choose kv = 2*sqrt(kp).-->
-				<kp>    1600.00000000       1.00000000       1.00000000 </kp>
+				<kp>     100.00000000       1.00000000       1.00000000 </kp>
 				<!--Velocity error feedback gain (damping). To achieve critical damping of
 				    errors, choose kv = 2*sqrt(kp).-->
-				<kv>      80.00000000       1.00000000       1.00000000 </kv>
+				<kv>      20.00000000       1.00000000       1.00000000 </kv>
 				<!--Feedforward acceleration gain.  This is normally set to 1.0, so no
 				    gain.-->
 				<ka>       1.00000000       1.00000000       1.00000000 </ka>
