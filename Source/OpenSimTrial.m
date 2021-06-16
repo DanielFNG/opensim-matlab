@@ -303,14 +303,15 @@ classdef OpenSimTrial < handle
             
         end
         
+        % Interface between OpenSimTrial and standalone tools
         function success = runTool(obj, method, options)
             
             switch method
                 
                 case 'IK'
                     
-                    success = obj.runIK(options.timerange, options.results, ...
-                        options.settings);
+                    success = runIK(obj.model_path, obj.marker_data, ...
+                        options.results, options.settings, options.timerange);
                     
                     % Filter IK data.
                     obj.filterIK();
@@ -353,38 +354,6 @@ classdef OpenSimTrial < handle
                         options.load, options.settings);
             end
             
-        end
-        
-        function success = runIK(obj, timerange, results, settings)
-        % Sets up the IK Tool.
-        
-            success = runIK(obj.model_path, obj.marker_data, results, ...
-                timerange, settings);
-        
-%             % Import OpenSim IKTool class and Model class.
-%             import org.opensim.modeling.InverseKinematicsTool;
-%             import org.opensim.modeling.Model;
-%             
-%             % Load IKTool.
-%             ikTool = InverseKinematicsTool(settings);
-%             
-%             % Load & assign model.
-%             model = Model(obj.model_path);
-%             model.initSystem();
-%             ikTool.setModel(model);
-%             
-%             % Assign parameters.
-%             ikTool.setStartTime(timerange(1));
-%             ikTool.setEndTime(timerange(2));
-%             ikTool.setMarkerDataFileName(obj.marker_data);
-%             if ~exist(results, 'dir')
-%                 mkdir(results);
-%             end
-%             ikTool.setResultsDir(results);
-%             ikTool.setOutputMotionFileName([results filesep 'ik.mot']);
-%             
-%             % Run tool.
-%             success = ikTool.run();
         end
         
         function success = runBK(obj, timerange, results, settings)
