@@ -358,30 +358,33 @@ classdef OpenSimTrial < handle
         function success = runIK(obj, timerange, results, settings)
         % Sets up the IK Tool.
         
-            % Import OpenSim IKTool class and Model class.
-            import org.opensim.modeling.InverseKinematicsTool;
-            import org.opensim.modeling.Model;
-            
-            % Load IKTool.
-            ikTool = InverseKinematicsTool(settings);
-            
-            % Load & assign model.
-            model = Model(obj.model_path);
-            model.initSystem();
-            ikTool.setModel(model);
-            
-            % Assign parameters.
-            ikTool.setStartTime(timerange(1));
-            ikTool.setEndTime(timerange(2));
-            ikTool.setMarkerDataFileName(obj.marker_data);
-            if ~exist(results, 'dir')
-                mkdir(results);
-            end
-            ikTool.setResultsDir(results);
-            ikTool.setOutputMotionFileName([results filesep 'ik.mot']);
-            
-            % Run tool.
-            success = ikTool.run();
+            success = runIK(obj.model_path, obj.marker_data, results, ...
+                timerange, settings);
+        
+%             % Import OpenSim IKTool class and Model class.
+%             import org.opensim.modeling.InverseKinematicsTool;
+%             import org.opensim.modeling.Model;
+%             
+%             % Load IKTool.
+%             ikTool = InverseKinematicsTool(settings);
+%             
+%             % Load & assign model.
+%             model = Model(obj.model_path);
+%             model.initSystem();
+%             ikTool.setModel(model);
+%             
+%             % Assign parameters.
+%             ikTool.setStartTime(timerange(1));
+%             ikTool.setEndTime(timerange(2));
+%             ikTool.setMarkerDataFileName(obj.marker_data);
+%             if ~exist(results, 'dir')
+%                 mkdir(results);
+%             end
+%             ikTool.setResultsDir(results);
+%             ikTool.setOutputMotionFileName([results filesep 'ik.mot']);
+%             
+%             % Run tool.
+%             success = ikTool.run();
         end
         
         function success = runBK(obj, timerange, results, settings)
