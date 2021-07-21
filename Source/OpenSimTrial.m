@@ -153,6 +153,11 @@ classdef OpenSimTrial < handle
             
             options = obj.parseAnalysisArguments('RRA', varargin{:});
             
+            % Set up data logging
+            log_file = getenv('OPENSIM_MATLAB_OUT');
+            org.opensim.modeling.Logger.removeFileSink();
+            org.opensim.modeling.Logger.addFileSink(log_file);
+            
             % Setup adjustment RRA.
             obj.runAdjustmentRRA(body, new_model, ...
                 options.timerange, options.results, options.load, ...
@@ -160,7 +165,7 @@ classdef OpenSimTrial < handle
             
             % Perform mass adjustments.
             obj.performMassAdjustment(...
-                new_model, human_model, getenv('OPENSIM_MATLAB_OUT')); 
+                new_model, human_model, log_file); 
             
             % Update computed status.
             obj.computed.model_adjustment = true;
