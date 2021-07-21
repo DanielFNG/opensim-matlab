@@ -1,7 +1,7 @@
 function scaleModel(...
     mass, output, static, settings, generic_model, generic_markers)
 
-    base = 'C:\Users\danie\Documents\GitHub\opensim-matlab\Defaults\Scale';
+    base = [getenv('OPENSIM_MATLAB_HOME') filesep 'Defaults' filesep 'Scale'];
 
     % Use default scale settings if none are provided.
     if nargin < 4
