@@ -295,7 +295,6 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             
         end
         
-        function rotate(obj, rotations, left_handed)
         function append(obj, another_obj)
             
             if obj.NCols ~= another_obj.NCols
@@ -306,7 +305,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
             end
         end
         
-        function rotate(obj, xrot, yrot, zrot, left_handed)
+        function rotate(obj, rotations, left_handed)
         % Rotate the spatial data in a Cartesian data object. 
         
             if ~obj.IsCartesian
