@@ -16,6 +16,7 @@ classdef OpenSimTrial < handle
         defaults
         marker_data 
         best_kinematics
+        best_controls = []
         results_directory
     end
     
@@ -322,10 +323,27 @@ classdef OpenSimTrial < handle
                             [options.results filesep 'ik.mot'];
                     end
                     
-                case 'BK'
+                case 'RRA'
                     
-                    success = obj.runBK(options.timerange, options.results, ...
-                        options.settings);
+                    success = obj.runRRA(...
+                        obj.model_path, obj.best_kinematics, obj.grfs_path, ...
+                        options.results, options.load, [], [], ...
+                        options.settings, options.timerange);
+                    
+                    % Update best kinematics.
+                    obj.best_kinematics = ...
+                        [options.results filesep 'RRA_Kinematics_q.sto'];
+                    
+                    % Update best controls.
+                    obj.best_controls = ...
+                        [options.results filesep 'RRA_controls.xml'];
+                    
+                case 'Analyse'
+                    
+                    success = runAnalyse(...
+                        obj.model_path, obj.best_kinematics, ...
+                        obj.best_controls, options.results, ...
+                        options.settings, options.timerange);
                     
                 case 'ID'
                     
@@ -334,15 +352,6 @@ classdef OpenSimTrial < handle
                     
                     % Filter ID data.
                     obj.filterID();
-                    
-                case 'RRA'
-                    
-                    success = obj.runRRA(options.timerange, options.results, ...
-                        options.load, options.settings);
-                    
-                    % Update best kinematics.
-                    obj.best_kinematics = ...
-                        [options.results filesep 'RRA_Kinematics_q.sto'];
                     
                 case 'SO'
                     success = obj.runSO(options.timerange, options.results, ...
@@ -353,126 +362,6 @@ classdef OpenSimTrial < handle
                     success = obj.runCMC(options.timerange, options.results, ...
                         options.load, options.settings);
             end
-            
-        end
-        
-        function success = runBK(obj, timerange, results, settings)
-        % Sets up the BodyKinematics tool.
-        
-            % Import OpenSim AnalyzeTool class and Model class.
-            import org.opensim.modeling.AnalyzeTool;
-            import org.opensim.modeling.Model;
-            
-            % Load bkTool.
-            bkTool = AnalyzeTool(settings, false);
-            
-            % Load & assign model.
-            model = Model(obj.model_path);
-            model.initSystem();
-            bkTool.setModel(model);
-            
-            % Assign parameters. 
-            bkTool.setCoordinatesFileName(obj.best_kinematics);
-            bkTool.setInitialTime(timerange(1));
-            bkTool.setFinalTime(timerange(2));
-            bkTool.setResultsDir(results);
-            bkTool.setLoadModelAndInput(true);
-            
-            % Run tool.
-            success = bkTool.run();
-        end
-        
-        function success = runRRA(obj, timerange, results, load, settings)
-        % Sets up the RRA tool. 
-        
-            % Temporarily copy RRA settings folder to new location.
-            [folder, name, ext] = fileparts(settings);
-            temp_settings = [results filesep 'temp'];
-            copyfile(folder, temp_settings);
-            settings = [temp_settings filesep name ext];
-            
-            % Modify pelvis COM in actuators file.
-            obj.modifyPelvisCOM(settings);
-            
-            % Import OpenSim RRATool class.
-            import org.opensim.modeling.RRATool;
-            
-            % Load RRATool.
-            rraTool = RRATool(settings);
-            
-            % Assign parameters.
-            rraTool.setModelFilename(obj.model_path);
-            rraTool.loadModel(settings);
-            rraTool.updateModelForces(rraTool.getModel(), settings);
-            rraTool.setInitialTime(timerange(1));
-            rraTool.setFinalTime(timerange(2));
-            rraTool.setDesiredKinematicsFileName(obj.best_kinematics);
-            rraTool.setResultsDir(results);
-            
-            % Set external loads.
-            ext = xmlread(load);
-            ext.getElementsByTagName('datafile').item(0).getFirstChild. ...
-                setNodeValue(obj.grfs_path);
-            temp = [results filesep 'temp.xml'];
-            xmlwrite(temp, ext);
-            rraTool.createExternalLoads(temp, rraTool.getModel());
-            
-            % Run tool.
-            success = rraTool.run();
-            
-            % File cleanup.
-            OpenSimTrial.attemptDelete(temp);
-            OpenSimTrial.attemptDelete(temp_settings);
-            
-        end
-        
-        function success = runAdjustmentRRA(...
-                obj, body, new_model, timerange, results, load,  settings)
-        % Setup RRA - with additional settings for mass adjustment.
-        
-            % Temporarily copy RRA settings folder to new location.
-            [folder, name, ext] = fileparts(settings);
-            temp_settings = [results filesep 'temp'];
-            copyfile(folder, temp_settings);
-            settings = [temp_settings filesep name ext];
-            
-            % Modify pelvis COM in actuators file.
-            obj.modifyPelvisCOM(settings);
-            
-            % Import OpenSim RRATool class.
-            import org.opensim.modeling.RRATool;
-            
-            % Load RRATool.
-            rraTool = RRATool(settings);
-            
-            % Assign parameters.
-            rraTool.setModelFilename(obj.model_path);
-            rraTool.loadModel(settings);
-            rraTool.updateModelForces(rraTool.getModel(), settings);
-            rraTool.setInitialTime(timerange(1));
-            rraTool.setFinalTime(timerange(2));
-            rraTool.setDesiredKinematicsFileName(obj.best_kinematics);
-            rraTool.setResultsDir(results);
-            
-            % Set external loads.
-            ext = xmlread(load);
-            ext.getElementsByTagName('datafile').item(0).getFirstChild. ...
-                setNodeValue(obj.grfs_path);
-            temp = [results filesep 'temp.xml'];
-            xmlwrite(temp, ext);
-            rraTool.createExternalLoads(temp, rraTool.getModel());
-            
-            % Adjustment specific settings.
-            rraTool.setAdjustCOMToReduceResiduals(true);
-            rraTool.setAdjustedCOMBody(body);
-            rraTool.setOutputModelFileName(new_model);
-            
-            % Run tool.
-            success = rraTool.run();
-            
-            % File cleanup.
-            OpenSimTrial.attemptDelete(temp);
-            OpenSimTrial.attemptDelete(temp_settings);
             
         end
         
@@ -655,46 +544,6 @@ classdef OpenSimTrial < handle
             % File cleanup.
             OpenSimTrial.attemptDelete(temp);
             OpenSimTrial.attemptDelete(temp_settings);
-        end
-        
-        function modifyPelvisCOM(obj, settings)
-        % Modify pelvis COM in the copied actuators file to match input model.
-        
-            % Import OpenSim libraries & get default actuators file path.
-            import org.opensim.modeling.Vec3
-            import org.opensim.modeling.Model
-            
-            [folder, ~, ~] = fileparts(settings);
-            actuators_path = [folder filesep 'actuators.xml'];
-            
-            % Store the pelvis COM from the model file. 
-            model = Model(obj.model_path);
-            com = model.getBodySet.get('pelvis').getMassCenter();
-            
-            % Convert the pelvis COM to a string. 
-            com_string = sprintf('%s\t', num2str(com.get(0)), ...
-                num2str(com.get(1)), num2str(com.get(2)));
-            com_string = [' ', com_string];
-            
-            % Read in the default actuators xml and identify the body nodes. 
-            actuators = xmlread(actuators_path);
-            bodies = actuators.getElementsByTagName('body');
-            
-            % Change the CoM for each of FX/FY/FZ. We skip i=0 since this
-            % occurs in the 'default' node. 
-            for i=0:2
-                bodies.item(i).getNextSibling().getNextSibling(). ...
-                    setTextContent(com_string);
-            end
-            
-            % Rewrite the actuators file with the changes. 
-            try
-                xmlwrite(actuators_path, actuators);
-            catch
-                pause(0.5);  % Sometimes we need to wait a bit... 
-                xmlwrite(actuators_path, actuators); 
-            end
-                
         end
         
         function performMassAdjustment(obj, new_model, human_model, log)

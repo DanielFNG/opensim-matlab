@@ -1,4 +1,4 @@
-function success = runIK(model, markers, results, settings, timerange)
+function success = runIK(model, markers, output, settings, timerange)
 % Run Inverse Kinematics in OpenSim. 
 %
 % A simplified interface which allows common parameters like time range,
@@ -6,8 +6,9 @@ function success = runIK(model, markers, results, settings, timerange)
 %
 %   model - path to an OpenSim model file
 %   markers - path to a marker trajectory trc file
-%   results - save directory
-%   timerange - [t_0, t_1], where IK is computed for t_0 to t_1
+%   output - path of output file
+%   timerange - optional [t_0, t_1], where IK is computed for t_0 to t_1
+%               if not given, full timerange of markers file
 %   settings - an OpenSim settings file containing desired settings
 
     % Create an IKTool from the supplied settings
@@ -24,15 +25,18 @@ function success = runIK(model, markers, results, settings, timerange)
         timerange = [input_data.Timesteps(1), input_data.Timesteps(end)];
     end
     
+    % Create results directory if needed
+    [folder, ~, ~] = fileparts(output);
+    if ~isempty(folder) && ~exist(folder, 'dir')
+        mkdir(folder);
+    end
+    
     % Assign parameters
     ik_tool.setStartTime(timerange(1));
     ik_tool.setEndTime(timerange(2));
     ik_tool.setMarkerDataFileName(markers);
-    if ~exist(results, 'dir')
-        mkdir(results);
-    end
-    ik_tool.setResultsDir(results);
-    ik_tool.setOutputMotionFileName([results filesep 'ik.mot']);
+    ik_tool.setResultsDir(folder);
+    ik_tool.setOutputMotionFileName(output);
 
     % Run tool
     success = ik_tool.run();
