@@ -7659,7 +7659,7 @@
 					<!--Specify whether shortening heat rate is to be calculated (true/false).-->
 					<shortening_rate_on>true</shortening_rate_on>
 					<!--Specify whether basal heat rate is to be calculated (true/false).-->
-					<basal_rate_on>false</basal_rate_on>
+					<basal_rate_on>true</basal_rate_on>
 					<!--Specify whether mechanical work rate is to be calculated (true/false).-->
 					<mechanical_work_rate_on>true</mechanical_work_rate_on>
 					<!--If set to false, the individual muscle metabolics, basal rate, and total summation will be reported. If set to true, only the total summation will be reported.-->
