@@ -1,5 +1,5 @@
 function success = runAnalyse(...
-    model, input, controls, results, settings, timerange)
+    name, model, input, controls, results, settings, timerange)
 % Run an analysis in OpenSim.
 %
 % A simplified interface which allows common parameters like time range,
@@ -8,9 +8,12 @@ function success = runAnalyse(...
 %   model - path to an OpenSim model file
 %   input - path to the input data
 %   controls - (optional) path to control data, [] if not available
-%   results - path to the results folder
+%   results - absolute path to the results folder
 %   settings - an OpenSim settings file containing desired settings
-%   timerange - [t_0, t_1], where BK is computed for t_0 to t_1
+%   timerange - [t_0, t_1], where analysis is computed for t_0 to t_1
+%
+% NOTE: the output acceleration data requires GRF forces or it will be
+% useless, see here: https://github.com/opensim-org/opensim-core/issues/2782
 
 
     % Import OpenSim AnalyzeTool class and Model class.
@@ -18,13 +21,16 @@ function success = runAnalyse(...
     import org.opensim.modeling.Model;
     
     % Get timerange if not specified by user
-    if nargin < 6
+    if nargin < 7
         input_data = Data(input);
         timerange = [input_data.Timesteps(1), input_data.Timesteps(end)];
     end
 
     % Load bkTool.
     bk_tool = AnalyzeTool(settings, false);
+    
+    % Rename
+    bk_tool.setName(name);
 
     % Load & assign model.
     model = Model(model);
