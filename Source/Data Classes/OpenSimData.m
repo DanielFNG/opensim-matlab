@@ -550,7 +550,7 @@ classdef (Abstract) OpenSimData < handle & matlab.mixin.Copyable
         function checkValues(obj)
         % Ensure that the entries of the Values array are well defined.
             if sum(sum(isnan(obj.Values))) ~= 0
-                error('Data:NaNValues', ['One or more elements of the data '...
+                warning('Data:NaNValues', ['One or more elements of the data '...
                        'array interpreted as NaN.'])
             end
         end
