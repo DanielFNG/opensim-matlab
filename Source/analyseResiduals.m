@@ -110,7 +110,7 @@ function analyseResiduals(rra)
         hold on;
         patch(x_shade_rms, bad, bad_patch, 'LineStyle', 'none');
         patch(x_shade_rms, okay, okay_patch, 'LineStyle', 'none');
-        patch(x_shade_max, good, good_patch, 'LineStyle', 'none');
+        patch(x_shade_rms, good, good_patch, 'LineStyle', 'none');
         bar([rms(dx), rms(dy), rms(dz)], 'FaceColor', rms_bar_colour);
         xticks([1 2 3]);
         xticklabels({[leg_pre 'X'], [leg_pre 'Y'], [leg_pre 'Z']});
